@@ -19,6 +19,7 @@ import javax.swing.event.DocumentListener;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupState;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.ViewManagerModel;
 
 /**
  * The View for the Signup Use Case.
@@ -27,6 +28,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     private final String viewName = "sign up";
 
     private final SignupViewModel signupViewModel;
+    private final ViewManagerModel viewManagerModel;
     private final JTextField usernameInputField = new JTextField(15);
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
@@ -36,8 +38,9 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     private final JButton cancel;
     private final JButton toLogin;
 
-    public SignupView(SignupViewModel signupViewModel) {
+    public SignupView(SignupViewModel signupViewModel, ViewManagerModel viewManagerModel) {
         this.signupViewModel = signupViewModel;
+        this.viewManagerModel = viewManagerModel;
         signupViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
@@ -178,7 +181,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        viewManagerModel.popViewOrClose();
     }
 
     @Override
