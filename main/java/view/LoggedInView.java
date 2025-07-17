@@ -17,6 +17,7 @@ import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.LoggedInState;
 import interface_adapter.change_password.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.ViewManagerModel;
 
 /**
  * The View for when the user is logged into the program.
@@ -28,6 +29,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController;
     private LogoutController logoutController;
+    private ViewManagerModel viewManagerModel;
 
     private final JLabel username;
 
@@ -35,9 +37,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private final JTextField passwordInputField = new JTextField(15);
     private final JButton changePassword;
+    private final JButton searchButton = new JButton("Search");
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel) {
+    public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
+        this.viewManagerModel = viewManagerModel;
+        // TODO: added viewmanagermodel, maybe review this change specifically
+        // why i made this change: 
+        // loginview/signinview both had these parameters, so i added it to the loggedinview as well
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel("Logged In Screen");
@@ -55,6 +62,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
+
+        buttons.add(searchButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -105,6 +114,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                     }
                 }
         );
+
+        searchButton.addActionListener(evt -> {
+            if (evt.getSource().equals(searchButton)) {
+                viewManagerModel.pushView("search");
+            }
+        });
 
         this.add(title);
         this.add(usernameInfo);

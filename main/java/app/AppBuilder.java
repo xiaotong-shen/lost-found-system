@@ -18,6 +18,8 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.search.SearchController;
+import interface_adapter.search.SearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
@@ -35,6 +37,7 @@ import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import view.LoggedInView;
 import view.LoginView;
+import view.SearchView;
 import view.SignupView;
 import view.ViewManager;
 
@@ -67,6 +70,8 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private SearchView searchView;
+    private SearchViewModel searchViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -100,8 +105,19 @@ public class AppBuilder {
      */
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
+        return this;
+    }
+
+    /**
+     * Adds the Search View to the application.
+     * @return this builder
+     */
+    public AppBuilder addSearchView() {
+        searchViewModel = new SearchViewModel();
+        searchView = new SearchView(searchViewModel);
+        cardPanel.add(searchView, searchView.getViewName());
         return this;
     }
 
@@ -165,6 +181,16 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
+        return this;
+    }
+
+    /**
+     * Adds the Search Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addSearchUseCase() {
+        final SearchController searchController = new SearchController(viewManagerModel);
+        searchView.setSearchController(searchController);
         return this;
     }
 
