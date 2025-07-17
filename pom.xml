@@ -36,7 +36,10 @@
 
     </dependencies>
 
-
+    <build>
+        <sourceDirectory>main/java</sourceDirectory>
+        <testSourceDirectory>test/java</testSourceDirectory>
+    </build>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
