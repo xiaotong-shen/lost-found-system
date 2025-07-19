@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.APIPostDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
@@ -19,6 +20,7 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.search.SearchController;
+import interface_adapter.search.SearchPresenter;
 import interface_adapter.search.SearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
@@ -32,6 +34,10 @@ import use_case.login.LoginOutputBoundary;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
+import use_case.search.SearchInputBoundary;
+import use_case.search.SearchInteractor;
+import use_case.search.SearchOutputBoundary;
+import use_case.search.SearchUserDataAccessInterface;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
@@ -63,6 +69,7 @@ public class AppBuilder {
     // thought question: is the hard dependency below a problem?
     // private final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
     private final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+    private final SearchUserDataAccessInterface postDataAccessObject = new APIPostDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -189,7 +196,9 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addSearchUseCase() {
-        final SearchController searchController = new SearchController(viewManagerModel);
+        final SearchOutputBoundary searchOutputBoundary = new SearchPresenter(searchViewModel);
+        final SearchInputBoundary searchInteractor = new SearchInteractor(postDataAccessObject, searchOutputBoundary);
+        final SearchController searchController = new SearchController(searchInteractor, viewManagerModel);
         searchView.setSearchController(searchController);
         return this;
     }

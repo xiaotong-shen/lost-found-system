@@ -1,20 +1,16 @@
 package view;
 
-import java.awt.Component;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
+import entity.Post;
 import interface_adapter.search.SearchController;
 import interface_adapter.search.SearchState;
 import interface_adapter.search.SearchViewModel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * The View for the Search functionality.
@@ -27,6 +23,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final JLabel searchErrorField = new JLabel();
     private final JButton searchButton = new JButton("Search");
     private final JButton backButton = new JButton("Back");
+    private final JPanel resultsPanel = new JPanel();
+    private final JScrollPane scrollPane;
     
     private SearchController searchController;
 
@@ -34,8 +32,16 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.searchViewModel = searchViewModel;
         this.searchViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Search Screen");
+        // Set up the main layout
+        this.setLayout(new BorderLayout());
+
+        // Create top panel for search input
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+
+        final JLabel title = new JLabel("Search Lost & Found Posts");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setFont(new Font("Arial", Font.BOLD, 18));
 
         final LabelTextPanel searchInfo = new LabelTextPanel(
                 new JLabel("Search Query"), searchInputField);
@@ -44,11 +50,26 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         buttons.add(searchButton);
         buttons.add(backButton);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        topPanel.add(title);
+        topPanel.add(Box.createVerticalStrut(10));
+        topPanel.add(searchInfo);
+        topPanel.add(Box.createVerticalStrut(5));
+        topPanel.add(searchErrorField);
+        topPanel.add(Box.createVerticalStrut(5));
+        topPanel.add(buttons);
+
+        // Set up results panel
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+        scrollPane = new JScrollPane(resultsPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Add components to main panel
+        this.add(topPanel, BorderLayout.NORTH);
+        this.add(scrollPane, BorderLayout.CENTER);
 
         // Add document listener to update state when text changes
-        searchInputField.getDocument().addDocumentListener(new DocumentListener() {
-
+        searchInputField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             private void documentListenerHelper() {
                 final SearchState currentState = searchViewModel.getState();
                 currentState.setSearchQuery(searchInputField.getText());
@@ -56,17 +77,17 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             }
 
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 documentListenerHelper();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
                 documentListenerHelper();
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
                 documentListenerHelper();
             }
         });
@@ -84,12 +105,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
                 searchController.navigateBack();
             }
         });
-
-        // Add components to panel
-        this.add(title);
-        this.add(searchInfo);
-        this.add(searchErrorField);
-        this.add(buttons);
     }
 
     @Override
@@ -98,7 +113,93 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             final SearchState state = (SearchState) evt.getNewValue();
             searchInputField.setText(state.getSearchQuery());
             searchErrorField.setText(state.getSearchError());
+            
+            // Update results display
+            updateResultsDisplay(state.getSearchResults(), state.isLoading());
         }
+    }
+
+    private void updateResultsDisplay(List<Post> posts, boolean isLoading) {
+        resultsPanel.removeAll();
+        
+        if (isLoading) {
+            JLabel loadingLabel = new JLabel("Searching...");
+            loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            resultsPanel.add(loadingLabel);
+        } else if (posts != null && !posts.isEmpty()) {
+            JLabel resultsLabel = new JLabel("Search Results (" + posts.size() + " posts found):");
+            resultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            resultsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            resultsPanel.add(resultsLabel);
+            resultsPanel.add(Box.createVerticalStrut(10));
+            
+            for (Post post : posts) {
+                resultsPanel.add(createPostPanel(post));
+                resultsPanel.add(Box.createVerticalStrut(10));
+            }
+        } else if (posts != null && posts.isEmpty()) {
+            JLabel noResultsLabel = new JLabel("No posts found matching your search criteria.");
+            noResultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            resultsPanel.add(noResultsLabel);
+        }
+        
+        resultsPanel.revalidate();
+        resultsPanel.repaint();
+    }
+
+    private JPanel createPostPanel(Post post) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        panel.setBackground(Color.WHITE);
+
+        // Title
+        JLabel titleLabel = new JLabel(post.getTitle());
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Description
+        JLabel descLabel = new JLabel(post.getDescription());
+        descLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        descLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+
+        // Details
+        JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailsPanel.setBackground(Color.WHITE);
+        
+        JLabel authorLabel = new JLabel("By: " + post.getAuthor());
+        JLabel locationLabel = new JLabel("Location: " + post.getLocation());
+        JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
+        typeLabel.setForeground(post.isLost() ? Color.RED : Color.GREEN);
+        typeLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        JLabel timeLabel = new JLabel("Posted: " + 
+            post.getTimestamp().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")));
+
+        detailsPanel.add(authorLabel);
+        detailsPanel.add(locationLabel);
+        detailsPanel.add(typeLabel);
+        detailsPanel.add(timeLabel);
+
+        // Tags
+        JLabel tagsLabel = new JLabel("Tags: " + String.join(", ", post.getTags()));
+        tagsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        tagsLabel.setForeground(Color.BLUE);
+
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(descLabel);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(detailsPanel);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(tagsLabel);
+
+        return panel;
     }
 
     public String getViewName() {
