@@ -8,6 +8,8 @@ import javax.swing.WindowConstants;
 
 import data_access.APIPostDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
+import data_access.FirebaseConfig;
+import data_access.FirebasePostDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
@@ -46,6 +48,14 @@ import view.LoginView;
 import view.SearchView;
 import view.SignupView;
 import view.ViewManager;
+import interface_adapter.dashboard.DashboardController;
+import interface_adapter.dashboard.DashboardPresenter;
+import interface_adapter.dashboard.DashboardViewModel;
+import use_case.dashboard.DashboardInputBoundary;
+import use_case.dashboard.DashboardInteractor;
+import use_case.dashboard.DashboardOutputBoundary;
+import use_case.dashboard.DashboardUserDataAccessInterface;
+import view.DashboardView;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -69,8 +79,9 @@ public class AppBuilder {
     // thought question: is the hard dependency below a problem?
     // private final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
     private final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
-    private final SearchUserDataAccessInterface postDataAccessObject = new APIPostDataAccessObject();
-
+    private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
+    private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
+    
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
@@ -79,8 +90,13 @@ public class AppBuilder {
     private LoginView loginView;
     private SearchView searchView;
     private SearchViewModel searchViewModel;
+    private DashboardView dashboardView;
+    private DashboardViewModel dashboardViewModel;
 
     public AppBuilder() {
+        // Initialize Firebase
+        FirebaseConfig.initializeFirebase();
+        
         cardPanel.setLayout(cardLayout);
     }
 
@@ -125,6 +141,17 @@ public class AppBuilder {
         searchViewModel = new SearchViewModel();
         searchView = new SearchView(searchViewModel);
         cardPanel.add(searchView, searchView.getViewName());
+        return this;
+    }
+
+    /**
+     * Adds the Dashboard View to the application.
+     * @return this builder
+     */
+    public AppBuilder addDashboardView() {
+        dashboardViewModel = new DashboardViewModel();
+        dashboardView = new DashboardView(dashboardViewModel);
+        cardPanel.add(dashboardView, dashboardView.getViewName());
         return this;
     }
 
@@ -200,6 +227,18 @@ public class AppBuilder {
         final SearchInputBoundary searchInteractor = new SearchInteractor(postDataAccessObject, searchOutputBoundary);
         final SearchController searchController = new SearchController(searchInteractor, viewManagerModel);
         searchView.setSearchController(searchController);
+        return this;
+    }
+
+    /**
+     * Adds the Dashboard Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addDashboardUseCase() {
+        final DashboardOutputBoundary dashboardOutputBoundary = new DashboardPresenter(dashboardViewModel);
+        final DashboardInputBoundary dashboardInteractor = new DashboardInteractor(dashboardDataAccessObject, dashboardOutputBoundary);
+        final DashboardController dashboardController = new DashboardController(dashboardInteractor, viewManagerModel);
+        dashboardView.setDashboardController(dashboardController);
         return this;
     }
 

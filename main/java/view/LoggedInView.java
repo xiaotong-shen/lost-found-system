@@ -34,6 +34,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel username;
 
     private final JButton logOut;
+    private final JButton dashboardButton = new JButton("Dashboard");
 
     private final JTextField passwordInputField = new JTextField(15);
     private final JButton changePassword;
@@ -64,6 +65,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         buttons.add(changePassword);
 
         buttons.add(searchButton);
+        buttons.add(dashboardButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -114,6 +116,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                     }
                 }
         );
+
+        dashboardButton.addActionListener(evt -> {
+            if (evt.getSource().equals(dashboardButton)) {
+                viewManagerModel.pushView("dashboard");
+            }
+        });
 
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {

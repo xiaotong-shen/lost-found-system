@@ -179,7 +179,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         typeLabel.setFont(new Font("Arial", Font.BOLD, 12));
         
         JLabel timeLabel = new JLabel("Posted: " + 
-            post.getTimestamp().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")));
+            post.getTimestamp());
 
         detailsPanel.add(authorLabel);
         detailsPanel.add(locationLabel);

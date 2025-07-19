@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-
+        <!-- Existing dependencies -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -21,6 +21,22 @@
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
         </dependency>
+
+        <!-- Firebase Admin SDK -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.2.0</version>
+        </dependency>
+
+        <!-- Google Cloud Storage (for file uploads) -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>2.22.0</version>
+        </dependency>
+
+        <!-- Existing test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -33,7 +49,11 @@
             <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.3-jre</version> <!-- Use latest version -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -45,6 +65,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Add these lines to suppress warnings -->
+        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
     </properties>
-
 </project>
