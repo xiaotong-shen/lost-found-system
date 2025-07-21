@@ -5,8 +5,14 @@ package entity;
  */
 public class CommonUser implements User {
 
-    private final String name;
-    private final String password;
+    // Firebase requires a no-arg constructor for deserialization
+    public CommonUser() {
+        this.name = "";
+        this.password = "";
+    }
+
+    private String name;
+    private String password;
 
     public CommonUser(String name, String password) {
         this.name = name;
@@ -23,4 +29,12 @@ public class CommonUser implements User {
         return password;
     }
 
+    // Firebase setters for deserialization
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
