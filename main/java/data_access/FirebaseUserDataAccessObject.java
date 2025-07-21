@@ -1,0 +1,191 @@
+package data_access;
+
+import com.google.firebase.database.*;
+import entity.User;
+import entity.CommonUser;
+import use_case.login.LoginUserDataAccessInterface;
+import use_case.signup.SignupUserDataAccessInterface;
+import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.logout.LogoutUserDataAccessInterface;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Firebase implementation of data access for user authentication.
+ */
+public class FirebaseUserDataAccessObject implements 
+        LoginUserDataAccessInterface, 
+        SignupUserDataAccessInterface,
+        ChangePasswordUserDataAccessInterface,
+        LogoutUserDataAccessInterface {
+    
+    private DatabaseReference usersRef;
+    private boolean useMockData;
+    private final Map<String, User> mockUsers = new HashMap<>();
+    
+    public FirebaseUserDataAccessObject() {
+        System.out.println("DEBUG: FirebaseUserDataAccessObject constructor called");
+        // Try to initialize Firebase
+        try {
+            FirebaseConfig.initializeFirebase();
+            this.usersRef = FirebaseConfig.getDatabase().getReference("users");
+            this.useMockData = false;
+            System.out.println("DEBUG: ✅ Using Firebase for user authentication");
+        } catch (Exception e) {
+            System.err.println("DEBUG: ❌ Firebase not available for users, using mock data: " + e.getMessage());
+            this.usersRef = null;
+            this.useMockData = true;
+            // Add some mock users for testing
+            mockUsers.put("testuser", new CommonUser("testuser", "password123"));
+            mockUsers.put("admin", new CommonUser("admin", "admin123"));
+            System.out.println("DEBUG: Mock users created: " + mockUsers.keySet());
+        }
+    }
+    
+    @Override
+    public boolean existsByName(String identifier) {
+        System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.existsByName() called ===");
+        System.out.println("DEBUG: Checking if user exists: '" + identifier + "'");
+        System.out.println("DEBUG: Using mock data: " + useMockData);
+        
+        if (useMockData) {
+            // Mock data for testing
+            boolean exists = mockUsers.containsKey(identifier);
+            System.out.println("DEBUG: Mock user exists: " + exists);
+            return exists;
+        }
+        
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        
+        usersRef.child(identifier).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean exists = dataSnapshot.exists();
+                System.out.println("DEBUG: Firebase user exists: " + exists);
+                future.complete(exists);
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("DEBUG: Firebase error checking user existence: " + databaseError.getMessage());
+                future.completeExceptionally(new RuntimeException("Failed to check user existence: " + databaseError.getMessage()));
+            }
+        });
+        
+        try {
+            // Add timeout to prevent blocking indefinitely
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.err.println("DEBUG: Error checking user existence: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    @Override
+    public void save(User user) {
+        System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.save() called ===");
+        System.out.println("DEBUG: Saving user: '" + user.getName() + "'");
+        System.out.println("DEBUG: Using mock data: " + useMockData);
+        
+        if (useMockData) {
+            mockUsers.put(user.getName(), user);
+            System.out.println("DEBUG: Mock user saved: " + user.getName());
+            return;
+        }
+        
+        usersRef.child(user.getName()).setValue(user, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.err.println("DEBUG: Firebase error saving user: " + databaseError.getMessage());
+                } else {
+                    System.out.println("DEBUG: Firebase user saved successfully: " + user.getName());
+                }
+            }
+        });
+    }
+    
+    @Override
+    public User get(String username) {
+        System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.get() called ===");
+        System.out.println("DEBUG: Getting user: '" + username + "'");
+        System.out.println("DEBUG: Using mock data: " + useMockData);
+        
+        if (useMockData) {
+            User user = mockUsers.get(username);
+            System.out.println("DEBUG: Mock user retrieved: " + (user != null ? user.getName() : "null"));
+            return user;
+        }
+        
+        CompletableFuture<User> future = new CompletableFuture<>();
+        
+        usersRef.child(username).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                CommonUser user = dataSnapshot.getValue(CommonUser.class);
+                System.out.println("DEBUG: Firebase user retrieved: " + (user != null ? user.getName() : "null"));
+                future.complete(user);
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("DEBUG: Firebase error getting user: " + databaseError.getMessage());
+                future.completeExceptionally(new RuntimeException("Failed to get user: " + databaseError.getMessage()));
+            }
+        });
+        
+        try {
+            // Add timeout to prevent blocking indefinitely
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.err.println("DEBUG: Error getting user: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    @Override
+    public String getCurrentUsername() {
+        System.out.println("DEBUG: getCurrentUsername() called - returning: " + currentUsername);
+        // For Firebase implementation, we'll store current user in memory
+        // In a production app, you might use Firebase Auth or session management
+        return currentUsername;
+    }
+    
+    @Override
+    public void setCurrentUsername(String username) {
+        System.out.println("DEBUG: setCurrentUsername() called with: '" + username + "'");
+        this.currentUsername = username;
+    }
+    
+    private String currentUsername = null;
+    
+    @Override
+    public void changePassword(User user) {
+        System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.changePassword() called ===");
+        System.out.println("DEBUG: Changing password for user: '" + user.getName() + "'");
+        System.out.println("DEBUG: Using mock data: " + useMockData);
+        
+        if (useMockData) {
+            mockUsers.put(user.getName(), user);
+            System.out.println("DEBUG: Mock password changed for user: " + user.getName());
+            return;
+        }
+        
+        // Update the user's password in Firebase
+        usersRef.child(user.getName()).setValue(user, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.err.println("DEBUG: Firebase error changing password: " + databaseError.getMessage());
+                } else {
+                    System.out.println("DEBUG: Firebase password changed successfully for user: " + user.getName());
+                }
+            }
+        });
+    }
+} 
