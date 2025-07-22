@@ -22,6 +22,7 @@ use_case/signup/SignupOutputData.class
 interface_adapter/change_password/LoggedInViewModel.class
 view/LoggedInView$1.class
 use_case/change_password/ChangePasswordOutputData.class
+view/DashboardView$2.class
 use_case/dashboard/DashboardInputBoundary.class
 interface_adapter/search/SearchPresenter.class
 interface_adapter/signup/SignupPresenter.class

@@ -139,20 +139,31 @@ public class FirebasePostDataAccessObject implements
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
-        
+
+        boolean allBlank = (title == null || title.isEmpty()) &&
+                           (location == null || location.isEmpty()) &&
+                           (tags == null || tags.isEmpty()) &&
+                           (isLost == null);
+
+        if (allBlank) {
+            // Return all posts sorted alphabetically by title
+            allPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
+            return allPosts;
+        }
+
         for (Post post : allPosts) {
             boolean matches = true;
-            
-            if (title != null && !title.isEmpty() && 
+
+            if (title != null && !title.isEmpty() &&
                 !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
                 matches = false;
             }
-            
-            if (location != null && !location.isEmpty() && 
+
+            if (location != null && !location.isEmpty() &&
                 !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
                 matches = false;
             }
-            
+
             if (tags != null && !tags.isEmpty()) {
                 boolean hasMatchingTag = false;
                 for (String searchTag : tags) {
@@ -168,16 +179,18 @@ public class FirebasePostDataAccessObject implements
                     matches = false;
                 }
             }
-            
+
             if (isLost != null && post.isLost() != isLost) {
                 matches = false;
             }
-            
+
             if (matches) {
                 matchingPosts.add(post);
             }
         }
-        
+
+        // Always sort the result alphabetically by title
+        matchingPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
         return matchingPosts;
     }
 } 

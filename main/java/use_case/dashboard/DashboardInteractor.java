@@ -33,7 +33,11 @@ public class DashboardInteractor implements DashboardInputBoundary {
                         DashboardOutputData searchOutputData = new DashboardOutputData(searchResults);
                         dashboardOutputBoundary.prepareSuccessView(searchOutputData);
                     } else {
-                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Search query cannot be empty."));
+                        // If search query is blank, return all posts sorted alphabetically by title
+                        List<Post> allPosts = dashboardDataAccessObject.getAllPosts();
+                        allPosts.sort(java.util.Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
+                        DashboardOutputData allPostsOutputData = new DashboardOutputData(allPosts);
+                        dashboardOutputBoundary.prepareSuccessView(allPostsOutputData);
                     }
                     break;
 
