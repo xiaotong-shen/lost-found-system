@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 /**
  * The View for the Dashboard (Piazza-like platform).
@@ -30,7 +32,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private JScrollPane postsScrollPane = new JScrollPane();
     // Note: postsScrollPane is not made final
     private final JTabbedPane tabbedPane;
-    
+
     private DashboardController dashboardController;
 
     public DashboardView(DashboardViewModel dashboardViewModel) {
@@ -44,13 +46,12 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         JPanel toolbarPanel = createToolbarPanel();
 
         // Create main content area with tabs
-        // Note: this is initialized not directly in the declaration, because ...
         tabbedPane = new JTabbedPane();
-        
+
         // Posts tab
         JPanel postsTab = createPostsTab();
         tabbedPane.addTab("General Postings", postsTab);
-        
+
         // Add more tabs as needed
         tabbedPane.addTab("My Posts", new JPanel());
         tabbedPane.addTab("Settings", new JPanel());
@@ -58,6 +59,17 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         // Add components to main panel
         this.add(toolbarPanel, BorderLayout.NORTH);
         this.add(tabbedPane, BorderLayout.CENTER);
+
+        // Add component listener to detect when view becomes visible
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                // Load posts when the view becomes visible
+                if (dashboardController != null) {
+                    dashboardController.loadPosts();
+                }
+            }
+        });
     }
 
     private JPanel createToolbarPanel() {
@@ -222,13 +234,13 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
             final DashboardState state = (DashboardState) evt.getNewValue();
-            
+
             // Update posts list
             updatePostsList(state.getPosts());
-            
+
             // Update selected post details
             updatePostDetails(state.getSelectedPost());
-            
+
             // Show error or success messages
             if (!state.getError().isEmpty()) {
                 JOptionPane.showMessageDialog(this, state.getError(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -247,7 +259,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
 
     private void updatePostsList(List<Post> posts) {
         postsPanel.removeAll();
-        
+
         if (posts != null && !posts.isEmpty()) {
             for (Post post : posts) {
                 postsPanel.add(createPostListItem(post));
@@ -258,7 +270,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             noPostsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             postsPanel.add(noPostsLabel);
         }
-        
+
         postsPanel.revalidate();
         postsPanel.repaint();
     }
@@ -291,13 +303,13 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setBackground(Color.WHITE);
-        
+
         JLabel authorLabel = new JLabel("By: " + post.getAuthor());
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
         typeLabel.setForeground(post.isLost() ? Color.RED : Color.GREEN);
         typeLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        
-        JLabel timeLabel = new JLabel("Posted: " + 
+
+        JLabel timeLabel = new JLabel("Posted: " +
             post.getTimestamp());
 
         detailsPanel.add(authorLabel);
@@ -384,4 +396,4 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     public void setDashboardController(DashboardController dashboardController) {
         this.dashboardController = dashboardController;
     }
-} 
+}
