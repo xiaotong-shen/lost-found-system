@@ -68,7 +68,7 @@ public class Post {
     public void setImageURL(String imageURL) { this.imageURL = imageURL; }
     
     public boolean isLost() { return isLost; }
-    public void setIsLost(boolean isLost) { this.isLost = isLost; }
+    public void setLost(boolean isLost) { this.isLost = isLost; }
     
     public int getNumberOfLikes() { return numberOfLikes; }
     public void setNumberOfLikes(int numberOfLikes) { this.numberOfLikes = numberOfLikes; }
