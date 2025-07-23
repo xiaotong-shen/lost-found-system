@@ -58,6 +58,15 @@ import use_case.dashboard.DashboardInteractor;
 import use_case.dashboard.DashboardOutputBoundary;
 import use_case.dashboard.DashboardUserDataAccessInterface;
 import view.DashboardView;
+import view.AccountView;
+import interface_adapter.change_username.ChangeUsernameController;
+import interface_adapter.change_username.ChangeUsernamePresenter;
+import interface_adapter.change_username.ChangeUsernameViewModel;
+import interface_adapter.change_username.ChangeUsernameState;
+import use_case.change_username.ChangeUsernameInputBoundary;
+import use_case.change_username.ChangeUsernameInteractor;
+import use_case.change_username.ChangeUsernameOutputBoundary;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -84,7 +93,7 @@ public class AppBuilder {
     // private final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
-    
+
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
@@ -95,11 +104,14 @@ public class AppBuilder {
     private SearchViewModel searchViewModel;
     private DashboardView dashboardView;
     private DashboardViewModel dashboardViewModel;
+    private AccountView accountView;
+    private ChangeUsernameController changeUsernameController;
+    private ChangeUsernameViewModel changeUsernameViewModel;
 
     public AppBuilder() {
         // Initialize Firebase
         FirebaseConfig.initializeFirebase();
-        
+
         cardPanel.setLayout(cardLayout);
     }
 
@@ -159,6 +171,17 @@ public class AppBuilder {
     }
 
     /**
+     * Adds the Account View to the application.
+     * @return this builder
+     */
+    public AppBuilder addAccountView() {
+        accountView = new AccountView(viewManagerModel);
+        accountView.setLoggedInViewModel(loggedInViewModel);
+        cardPanel.add(accountView, accountView.getViewName());
+        return this;
+    }
+
+    /**
      * Adds the Signup Use Case to the application.
      * @return this builder
      */
@@ -202,6 +225,7 @@ public class AppBuilder {
         final ChangePasswordController changePasswordController =
                 new ChangePasswordController(changePasswordInteractor);
         loggedInView.setChangePasswordController(changePasswordController);
+        if (accountView != null) accountView.setChangePasswordController(changePasswordController);
         return this;
     }
 
@@ -218,6 +242,7 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
+        if (accountView != null) accountView.setLogoutController(logoutController);
         return this;
     }
 
@@ -242,6 +267,23 @@ public class AppBuilder {
         final DashboardInputBoundary dashboardInteractor = new DashboardInteractor(dashboardDataAccessObject, dashboardOutputBoundary);
         final DashboardController dashboardController = new DashboardController(dashboardInteractor, viewManagerModel);
         dashboardView.setDashboardController(dashboardController);
+        return this;
+    }
+
+    /**
+     * Adds the Change Username Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addChangeUsernameUseCase() {
+        changeUsernameViewModel = new ChangeUsernameViewModel();
+        ChangeUsernameOutputBoundary outputBoundary = new ChangeUsernamePresenter(changeUsernameViewModel, loggedInViewModel);
+        ChangeUsernameUserDataAccessInterface dao = userDataAccessObject;
+        ChangeUsernameInputBoundary interactor = new ChangeUsernameInteractor(dao, outputBoundary);
+        changeUsernameController = new ChangeUsernameController(interactor);
+        if (accountView != null) {
+            accountView.setChangeUsernameController(changeUsernameController);
+            accountView.setChangeUsernameViewModel(changeUsernameViewModel);
+        }
         return this;
     }
 

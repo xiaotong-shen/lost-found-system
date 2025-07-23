@@ -8,6 +8,7 @@ import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
 /**
  * In-memory implementation of the DAO for storing user data. This implementation does
@@ -16,7 +17,8 @@ import use_case.signup.SignupUserDataAccessInterface;
 public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterface,
         LoginUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
-        LogoutUserDataAccessInterface {
+        LogoutUserDataAccessInterface,
+        ChangeUsernameUserDataAccessInterface {
 
     private final Map<String, User> users = new HashMap<>();
 
@@ -51,5 +53,19 @@ public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterfa
     @Override
     public String getCurrentUsername() {
         return this.currentUsername;
+    }
+
+    @Override
+    public boolean changeUsername(String oldUsername, String newUsername) {
+        if (!users.containsKey(oldUsername) || users.containsKey(newUsername)) {
+            return false;
+        }
+        User user = users.remove(oldUsername);
+        ((entity.CommonUser)user).setName(newUsername);
+        users.put(newUsername, user);
+        if (currentUsername != null && currentUsername.equals(oldUsername)) {
+            currentUsername = newUsername;
+        }
+        return true;
     }
 }

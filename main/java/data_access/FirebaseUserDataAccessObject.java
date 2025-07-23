@@ -7,6 +7,7 @@ import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -22,7 +23,8 @@ public class FirebaseUserDataAccessObject implements
         LoginUserDataAccessInterface, 
         SignupUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
-        LogoutUserDataAccessInterface {
+        LogoutUserDataAccessInterface,
+        ChangeUsernameUserDataAccessInterface {
     
     private DatabaseReference usersRef;
     private boolean useMockData;
@@ -187,5 +189,71 @@ public class FirebaseUserDataAccessObject implements
                 }
             }
         });
+    }
+
+    @Override
+    public boolean changeUsername(String oldUsername, String newUsername) {
+        if (useMockData) {
+            if (!mockUsers.containsKey(oldUsername) || mockUsers.containsKey(newUsername)) {
+                return false;
+            }
+            User user = mockUsers.remove(oldUsername);
+            ((entity.CommonUser)user).setName(newUsername);
+            mockUsers.put(newUsername, user);
+            if (currentUsername != null && currentUsername.equals(oldUsername)) {
+                currentUsername = newUsername;
+            }
+            return true;
+        }
+        try {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            usersRef.child(oldUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.exists()) {
+                        future.complete(false);
+                        return;
+                    }
+                    usersRef.child(newUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot newUserSnapshot) {
+                            if (newUserSnapshot.exists()) {
+                                future.complete(false);
+                                return;
+                            }
+                            CommonUser user = dataSnapshot.getValue(CommonUser.class);
+                            user.setName(newUsername);
+                            usersRef.child(newUsername).setValue(user, (err, ref) -> {
+                                if (err != null) {
+                                    future.complete(false);
+                                } else {
+                                    usersRef.child(oldUsername).removeValue((err2, ref2) -> {
+                                        if (err2 != null) {
+                                            future.complete(false);
+                                        } else {
+                                            if (currentUsername != null && currentUsername.equals(oldUsername)) {
+                                                currentUsername = newUsername;
+                                            }
+                                            future.complete(true);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError error) {
+                            future.complete(false);
+                        }
+                    });
+                }
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    future.complete(false);
+                }
+            });
+            return future.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return false;
+        }
     }
 } 

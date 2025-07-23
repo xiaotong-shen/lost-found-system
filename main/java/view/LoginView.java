@@ -138,7 +138,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
-        viewManagerModel.popViewOrClose();
+        viewManagerModel.pushView("sign up");
     }
 
     @Override
