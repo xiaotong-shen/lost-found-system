@@ -33,89 +33,29 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private final JLabel username;
 
-    private final JButton logOut;
     private final JButton dashboardButton = new JButton("Dashboard");
-
-    private final JTextField passwordInputField = new JTextField(15);
-    private final JButton changePassword;
     private final JButton searchButton = new JButton("Search");
+    private final JButton accountButton = new JButton("Account");
+    private final JButton dmsButton = new JButton("DMs");
 
     public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.viewManagerModel = viewManagerModel;
-        // TODO: added viewmanagermodel, maybe review this change specifically
-        // why i made this change: 
-        // loginview/signinview both had these parameters, so i added it to the loggedinview as well
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel("Logged In Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
-
         final JLabel usernameInfo = new JLabel("Currently logged in: ");
         username = new JLabel();
 
         final JPanel buttons = new JPanel();
-        logOut = new JButton("Log Out");
-        buttons.add(logOut);
-
-        changePassword = new JButton("Change Password");
-        buttons.add(changePassword);
-
-        buttons.add(searchButton);
         buttons.add(dashboardButton);
+        buttons.add(searchButton);
+        buttons.add(accountButton);
+        buttons.add(dmsButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final LoggedInState currentState = loggedInViewModel.getState();
-                currentState.setPassword(passwordInputField.getText());
-                loggedInViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
-
-        changePassword.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(changePassword)) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-
-                        this.changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
-                    }
-                }
-        );
-
-        logOut.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(logOut)) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-                        logoutController.execute(currentState.getUsername());
-                    }
-                }
-        );
 
         dashboardButton.addActionListener(evt -> {
             if (evt.getSource().equals(dashboardButton)) {
@@ -129,12 +69,17 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        accountButton.addActionListener(evt -> {
+            if (evt.getSource().equals(accountButton)) {
+                viewManagerModel.pushView("account");
+            }
+        });
+
+        // DMs button does nothing for now
+
         this.add(title);
         this.add(usernameInfo);
         this.add(username);
-
-        this.add(passwordInfo);
-        this.add(passwordErrorField);
         this.add(buttons);
     }
 
