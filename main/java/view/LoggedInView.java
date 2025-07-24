@@ -75,7 +75,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // DMs button does nothing for now
+        dmsButton.addActionListener(evt -> {
+            if (evt.getSource().equals(dmsButton)) {
+                viewManagerModel.pushView("dms");
+            }
+        });
 
         this.add(title);
         this.add(usernameInfo);
@@ -91,7 +95,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         }
         else if (evt.getPropertyName().equals("password")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
-            JOptionPane.showMessageDialog(null, "password updated for " + state.getUsername());
         }
 
     }

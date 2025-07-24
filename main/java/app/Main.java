@@ -20,6 +20,7 @@ public class Main {
                                             .addChangeUsernameUseCase()
                                             .addSearchView()
                                             .addDashboardView()
+                                            .addDMsView()
                                             .addSignupUseCase()
                                             .addLoginUseCase()
                                             .addLogoutUseCase()

@@ -67,6 +67,7 @@ import use_case.change_username.ChangeUsernameInputBoundary;
 import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
+import view.DMsView;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -107,6 +108,7 @@ public class AppBuilder {
     private AccountView accountView;
     private ChangeUsernameController changeUsernameController;
     private ChangeUsernameViewModel changeUsernameViewModel;
+    private DMsView dmsView;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -284,6 +286,17 @@ public class AppBuilder {
             accountView.setChangeUsernameController(changeUsernameController);
             accountView.setChangeUsernameViewModel(changeUsernameViewModel);
         }
+        return this;
+    }
+
+    /**
+     * Adds the DMs View to the application.
+     * @return this builder
+     */
+    public AppBuilder addDMsView() {
+        dmsView = new DMsView();
+        dmsView.getBackButton().addActionListener(e -> viewManagerModel.popViewOrClose());
+        cardPanel.add(dmsView, dmsView.getViewName());
         return this;
     }
 
