@@ -184,6 +184,16 @@ public class AppBuilder {
     }
 
     /**
+     * Adds the DMs View to the application.
+     * @return this builder
+     */
+    public AppBuilder addDMsView() {
+        dmsView = new DMsView(viewManagerModel);
+        cardPanel.add(dmsView, dmsView.getViewName());
+        return this;
+    }
+
+    /**
      * Adds the Signup Use Case to the application.
      * @return this builder
      */
@@ -286,17 +296,6 @@ public class AppBuilder {
             accountView.setChangeUsernameController(changeUsernameController);
             accountView.setChangeUsernameViewModel(changeUsernameViewModel);
         }
-        return this;
-    }
-
-    /**
-     * Adds the DMs View to the application.
-     * @return this builder
-     */
-    public AppBuilder addDMsView() {
-        dmsView = new DMsView();
-        dmsView.getBackButton().addActionListener(e -> viewManagerModel.popViewOrClose());
-        cardPanel.add(dmsView, dmsView.getViewName());
         return this;
     }
 

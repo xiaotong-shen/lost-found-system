@@ -1,5 +1,7 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +18,7 @@ public class DMsView extends JPanel {
     private final JPanel dmsListPanel = new JPanel();
     private JScrollPane dmsScrollPane = new JScrollPane();
 
-    public DMsView() {
+    public DMsView(ViewManagerModel viewManagerModel) {
         // Set up the main layout
         this.setLayout(new BorderLayout());
 
@@ -52,13 +54,11 @@ public class DMsView extends JPanel {
         // Add components to main panel
         this.add(toolbarPanel, BorderLayout.NORTH);
         this.add(dmsScrollPane, BorderLayout.WEST);
+
+        backButton.addActionListener(e -> {viewManagerModel.popViewOrClose();});
     }
 
     public String getViewName() {
         return viewName;
     }
-
-    public JButton getBackButton() {
-        return backButton;
-    }
-} 
+}
