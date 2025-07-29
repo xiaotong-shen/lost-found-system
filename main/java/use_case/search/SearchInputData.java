@@ -13,6 +13,7 @@ public class SearchInputData {
     private final Boolean isLost;
 
     public SearchInputData(String query) {
+        System.out.println("DEBUG: SearchInputData(String query) constructor called with: '" + query + "'");
         this.query = query;
         this.title = null;
         this.location = null;
@@ -21,11 +22,20 @@ public class SearchInputData {
     }
 
     public SearchInputData(String title, String location, List<String> tags, Boolean isLost) {
+        System.out.println("DEBUG: SearchInputData(String title, String location, List<String> tags, Boolean isLost) constructor called");
+        System.out.println("DEBUG:   - Title: '" + title + "'");
+        System.out.println("DEBUG:   - Location: '" + location + "'");
+        System.out.println("DEBUG:   - Tags: " + tags);
+        System.out.println("DEBUG:   - IsLost: " + isLost);
+        
+        // Handle null values gracefully
         this.query = null;
-        this.title = title;
-        this.location = location;
-        this.tags = tags;
-        this.isLost = isLost;
+        this.title = title != null ? title : "";
+        this.location = location != null ? location : "";
+        this.tags = tags; // Keep as null if null, this is valid
+        this.isLost = isLost; // Keep as null if null, this is valid
+        
+        System.out.println("DEBUG: SearchInputData created successfully");
     }
 
     // Getters
