@@ -43,8 +43,8 @@ public class FirebaseUserDataAccessObject implements
             this.usersRef = null;
             this.useMockData = true;
             // Add some mock users for testing
-            mockUsers.put("testuser", new CommonUser("testuser", "password123"));
-            mockUsers.put("admin", new CommonUser("admin", "admin123"));
+            mockUsers.put("testuser", new CommonUser("testuser", "password123", false));
+            mockUsers.put("admin", new CommonUser("admin", "admin123", true));
             System.out.println("DEBUG: Mock users created: " + mockUsers.keySet());
         }
     }

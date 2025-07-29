@@ -7,10 +7,12 @@ public class ChangePasswordInputData {
 
     private final String password;
     private final String username;
+    private final boolean admin;
 
-    public ChangePasswordInputData(String password, String username) {
+    public ChangePasswordInputData(String password, String username, boolean admin) {
         this.password = password;
         this.username = username;
+        this.admin = admin;
     }
 
     String getPassword() {
@@ -19,6 +21,10 @@ public class ChangePasswordInputData {
 
     String getUsername() {
         return username;
+    }
+
+    boolean getAdmin() {
+        return admin;
     }
 
 }

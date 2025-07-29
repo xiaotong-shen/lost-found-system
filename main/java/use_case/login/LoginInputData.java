@@ -7,10 +7,12 @@ public class LoginInputData {
 
     private final String username;
     private final String password;
+    private final boolean admin;
 
-    public LoginInputData(String username, String password) {
+    public LoginInputData(String username, String password, boolean admin) {
         this.username = username;
         this.password = password;
+        this.admin = admin;
     }
 
     String getUsername() {
@@ -19,6 +21,10 @@ public class LoginInputData {
 
     String getPassword() {
         return password;
+    }
+
+    boolean getAdmin() {
+        return admin;
     }
 
 }

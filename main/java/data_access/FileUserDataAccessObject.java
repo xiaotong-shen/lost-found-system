@@ -35,6 +35,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
         csvFile = new File(csvPath);
         headers.put("username", 0);
         headers.put("password", 1);
+        headers.put("admin", 2);
 
         if (csvFile.length() == 0) {
             save();
@@ -53,7 +54,8 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                     final String[] col = row.split(",");
                     final String username = String.valueOf(col[headers.get("username")]);
                     final String password = String.valueOf(col[headers.get("password")]);
-                    final User user = userFactory.create(username, password);
+                    final boolean isAdmin = Boolean.parseBoolean(String.valueOf(col[headers.get("admin")]));
+                    final User user = userFactory.create(username, password, isAdmin);
                     accounts.put(username, user);
                 }
             }

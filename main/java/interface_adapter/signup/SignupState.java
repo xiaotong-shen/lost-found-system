@@ -10,6 +10,7 @@ public class SignupState {
     private String passwordError;
     private String repeatPassword = "";
     private String repeatPasswordError;
+    private boolean admin = false;
 
     public String getUsername() {
         return username;
@@ -33,6 +34,10 @@ public class SignupState {
 
     public String getRepeatPasswordError() {
         return repeatPasswordError;
+    }
+
+    public boolean getAdmin() {
+        return admin;
     }
 
     public void setUsername(String username) {
@@ -59,12 +64,17 @@ public class SignupState {
         this.repeatPasswordError = repeatPasswordError;
     }
 
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
     @Override
     public String toString() {
         return "SignupState{"
                 + "username='" + username + '\''
                 + ", password='" + password + '\''
                 + ", repeatPassword='" + repeatPassword + '\''
+                + ", admin=" + admin + '\''
                 + '}';
     }
 }

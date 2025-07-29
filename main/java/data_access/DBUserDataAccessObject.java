@@ -72,7 +72,7 @@ public class DBUserDataAccessObject implements SignupUserDataAccessInterface,
                 System.out.println("DEBUG:   - Password: '" + password + "'");
                 System.out.println("DEBUG:   - Password length: " + password.length());
                 
-                User user = userFactory.create(name, password);
+                User user = userFactory.create(name, password, false);
                 System.out.println("DEBUG: Created user object: " + user.getName());
                 return user;
             }

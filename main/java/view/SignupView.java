@@ -3,16 +3,11 @@ package view;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -30,6 +25,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     private final SignupViewModel signupViewModel;
     private final ViewManagerModel viewManagerModel;
     private final JTextField usernameInputField = new JTextField(15);
+    private final JCheckBox isAdminCheckbox = new JCheckBox("Sign up as Admin");
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
     private SignupController signupController;
@@ -52,6 +48,8 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
         final LabelTextPanel repeatPasswordInfo = new LabelTextPanel(
                 new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
+        final JPanel isAdminPanel = new JPanel();
+        isAdminPanel.add(isAdminCheckbox);
 
         final JPanel buttons = new JPanel();
         toLogin = new JButton(SignupViewModel.TO_LOGIN_BUTTON_LABEL);
@@ -114,7 +112,8 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                             signupController.execute(
                                     currentState.getUsername(),
                                     currentState.getPassword(),
-                                    currentState.getRepeatPassword()
+                                    currentState.getRepeatPassword(),
+                                    currentState.getAdmin()
                             );
                         }
                     }
@@ -134,6 +133,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         addUsernameListener();
         addPasswordListener();
         addRepeatPasswordListener();
+        addAdminCheckboxListener();
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -141,6 +141,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         this.add(usernameInfo);
         this.add(passwordInfo);
         this.add(repeatPasswordInfo);
+        this.add(isAdminPanel);
         this.add(buttons);
     }
 
@@ -221,6 +222,15 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
             }
         });
     }
+
+    private void addAdminCheckboxListener() {
+        isAdminCheckbox.addItemListener(e -> {
+            SignupState currentState = signupViewModel.getState();
+            currentState.setAdmin(e.getStateChange() == ItemEvent.SELECTED);
+            signupViewModel.setState(currentState);
+        });
+    }
+
 
     private String getPasswordStrength(String password) {
         boolean hasLetter = password.matches(".*[a-zA-Z].*");
