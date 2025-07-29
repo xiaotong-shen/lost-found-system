@@ -10,6 +10,7 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,9 +20,16 @@ public class SearchView extends JPanel implements PropertyChangeListener {
 
     private final String viewName = "search";
     private final SearchViewModel searchViewModel;
-    private final JTextField searchInputField = new JTextField(15);
+    
+    // Search input fields
+    private final JTextField titleField = new JTextField(15);
+    private final JTextField locationField = new JTextField(15);
+    private final JTextField tagsField = new JTextField(15);
+    private final JComboBox<String> isLostComboBox = new JComboBox<>(new String[]{"All", "Lost", "Found"});
+    
     private final JLabel searchErrorField = new JLabel();
     private final JButton searchButton = new JButton("Search");
+    private final JButton clearButton = new JButton("Clear");
     private final JButton backButton = new JButton("Back");
     private final JPanel resultsPanel = new JPanel();
     private final JScrollPane scrollPane;
@@ -43,16 +51,33 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setFont(new Font("Arial", Font.BOLD, 18));
 
-        final LabelTextPanel searchInfo = new LabelTextPanel(
-                new JLabel("Search Query"), searchInputField);
+        // Create search criteria panels
+        final LabelTextPanel titleInfo = new LabelTextPanel(
+                new JLabel("Title"), titleField);
+        final LabelTextPanel locationInfo = new LabelTextPanel(
+                new JLabel("Location"), locationField);
+        final LabelTextPanel tagsInfo = new LabelTextPanel(
+                new JLabel("Tags (comma-separated)"), tagsField);
+        
+        // Create lost/found selection panel
+        JPanel lostFoundPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        lostFoundPanel.add(new JLabel("Type: "));
+        lostFoundPanel.add(isLostComboBox);
 
         final JPanel buttons = new JPanel();
         buttons.add(searchButton);
+        buttons.add(clearButton);
         buttons.add(backButton);
 
         topPanel.add(title);
         topPanel.add(Box.createVerticalStrut(10));
-        topPanel.add(searchInfo);
+        topPanel.add(titleInfo);
+        topPanel.add(Box.createVerticalStrut(5));
+        topPanel.add(locationInfo);
+        topPanel.add(Box.createVerticalStrut(5));
+        topPanel.add(tagsInfo);
+        topPanel.add(Box.createVerticalStrut(5));
+        topPanel.add(lostFoundPanel);
         topPanel.add(Box.createVerticalStrut(5));
         topPanel.add(searchErrorField);
         topPanel.add(Box.createVerticalStrut(5));
@@ -68,11 +93,67 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.add(topPanel, BorderLayout.NORTH);
         this.add(scrollPane, BorderLayout.CENTER);
 
-        // Add document listener to update state when text changes
-        searchInputField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        // Add document listeners to update state when text changes
+        titleField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             private void documentListenerHelper() {
                 final SearchState currentState = searchViewModel.getState();
-                currentState.setSearchQuery(searchInputField.getText());
+                currentState.setTitle(titleField.getText());
+                searchViewModel.setState(currentState);
+            }
+
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+        });
+
+        locationField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void documentListenerHelper() {
+                final SearchState currentState = searchViewModel.getState();
+                currentState.setLocation(locationField.getText());
+                searchViewModel.setState(currentState);
+            }
+
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                documentListenerHelper();
+            }
+        });
+
+        tagsField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void documentListenerHelper() {
+                final SearchState currentState = searchViewModel.getState();
+                String tagsText = tagsField.getText().trim();
+                if (!tagsText.isEmpty()) {
+                    String[] tagsArray = tagsText.split(",");
+                    List<String> tagsList = new ArrayList<>();
+                    for (String tag : tagsArray) {
+                        tagsList.add(tag.trim());
+                    }
+                    currentState.setTags(tagsList);
+                } else {
+                    currentState.setTags(null);
+                }
                 searchViewModel.setState(currentState);
             }
 
@@ -96,7 +177,40 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {
                 final SearchState currentState = searchViewModel.getState();
-                searchController.execute(currentState.getSearchQuery());
+                
+                // Get the isLost value from combo box
+                String selectedType = (String) isLostComboBox.getSelectedItem();
+                Boolean isLost = null;
+                if ("Lost".equals(selectedType)) {
+                    isLost = true;
+                } else if ("Found".equals(selectedType)) {
+                    isLost = false;
+                }
+                currentState.setIsLost(isLost);
+                
+                // Execute advanced search with all criteria
+                searchController.executeAdvancedSearch(
+                    currentState.getTitle(),
+                    currentState.getLocation(),
+                    currentState.getTags(),
+                    currentState.getIsLost()
+                );
+            }
+        });
+
+        clearButton.addActionListener(evt -> {
+            if (evt.getSource().equals(clearButton)) {
+                titleField.setText("");
+                locationField.setText("");
+                tagsField.setText("");
+                isLostComboBox.setSelectedItem("All");
+                
+                final SearchState currentState = searchViewModel.getState();
+                currentState.setTitle("");
+                currentState.setLocation("");
+                currentState.setTags(null);
+                currentState.setIsLost(null);
+                searchViewModel.setState(currentState);
             }
         });
 
@@ -111,7 +225,25 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
             final SearchState state = (SearchState) evt.getNewValue();
-            searchInputField.setText(state.getSearchQuery());
+            
+            // Update input fields with current state
+            titleField.setText(state.getTitle());
+            locationField.setText(state.getLocation());
+            
+            if (state.getTags() != null) {
+                tagsField.setText(String.join(", ", state.getTags()));
+            } else {
+                tagsField.setText("");
+            }
+            
+            if (state.getIsLost() == null) {
+                isLostComboBox.setSelectedItem("All");
+            } else if (state.getIsLost()) {
+                isLostComboBox.setSelectedItem("Lost");
+            } else {
+                isLostComboBox.setSelectedItem("Found");
+            }
+            
             searchErrorField.setText(state.getSearchError());
             
             // Update results display
@@ -168,7 +300,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         descLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 
         // Details
-        JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setBackground(Color.WHITE);
         
@@ -187,7 +319,14 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(timeLabel);
 
         // Tags
-        JLabel tagsLabel = new JLabel("Tags: " + String.join(", ", post.getTags()));
+        List<String> tags = post.getTags();
+        String tagsText = "Tags: ";
+        if (tags != null && !tags.isEmpty()) {
+            tagsText += String.join(", ", tags);
+        } else {
+            tagsText += "No tags";
+        }
+        JLabel tagsLabel = new JLabel(tagsText);
         tagsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         tagsLabel.setForeground(Color.BLUE);
 
