@@ -25,14 +25,16 @@ public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
     public void prepareSuccessView(LoginOutputData response) {
-        // On success, switch to the logged in view.
-
-        final LoggedInState loggedInState = loggedInViewModel.getState();
+        // Update the logged in state
+        LoggedInState loggedInState = loggedInViewModel.getState();
         loggedInState.setUsername(response.getUsername());
-        this.loggedInViewModel.setState(loggedInState);
-        this.loggedInViewModel.firePropertyChanged();
+        loggedInState.setAdmin(response.isAdmin());  // Make sure to set admin status
+        loggedInViewModel.setState(loggedInState);
+        loggedInViewModel.firePropertyChanged();
 
-        this.viewManagerModel.pushView(loggedInViewModel.getViewName());
+        // Choose view based on admin status
+        String viewName = response.isAdmin() ? "admin" : loggedInViewModel.getViewName();
+        viewManagerModel.pushView(viewName);
     }
 
     @Override
