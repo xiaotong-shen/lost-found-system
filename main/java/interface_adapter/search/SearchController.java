@@ -4,6 +4,8 @@ import interface_adapter.ViewManagerModel;
 import use_case.search.SearchInputBoundary;
 import use_case.search.SearchInputData;
 
+import java.util.List;
+
 /**
  * The controller for the Search View.
  */
@@ -18,11 +20,12 @@ public class SearchController {
     }
 
     /**
-     * Executes the search functionality.
+     * Executes a basic search with query and fuzzy toggle.
      * @param searchQuery the search query entered by the user
+     * @param isFuzzy whether to use fuzzy search
      */
-    public void execute(String searchQuery) {
-        SearchInputData searchInputData = new SearchInputData(searchQuery);
+    public void execute(String searchQuery, boolean isFuzzy) {
+        SearchInputData searchInputData = new SearchInputData(searchQuery, isFuzzy);
         searchInteractor.execute(searchInputData);
     }
 
@@ -33,7 +36,7 @@ public class SearchController {
      * @param tags tags to search for
      * @param isLost whether to search for lost or found items
      */
-    public void executeAdvancedSearch(String title, String location, java.util.List<String> tags, Boolean isLost) {
+    public void executeAdvancedSearch(String title, String location, List<String> tags, Boolean isLost) {
         SearchInputData searchInputData = new SearchInputData(title, location, tags, isLost);
         searchInteractor.execute(searchInputData);
     }
@@ -44,4 +47,4 @@ public class SearchController {
     public void navigateBack() {
         viewManagerModel.popViewOrClose();
     }
-} 
+}

@@ -16,22 +16,22 @@ import java.util.concurrent.ExecutionException;
 /**
  * Firebase implementation of data access for posts.
  */
-public class FirebasePostDataAccessObject implements 
-        DashboardUserDataAccessInterface, 
+public class FirebasePostDataAccessObject implements
+        DashboardUserDataAccessInterface,
         SearchUserDataAccessInterface {
-    
+
     private final DatabaseReference postsRef;
     private final DateTimeFormatter dateFormatter;
-    
+
     public FirebasePostDataAccessObject() {
         this.postsRef = FirebaseConfig.getDatabase().getReference("posts");
         this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     }
-    
+
     @Override
     public List<Post> getAllPosts() {
         CompletableFuture<List<Post>> future = new CompletableFuture<>();
-        
+
         postsRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -44,13 +44,13 @@ public class FirebasePostDataAccessObject implements
                 }
                 future.complete(posts);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 future.completeExceptionally(new RuntimeException("Failed to load posts: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -58,41 +58,40 @@ public class FirebasePostDataAccessObject implements
             return new ArrayList<>();
         }
     }
-    
+
     @Override
     public List<Post> searchPosts(String query) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
         String lowerQuery = query.toLowerCase();
-        
+
         for (Post post : allPosts) {
-            // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
-                post.getDescription().toLowerCase().contains(lowerQuery)) {
+                    post.getDescription().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
             }
         }
-        
+
         return matchingPosts;
     }
-    
+
     @Override
     public Post getPostById(int postID) {
         CompletableFuture<Post> future = new CompletableFuture<>();
-        
+
         postsRef.child(String.valueOf(postID)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Post post = dataSnapshot.getValue(Post.class);
                 future.complete(post);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -100,27 +99,25 @@ public class FirebasePostDataAccessObject implements
             return null;
         }
     }
-    
+
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
-        // Generate new post ID
         String postId = postsRef.push().getKey();
-        
+
         Post newPost = new Post(
-            postId.hashCode(), // Use hash code instead of parsing
-            title,
-            content,
-            tags != null ? tags : new ArrayList<>(),
-            LocalDateTime.now(),
-            author,
-            location,
-            null, // image URL
-            isLost,
-            0, // likes
-            new HashMap<>() // reactions
+                postId.hashCode(),
+                title,
+                content,
+                tags != null ? tags : new ArrayList<>(),
+                LocalDateTime.now(),
+                author,
+                location,
+                null,
+                isLost,
+                0,
+                new HashMap<>()
         );
-        
-        // Save to Firebase
+
         postsRef.child(postId).setValue(newPost, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -131,22 +128,21 @@ public class FirebasePostDataAccessObject implements
                 }
             }
         });
-        
+
         return newPost;
     }
-    
+
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
 
         boolean allBlank = (title == null || title.isEmpty()) &&
-                           (location == null || location.isEmpty()) &&
-                           (tags == null || tags.isEmpty()) &&
-                           (isLost == null);
+                (location == null || location.isEmpty()) &&
+                (tags == null || tags.isEmpty()) &&
+                (isLost == null);
 
         if (allBlank) {
-            // Return all posts sorted alphabetically by title
             allPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
             return allPosts;
         }
@@ -155,12 +151,12 @@ public class FirebasePostDataAccessObject implements
             boolean matches = true;
 
             if (title != null && !title.isEmpty() &&
-                !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                    !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
                 matches = false;
             }
 
             if (location != null && !location.isEmpty() &&
-                !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
+                    !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
                 matches = false;
             }
 
@@ -189,8 +185,12 @@ public class FirebasePostDataAccessObject implements
             }
         }
 
-        // Always sort the result alphabetically by title
         matchingPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
         return matchingPosts;
     }
-} 
+
+    @Override
+    public List<Post> fuzzySearch(String query) {
+        throw new UnsupportedOperationException("Fuzzy search is not supported in FirebasePostDataAccessObject.");
+    }
+}
