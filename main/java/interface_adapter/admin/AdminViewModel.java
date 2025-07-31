@@ -21,4 +21,5 @@ public class AdminViewModel extends ViewModel<AdminState> {
     public void firePropertyChanged(String propertyName) {
         super.firePropertyChanged(propertyName);
     }
+
 }

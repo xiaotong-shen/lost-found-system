@@ -35,8 +35,8 @@ public class AdminController {
      * Loads all posts for the dashboard.
      */
     public void loadPosts() {
-        AdminInputData adminInputData = new AdminOutputData("load_posts");
-        AdminInteractor.execute(adminInputData);
+        AdminInputData adminInputData = new AdminInputData("load_posts");
+        adminInteractor.execute(adminInputData);
     }
 
     /**
@@ -60,10 +60,17 @@ public class AdminController {
         AdminInputData adminInputData = new AdminInputData("add_post", title, content, tags, location, isLost, currentUser);
         adminInteractor.execute(adminInputData);
     }
+    // Add edit functionality
+    public void editPost(String postId, String title, String description,
+                         String location, List<String> tags, boolean isLost) {
+        AdminInputData inputData = new AdminInputData("edit_post", postId, title, description, tags, location, isLost, currentUser);
 
-    /**
-     * Navigates back to the previous view.
-     */
+        adminInteractor.execute(inputData);
+    }
+
+        /**
+         * Navigates back to the previous view.
+         */
     public void navigateBack() {
         viewManagerModel.popViewOrClose();
     }

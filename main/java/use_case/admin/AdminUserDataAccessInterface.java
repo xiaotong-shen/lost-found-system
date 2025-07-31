@@ -38,4 +38,6 @@ public interface AdminUserDataAccessInterface {
      * @return the created post
      */
     Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author);
+
+    boolean editPost(String postId, String title, String description, String location, List<String> tags, boolean isLost);
 }

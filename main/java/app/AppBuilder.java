@@ -26,6 +26,20 @@ import interface_adapter.search.SearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.dashboard.DashboardController;
+import interface_adapter.dashboard.DashboardPresenter;
+import interface_adapter.dashboard.DashboardViewModel;
+import interface_adapter.change_username.ChangeUsernameController;
+import interface_adapter.change_username.ChangeUsernamePresenter;
+import interface_adapter.change_username.ChangeUsernameViewModel;
+import interface_adapter.admin.AdminController;
+import interface_adapter.admin.AdminPresenter;
+import interface_adapter.admin.AdminViewModel;
+import use_case.admin.AdminInputBoundary;
+import use_case.admin.AdminInteractor;
+import use_case.admin.AdminOutputBoundary;
+import use_case.admin.AdminUserDataAccessInterface;
+import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -42,27 +56,15 @@ import use_case.search.SearchUserDataAccessInterface;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.LoggedInView;
-import view.LoginView;
-import view.SearchView;
-import view.SignupView;
-import view.ViewManager;
-import interface_adapter.dashboard.DashboardController;
-import interface_adapter.dashboard.DashboardPresenter;
-import interface_adapter.dashboard.DashboardViewModel;
 import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardInteractor;
 import use_case.dashboard.DashboardOutputBoundary;
 import use_case.dashboard.DashboardUserDataAccessInterface;
-import view.AccountView;
-import interface_adapter.change_username.ChangeUsernameController;
-import interface_adapter.change_username.ChangeUsernamePresenter;
-import interface_adapter.change_username.ChangeUsernameViewModel;
 import use_case.change_username.ChangeUsernameInputBoundary;
 import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
-import view.DMsView;
+import view.*;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -89,6 +91,7 @@ public class AppBuilder {
     // private final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
+    private final AdminUserDataAccessInterface adminDataAccessObject = new FirebasePostDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -104,6 +107,8 @@ public class AppBuilder {
     private ChangeUsernameController changeUsernameController;
     private ChangeUsernameViewModel changeUsernameViewModel;
     private DMsView dmsView;
+    private AdminView adminView;
+    private AdminViewModel adminViewModel;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -164,6 +169,14 @@ public class AppBuilder {
         dashboardViewModel = new DashboardViewModel();
         dashboardView = new DashboardView(dashboardViewModel);
         cardPanel.add(dashboardView, dashboardView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addAdminView() {
+        adminViewModel = new AdminViewModel();
+
+        adminView = new AdminView(adminViewModel);
+        cardPanel.add(adminView, adminView.getViewName());
         return this;
     }
 
@@ -274,6 +287,14 @@ public class AppBuilder {
         final DashboardInputBoundary dashboardInteractor = new DashboardInteractor(dashboardDataAccessObject, dashboardOutputBoundary);
         final DashboardController dashboardController = new DashboardController(dashboardInteractor, viewManagerModel);
         dashboardView.setDashboardController(dashboardController);
+        return this;
+    }
+
+    public AppBuilder addAdminUseCase() {
+        final AdminOutputBoundary adminOutputBoundary = new AdminPresenter(adminViewModel);
+        final AdminInputBoundary adminInteractor = new AdminInteractor(adminDataAccessObject, adminOutputBoundary);
+        final AdminController adminController = new AdminController(adminInteractor, viewManagerModel);
+        adminView.setAdminController(adminController);
         return this;
     }
 

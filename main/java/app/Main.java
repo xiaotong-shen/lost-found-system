@@ -21,12 +21,14 @@ public class Main {
                                             .addSearchView()
                                             .addDashboardView()
                                             .addDMsView()
+                                            .addAdminView()
                                             .addSignupUseCase()
                                             .addLoginUseCase()
                                             .addLogoutUseCase()
                                             .addChangePasswordUseCase()
                                             .addSearchUseCase()
                                             .addDashboardUseCase()
+                                            .addAdminUseCase()
                                             .build();
 
         application.pack();

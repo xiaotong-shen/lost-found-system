@@ -2,6 +2,7 @@ package data_access;
 
 import com.google.firebase.database.*;
 import entity.Post;
+import use_case.admin.AdminUserDataAccessInterface;
 import use_case.dashboard.DashboardUserDataAccessInterface;
 import use_case.search.SearchUserDataAccessInterface;
 
@@ -18,20 +19,21 @@ import java.util.concurrent.ExecutionException;
  */
 public class FirebasePostDataAccessObject implements 
         DashboardUserDataAccessInterface, 
-        SearchUserDataAccessInterface {
-    
+        SearchUserDataAccessInterface,
+        AdminUserDataAccessInterface {
+
     private final DatabaseReference postsRef;
     private final DateTimeFormatter dateFormatter;
-    
+
     public FirebasePostDataAccessObject() {
         this.postsRef = FirebaseConfig.getDatabase().getReference("posts");
         this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     }
-    
+
     @Override
     public List<Post> getAllPosts() {
         CompletableFuture<List<Post>> future = new CompletableFuture<>();
-        
+
         postsRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -44,13 +46,13 @@ public class FirebasePostDataAccessObject implements
                 }
                 future.complete(posts);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 future.completeExceptionally(new RuntimeException("Failed to load posts: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -58,13 +60,13 @@ public class FirebasePostDataAccessObject implements
             return new ArrayList<>();
         }
     }
-    
+
     @Override
     public List<Post> searchPosts(String query) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
         String lowerQuery = query.toLowerCase();
-        
+
         for (Post post : allPosts) {
             // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
@@ -72,27 +74,27 @@ public class FirebasePostDataAccessObject implements
                 matchingPosts.add(post);
             }
         }
-        
+
         return matchingPosts;
     }
-    
+
     @Override
     public Post getPostById(int postID) {
         CompletableFuture<Post> future = new CompletableFuture<>();
-        
+
         postsRef.child(String.valueOf(postID)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Post post = dataSnapshot.getValue(Post.class);
                 future.complete(post);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -100,12 +102,13 @@ public class FirebasePostDataAccessObject implements
             return null;
         }
     }
-    
+
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
         // Generate new post ID
         String postId = postsRef.push().getKey();
-        
+        System.out.println("Post ID: " + postId);
+        System.out.println("Post ID: " + postId.hashCode());
         Post newPost = new Post(
             postId.hashCode(), // Use hash code instead of parsing
             title,
@@ -119,7 +122,7 @@ public class FirebasePostDataAccessObject implements
             0, // likes
             new HashMap<>() // reactions
         );
-        
+
         // Save to Firebase
         postsRef.child(postId).setValue(newPost, new DatabaseReference.CompletionListener() {
             @Override
@@ -131,10 +134,74 @@ public class FirebasePostDataAccessObject implements
                 }
             }
         });
-        
+
         return newPost;
     }
-    
+
+    @Override
+    public boolean editPost(String currentTitle, String newTitle, String description,
+                            String location, List<String> tags, boolean isLost) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        // Query for the post with matching title
+        postsRef.orderByChild("title").equalTo(newTitle)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Should only be one post with this title
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            Post existingPost = postSnapshot.getValue(Post.class);
+                            if (existingPost != null) {
+                                // Create updated post
+                                Post updatedPost = new Post(
+                                        existingPost.getPostID(),
+                                        newTitle,
+                                        description,
+                                        tags != null ? tags : existingPost.getTags(),
+                                        LocalDateTime.parse(existingPost.getTimestamp(), dateFormatter),
+                                        existingPost.getAuthor(),
+                                        location,
+                                        existingPost.getImageURL(),
+                                        isLost,
+                                        existingPost.getNumberOfLikes(),
+                                        existingPost.getReactions()
+                                );
+
+                                // Update in Firebase using the snapshot's key
+                                postsRef.child(postSnapshot.getKey())
+                                        .setValue(updatedPost, (databaseError, databaseReference) -> {
+                                            if (databaseError != null) {
+                                                System.err.println("Error updating post: " +
+                                                        databaseError.getMessage());
+                                                future.complete(false);
+                                            } else {
+                                                System.out.println("Post updated successfully!");
+                                                future.complete(true);
+                                            }
+                                        });
+                                return;  // Exit after finding and updating the post
+                            }
+                        }
+                        // If we get here, no post was found
+                        System.err.println("Post not found with title: " + newTitle);
+                        future.complete(false);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.err.println("Error fetching post for update: " +
+                                databaseError.getMessage());
+                        future.complete(false);
+                    }
+                });
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.err.println("Error during post update: " + e.getMessage());
+            return false;
+        }
+    }
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         List<Post> allPosts = getAllPosts();
@@ -193,4 +260,4 @@ public class FirebasePostDataAccessObject implements
         matchingPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
         return matchingPosts;
     }
-} 
+}

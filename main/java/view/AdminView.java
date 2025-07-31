@@ -1,14 +1,13 @@
 package view;
 
 import entity.Post;
+import interface_adapter.admin.*;
 import interface_adapter.admin.AdminViewModel;
-import interface_adapter.admin.AdminController;
-import interface_adapter.admin.AdminState;
-import interface_adapter.admin.AdminViewModel;
-import interface_adapter.admin.AdminPresenter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
@@ -21,8 +20,15 @@ import java.awt.event.ComponentEvent;
 /**
  * The View for the Dashboard (Piazza-like platform).
  */
-public class AdminView extends JPanel implements PropertyChangeListener {
-
+public class AdminView extends JPanel implements ActionListener, PropertyChangeListener {
+    private final JButton editButton = new JButton("Edit Post");
+    private final JDialog editDialog;
+    private final JTextField titleField = new JTextField(20);
+    private final JTextArea descriptionArea = new JTextArea(5, 20);
+    private final JTextField locationField = new JTextField(20);
+    private final JTextField tagsField = new JTextField(20);
+    private final JCheckBox isLostCheckBox = new JCheckBox("Lost Item");
+    private String selectedPostId;
     private final String viewName = "admin";
     private final AdminViewModel adminViewModel;
     private final JTextField searchField = new JTextField(20);
@@ -38,6 +44,45 @@ public class AdminView extends JPanel implements PropertyChangeListener {
     private AdminController adminController;
 
     public AdminView(AdminViewModel adminViewModel) {
+
+        // Create edit dialog
+        editDialog = new JDialog();
+        editDialog.setTitle("Edit Post");
+        editDialog.setModal(true);
+        editDialog.setLayout(new BorderLayout());
+
+        // Create form panel
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(2, 2, 2, 2);
+
+        // Add form components
+        addFormRow(formPanel, "Title:", titleField, gbc, 0);
+        addFormRow(formPanel, "Description:", new JScrollPane(descriptionArea), gbc, 1);
+        addFormRow(formPanel, "Location:", locationField, gbc, 2);
+        addFormRow(formPanel, "Tags:", tagsField, gbc, 3);
+        addFormRow(formPanel, "", isLostCheckBox, gbc, 4);
+
+        // Add buttons
+        JPanel buttonPanel = new JPanel();
+        JButton saveButton = new JButton("Save");
+        JButton cancelButton = new JButton("Cancel");
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        editDialog.add(formPanel, BorderLayout.CENTER);
+        editDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add action listeners
+        saveButton.addActionListener(e -> saveEdit());
+        cancelButton.addActionListener(e -> editDialog.setVisible(false));
+        editButton.addActionListener(e -> showEditDialog());
+
+        // Pack dialog
+        editDialog.pack();
+        editDialog.setLocationRelativeTo(null);
         this.adminViewModel = adminViewModel;
         this.adminViewModel.addPropertyChangeListener(this);
 
@@ -86,6 +131,7 @@ public class AdminView extends JPanel implements PropertyChangeListener {
 
         // Right side - buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(editButton);
         buttonPanel.add(addPostButton);
         buttonPanel.add(backButton);
 
@@ -138,6 +184,52 @@ public class AdminView extends JPanel implements PropertyChangeListener {
         postsTab.add(postDetailPanel, BorderLayout.CENTER);
 
         return postsTab;
+    }
+
+    private void addFormRow(JPanel panel, String label, Component component, 
+                          GridBagConstraints gbc, int row) {
+        gbc.gridy = row;
+        gbc.gridx = 0;
+        panel.add(new JLabel(label), gbc);
+        gbc.gridx = 1;
+        panel.add(component, gbc);
+    }
+
+    private void showEditDialog() {
+        if (selectedPostId == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Please select a post to edit first", 
+                "No Post Selected", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Populate fields with current post data
+        Post post = getCurrentlySelectedPost();
+        if (post != null) {
+            titleField.setText(post.getTitle());
+            descriptionArea.setText(post.getDescription());
+            locationField.setText(post.getLocation());
+            tagsField.setText(String.join(", ", post.getTags()));
+            isLostCheckBox.setSelected(post.isLost());
+        }
+
+        editDialog.setVisible(true);
+    }
+
+    private void saveEdit() {
+        List<String> tags = Arrays.asList(tagsField.getText().split("\\s*,\\s*"));
+
+        adminController.editPost(
+            selectedPostId,
+            titleField.getText(),
+            descriptionArea.getText(),
+            locationField.getText(),
+            tags,
+            isLostCheckBox.isSelected()
+        );
+
+        editDialog.setVisible(false);
     }
 
     private void showAddPostDialog() {
@@ -234,6 +326,17 @@ public class AdminView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("editSuccess")) {
+            JOptionPane.showMessageDialog(this,
+                "Post updated successfully",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+        } else if (evt.getPropertyName().equals("editError")) {
+            JOptionPane.showMessageDialog(this,
+                "Error updating post: " + evt.getNewValue(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
         if (evt.getPropertyName().equals("state")) {
             final AdminState state = (AdminState) evt.getNewValue();
 
@@ -329,6 +432,7 @@ public class AdminView extends JPanel implements PropertyChangeListener {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 showPostDetails(post);
+                setSelectedPost(String.valueOf(post.getPostID())); // Add this line
             }
         });
 
@@ -391,11 +495,36 @@ public class AdminView extends JPanel implements PropertyChangeListener {
         }
     }
 
+    // Handle post selection
+    public void setSelectedPost(String postId) {
+        this.selectedPostId = postId;
+        editButton.setEnabled(postId != null);
+    }
+
     public String getViewName() {
         return viewName;
     }
 
-    public void setDashboardController(AdminController adminController) {
+    public void setAdminController(AdminController adminController) {
         this.adminController = adminController;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private Post getCurrentlySelectedPost() {
+        AdminState currentState = adminViewModel.getState();
+        List<Post> posts = currentState.getPosts();
+
+        for (Post post : posts) {
+            if (post.getPostID() == Integer.parseInt(selectedPostId)) {
+                return post;
+            }
+        }
+
+        return null;
     }
 }

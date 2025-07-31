@@ -61,6 +61,26 @@ public class AdminInteractor implements AdminInputBoundary {
                     }
                     break;
 
+                case "edit_post":
+                    boolean editSuccess = adminDataAccessObject.editPost(
+                            adminInputData.getPostId(),
+                            adminInputData.getPostTitle(),
+                            adminInputData.getPostContent(),
+                            adminInputData.getPostLocation(),
+                            adminInputData.getPostTags(),
+                            adminInputData.isLost()
+                    );
+
+                    if (editSuccess) {
+                        // Get updated post list after edit
+                        List<Post> updatedPosts = adminDataAccessObject.getAllPosts();
+                        AdminOutputData editOutputData = new AdminOutputData("Post edited successfully!", true);
+                        adminOutputBoundary.prepareSuccessView(editOutputData);
+                    } else {
+                        adminOutputBoundary.prepareFailView(new AdminOutputData("Failed to edit post"));
+                    }
+                    break;
+
                 default:
                     adminOutputBoundary.prepareFailView(new AdminOutputData("Invalid action."));
                     break;

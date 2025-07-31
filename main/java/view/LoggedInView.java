@@ -37,6 +37,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JButton searchButton = new JButton("Search");
     private final JButton accountButton = new JButton("Account");
     private final JButton dmsButton = new JButton("DMs");
+    private final JButton adminButton = new JButton("AdminDashboard");
+
 
     public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -54,6 +56,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         buttons.add(searchButton);
         buttons.add(accountButton);
         buttons.add(dmsButton);
+        buttons.add(adminButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -78,6 +81,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         dmsButton.addActionListener(evt -> {
             if (evt.getSource().equals(dmsButton)) {
                 viewManagerModel.pushView("dms");
+            }
+        });
+
+        adminButton.addActionListener(evt -> {
+            if (evt.getSource().equals(adminButton)) {
+                viewManagerModel.pushView("admin");
             }
         });
 
