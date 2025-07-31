@@ -35,10 +35,29 @@ public class SearchController {
      * @param location location to search for
      * @param tags tags to search for
      * @param isLost whether to search for lost or found items
+     * @param isFuzzy whether to enable fuzzy search
      */
-    public void executeAdvancedSearch(String title, String location, List<String> tags, Boolean isLost) {
-        SearchInputData searchInputData = new SearchInputData(title, location, tags, isLost);
+    public void executeAdvancedSearch(String title, String location, List<String> tags, Boolean isLost, boolean isFuzzy) {
+        System.out.println("\n=== DEBUG: SearchController.executeAdvancedSearch() called ===");
+        System.out.println("DEBUG: Parameters received:");
+        System.out.println("  - Title: '" + title + "'");
+        System.out.println("  - Location: '" + location + "'");
+        System.out.println("  - Tags: " + tags);
+        System.out.println("  - IsLost: " + isLost);
+        System.out.println("  - isFuzzy: " + isFuzzy);
+
+        SearchInputData searchInputData = new SearchInputData(title, location, tags, isLost, isFuzzy);
+
+        System.out.println("DEBUG: Created SearchInputData with:");
+        System.out.println("  - Title: '" + searchInputData.getTitle() + "'");
+        System.out.println("  - Location: '" + searchInputData.getLocation() + "'");
+        System.out.println("  - Tags: " + searchInputData.getTags());
+        System.out.println("  - IsLost: " + searchInputData.getIsLost());
+        System.out.println("  - isFuzzy: " + searchInputData.isFuzzy());
+
+        System.out.println("DEBUG: Calling searchInteractor.execute()...");
         searchInteractor.execute(searchInputData);
+        System.out.println("DEBUG: searchInteractor.execute() completed");
     }
 
     /**
