@@ -30,6 +30,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private ChangePasswordController changePasswordController;
     private LogoutController logoutController;
     private ViewManagerModel viewManagerModel;
+    private DMsView dmsView;
 
     private final JLabel username;
 
@@ -77,6 +78,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         dmsButton.addActionListener(evt -> {
             if (evt.getSource().equals(dmsButton)) {
+                if (dmsView != null) {
+                    dmsView.setCurrentUsername(username.getText());
+                }
                 viewManagerModel.pushView("dms");
             }
         });
@@ -109,5 +113,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setDMsView(DMsView dmsView) {
+        this.dmsView = dmsView;
     }
 }
