@@ -32,9 +32,7 @@ public class LoginPresenter implements LoginOutputBoundary {
         loggedInViewModel.setState(loggedInState);
         loggedInViewModel.firePropertyChanged();
 
-        // Choose view based on admin status
-        String viewName = response.isAdmin() ? "admin" : loggedInViewModel.getViewName();
-        viewManagerModel.pushView(viewName);
+        this.viewManagerModel.pushView(loggedInViewModel.getViewName());
     }
 
     @Override

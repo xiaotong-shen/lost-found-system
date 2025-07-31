@@ -133,4 +133,4 @@ public class AccountView extends JPanel implements PropertyChangeListener {
     public String getViewName() {
         return viewName;
     }
-} 
+}
