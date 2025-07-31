@@ -7,28 +7,13 @@ import java.util.List;
  * The state for the Search View Model.
  */
 public class SearchState {
-    private String title = "";
-    private String location = "";
-    private List<String> tags = null;
-    private Boolean isLost = null;
+    private String searchQuery = "";
     private String searchError = "";
     private List<Post> searchResults = null;
     private boolean isLoading = false;
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public Boolean getIsLost() {
-        return isLost;
+    public String getSearchQuery() {
+        return searchQuery;
     }
 
     public String getSearchError() {
@@ -43,20 +28,8 @@ public class SearchState {
         return isLoading;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    public void setIsLost(Boolean isLost) {
-        this.isLost = isLost;
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 
     public void setSearchError(String searchError) {

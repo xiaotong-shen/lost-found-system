@@ -30,44 +30,31 @@ public class FirebasePostDataAccessObject implements
 
     @Override
     public List<Post> getAllPosts() {
-        System.out.println("\n=== DEBUG: getAllPosts() called ===");
         CompletableFuture<List<Post>> future = new CompletableFuture<>();
 
-        System.out.println("DEBUG: Setting up Firebase listener...");
         postsRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println("DEBUG: Firebase onDataChange called");
                 List<Post> posts = new ArrayList<>();
-                int postCount = 0;
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Post post = snapshot.getValue(Post.class);
                     if (post != null) {
                         posts.add(post);
-                        postCount++;
-                    } else {
-                        System.out.println("DEBUG: Warning - null post found in snapshot");
                     }
                 }
-                System.out.println("DEBUG: Retrieved " + postCount + " posts from Firebase");
                 future.complete(posts);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                System.out.println("DEBUG: Firebase onCancelled called with error: " + databaseError.getMessage());
                 future.completeExceptionally(new RuntimeException("Failed to load posts: " + databaseError.getMessage()));
             }
         });
 
         try {
-            System.out.println("DEBUG: Waiting for Firebase response (timeout: 5 seconds)...");
-            List<Post> result = future.get(5, TimeUnit.SECONDS);
-            System.out.println("DEBUG: getAllPosts() returning " + result.size() + " posts");
-            return result;
+            return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.out.println("DEBUG: Exception in getAllPosts(): " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error fetching posts: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -79,7 +66,6 @@ public class FirebasePostDataAccessObject implements
         String lowerQuery = query.toLowerCase();
 
         for (Post post : allPosts) {
-            // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
                     post.getDescription().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
@@ -148,16 +134,7 @@ public class FirebasePostDataAccessObject implements
 
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
-        System.out.println("\n=== DEBUG: searchPostsByCriteria() called ===");
-        System.out.println("DEBUG: Search criteria:");
-        System.out.println("  - Title: '" + title + "'");
-        System.out.println("  - Location: '" + location + "'");
-        System.out.println("  - Tags: " + (tags != null ? tags.toString() : "null"));
-        System.out.println("  - IsLost: " + isLost);
-
         List<Post> allPosts = getAllPosts();
-        System.out.println("DEBUG: Retrieved " + allPosts.size() + " total posts from database");
-
         List<Post> matchingPosts = new ArrayList<>();
 
         boolean allBlank = (title == null || title.isEmpty()) &&
@@ -166,63 +143,49 @@ public class FirebasePostDataAccessObject implements
                 (isLost == null);
 
         if (allBlank) {
-            System.out.println("DEBUG: All criteria blank, returning all posts sorted by title");
             allPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
             return allPosts;
         }
 
-        int postIndex = 0;
         for (Post post : allPosts) {
-            postIndex++;
-            System.out.println("\nDEBUG: Checking post " + postIndex + ": '" + post.getTitle() + "'");
             boolean matches = true;
 
-            if (title != null && !title.isEmpty()) {
-                boolean titleMatches = post.getTitle().toLowerCase().contains(title.toLowerCase());
-                System.out.println("DEBUG:   Title check -> " + titleMatches);
-                if (!titleMatches) matches = false;
+            if (title != null && !title.isEmpty() &&
+                    !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                matches = false;
             }
 
-            if (location != null && !location.isEmpty()) {
-                boolean locationMatches = post.getLocation().toLowerCase().contains(location.toLowerCase());
-                System.out.println("DEBUG:   Location check -> " + locationMatches);
-                if (!locationMatches) matches = false;
+            if (location != null && !location.isEmpty() &&
+                    !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
+                matches = false;
             }
 
             if (tags != null && !tags.isEmpty()) {
-                System.out.println("DEBUG:   Tags check -> Searching for any match in: " + tags);
                 boolean hasMatchingTag = false;
-                List<String> postTags = post.getTags();
-                if (postTags != null) {
-                    for (String searchTag : tags) {
-                        for (String postTag : postTags) {
-                            if (postTag.toLowerCase().contains(searchTag.toLowerCase())) {
-                                hasMatchingTag = true;
-                                break;
-                            }
+                for (String searchTag : tags) {
+                    for (String postTag : post.getTags()) {
+                        if (postTag.toLowerCase().contains(searchTag.toLowerCase())) {
+                            hasMatchingTag = true;
+                            break;
                         }
-                        if (hasMatchingTag) break;
                     }
+                    if (hasMatchingTag) break;
                 }
-                if (!hasMatchingTag) matches = false;
+                if (!hasMatchingTag) {
+                    matches = false;
+                }
             }
 
-            if (isLost != null) {
-                boolean lostMatches = post.isLost() == isLost;
-                System.out.println("DEBUG:   Lost status check -> " + lostMatches);
-                if (!lostMatches) matches = false;
+            if (isLost != null && post.isLost() != isLost) {
+                matches = false;
             }
 
             if (matches) {
                 matchingPosts.add(post);
-                System.out.println("DEBUG:   ✓ Post added to results");
-            } else {
-                System.out.println("DEBUG:   ✗ Post excluded");
             }
         }
 
         matchingPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
-        System.out.println("DEBUG: Returning " + matchingPosts.size() + " matched posts");
         return matchingPosts;
     }
 

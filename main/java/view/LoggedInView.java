@@ -34,7 +34,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel username;
 
     private final JButton dashboardButton = new JButton("Dashboard");
-    private final JButton searchButton = new JButton("Search by Criteria");
+    private final JButton searchButton = new JButton("Search");
     private final JButton accountButton = new JButton("Account");
     private final JButton dmsButton = new JButton("DMs");
 
