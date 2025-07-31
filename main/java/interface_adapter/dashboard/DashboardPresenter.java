@@ -25,6 +25,7 @@ public class DashboardPresenter implements DashboardOutputBoundary {
             currentState.setSelectedPost(dashboardOutputData.getSelectedPost());
         }
         if (dashboardOutputData.getSuccessMessage() != null) {
+            System.out.println("DEBUG: DashboardPresenter setting success message: '" + dashboardOutputData.getSuccessMessage() + "'");
             currentState.setSuccessMessage(dashboardOutputData.getSuccessMessage());
         }
         

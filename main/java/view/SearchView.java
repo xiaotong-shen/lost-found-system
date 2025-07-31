@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+// SESSION CHANGE: Author label now shows just the username in search results. See also: FirebasePostDataAccessObject, DashboardInteractor, DashboardView, LoginPresenter, SignupPresenter, LoggedInView, AppBuilder.
+
 /**
  * The View for the Search functionality.
  */
@@ -304,7 +306,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setBackground(Color.WHITE);
         
-        JLabel authorLabel = new JLabel("By: " + post.getAuthor());
+        // SESSION CHANGE: Author label now shows just the username
+        JLabel authorLabel = new JLabel(post.getAuthor());
         JLabel locationLabel = new JLabel("Location: " + post.getLocation());
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
         typeLabel.setForeground(post.isLost() ? Color.RED : Color.GREEN);

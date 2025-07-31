@@ -3,6 +3,8 @@ package use_case.dashboard;
 import entity.Post;
 import java.util.List;
 
+// SESSION CHANGE: Dashboard search returns all posts alphabetically if query is blank. See also: FirebasePostDataAccessObject, DashboardView, LoginPresenter, SignupPresenter, LoggedInView, AppBuilder.
+
 /**
  * Interactor for the dashboard use case.
  * Implements the business logic for dashboard operations.
@@ -28,12 +30,12 @@ public class DashboardInteractor implements DashboardInputBoundary {
                     break;
 
                 case "search_posts":
+                    // SESSION CHANGE: If search query is blank, return all posts sorted alphabetically by title
                     if (dashboardInputData.getSearchQuery() != null && !dashboardInputData.getSearchQuery().trim().isEmpty()) {
                         List<Post> searchResults = dashboardDataAccessObject.searchPosts(dashboardInputData.getSearchQuery().trim());
                         DashboardOutputData searchOutputData = new DashboardOutputData(searchResults);
                         dashboardOutputBoundary.prepareSuccessView(searchOutputData);
                     } else {
-                        // If search query is blank, return all posts sorted alphabetically by title
                         List<Post> allPosts = dashboardDataAccessObject.getAllPosts();
                         allPosts.sort(java.util.Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
                         DashboardOutputData allPostsOutputData = new DashboardOutputData(allPosts);
@@ -58,6 +60,30 @@ public class DashboardInteractor implements DashboardInputBoundary {
                         dashboardOutputBoundary.prepareSuccessView(addPostOutputData);
                     } else {
                         dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post title and content are required."));
+                    }
+                    break;
+
+                case "update_post":
+                    if (dashboardInputData.getPost() != null) {
+                        boolean updateSuccess = dashboardDataAccessObject.updatePost(dashboardInputData.getPost());
+                        if (updateSuccess) {
+                            DashboardOutputData updatePostOutputData = new DashboardOutputData("Post updated successfully!", true);
+                            dashboardOutputBoundary.prepareSuccessView(updatePostOutputData);
+                        } else {
+                            dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Failed to update post."));
+                        }
+                    } else {
+                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post data is required for update."));
+                    }
+                    break;
+
+                case "delete_post":
+                    boolean deleteSuccess = dashboardDataAccessObject.deletePost(dashboardInputData.getPostId());
+                    if (deleteSuccess) {
+                        DashboardOutputData deletePostOutputData = new DashboardOutputData("Post deleted successfully!", true);
+                        dashboardOutputBoundary.prepareSuccessView(deletePostOutputData);
+                    } else {
+                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Failed to delete post."));
                     }
                     break;
 

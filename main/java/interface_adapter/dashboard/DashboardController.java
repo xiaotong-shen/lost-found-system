@@ -3,6 +3,7 @@ package interface_adapter.dashboard;
 import interface_adapter.ViewManagerModel;
 import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardInputData;
+import entity.Post;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public class DashboardController {
     private final DashboardInputBoundary dashboardInteractor;
     private final ViewManagerModel viewManagerModel;
     private String currentUser; // Add current user tracking
+    private view.DashboardView dashboardView; // Reference to DashboardView
 
     public DashboardController(DashboardInputBoundary dashboardInteractor, ViewManagerModel viewManagerModel) {
         this.dashboardInteractor = dashboardInteractor;
@@ -26,6 +28,18 @@ public class DashboardController {
      */
     public void setCurrentUser(String username) {
         this.currentUser = username;
+        // Also set the current user in the DashboardView
+        if (dashboardView != null) {
+            dashboardView.setCurrentUser(username);
+        }
+    }
+    
+    /**
+     * Sets the DashboardView reference.
+     * @param dashboardView the DashboardView instance
+     */
+    public void setDashboardView(view.DashboardView dashboardView) {
+        this.dashboardView = dashboardView;
     }
 
     /**
@@ -63,5 +77,23 @@ public class DashboardController {
      */
     public void navigateBack() {
         viewManagerModel.popViewOrClose();
+    }
+    
+    /**
+     * Updates an existing post.
+     * @param post the post to update
+     */
+    public void updatePost(Post post) {
+        DashboardInputData dashboardInputData = new DashboardInputData("update_post", post);
+        dashboardInteractor.execute(dashboardInputData);
+    }
+    
+    /**
+     * Deletes a post.
+     * @param postId the ID of the post to delete
+     */
+    public void deletePost(int postId) {
+        DashboardInputData dashboardInputData = new DashboardInputData("delete_post", postId);
+        dashboardInteractor.execute(dashboardInputData);
     }
 }

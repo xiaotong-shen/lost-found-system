@@ -15,6 +15,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.border.EmptyBorder;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import java.awt.*;
 
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupState;
@@ -29,38 +33,188 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     private final SignupViewModel signupViewModel;
     private final ViewManagerModel viewManagerModel;
-    private final JTextField usernameInputField = new JTextField(15);
-    private final JPasswordField passwordInputField = new JPasswordField(15);
-    private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
+    private final JTextField usernameInputField = new JTextField(20);
+    private final JPasswordField passwordInputField = new JPasswordField(20);
+    private final JPasswordField repeatPasswordInputField = new JPasswordField(20);
     private SignupController signupController;
 
-    private final JButton signUp;
-    private final JButton cancel;
-    private final JButton toLogin;
+    private JButton signUp;
+    private JButton cancel;
+    private JButton toLogin;
 
     public SignupView(SignupViewModel signupViewModel, ViewManagerModel viewManagerModel) {
         this.signupViewModel = signupViewModel;
         this.viewManagerModel = viewManagerModel;
         signupViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
+        // Set up the main panel with modern styling
+        this.setLayout(new BorderLayout());
+        this.setBackground(new Color(248, 249, 250)); // Light gray background
+
+        // Create the main content panel
+        JPanel mainContentPanel = createMainContentPanel();
+        this.add(mainContentPanel, BorderLayout.CENTER);
+
+        // Set up action listeners
+        setupActionListeners();
+    }
+
+    private JPanel createMainContentPanel() {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setOpaque(false);
+        mainPanel.setBorder(new EmptyBorder(50, 50, 50, 50));
+
+        // Create the signup card
+        JPanel signupCard = createSignupCard();
+        mainPanel.add(signupCard);
+
+        return mainPanel;
+    }
+
+    private JPanel createSignupCard() {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            new EmptyBorder(40, 40, 40, 40)
+        ));
+        card.setMaximumSize(new Dimension(400, 600));
+        card.setPreferredSize(new Dimension(400, 600));
+
+        // Title with modern styling
+        JLabel title = new JLabel("Create Account");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.BLACK);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
-        final LabelTextPanel repeatPasswordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
+        // Subtitle
+        JLabel subtitle = new JLabel("Join our community today");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitle.setForeground(Color.BLACK);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitle.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        final JPanel buttons = new JPanel();
-        toLogin = new JButton(SignupViewModel.TO_LOGIN_BUTTON_LABEL);
-        buttons.add(toLogin);
-        signUp = new JButton(SignupViewModel.SIGNUP_BUTTON_LABEL);
-        buttons.add(signUp);
-        cancel = new JButton(SignupViewModel.CANCEL_BUTTON_LABEL);
-        buttons.add(cancel);
+        // Username field
+        JPanel usernamePanel = createInputPanel("Username", usernameInputField);
+        
+        // Password field
+        JPanel passwordPanel = createInputPanel("Password", passwordInputField);
+        
+        // Repeat password field
+        JPanel repeatPasswordPanel = createInputPanel("Confirm Password", repeatPasswordInputField);
 
+        // Buttons panel
+        JPanel buttonsPanel = createButtonsPanel();
+
+        // Add components to card
+        card.add(title);
+        card.add(subtitle);
+        card.add(usernamePanel);
+        card.add(Box.createVerticalStrut(20));
+        card.add(passwordPanel);
+        card.add(Box.createVerticalStrut(20));
+        card.add(repeatPasswordPanel);
+        card.add(Box.createVerticalStrut(30));
+        card.add(buttonsPanel);
+
+        return card;
+    }
+
+    private JPanel createInputPanel(String labelText, JTextField inputField) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setMaximumSize(new Dimension(320, 80));
+
+        // Label
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        label.setForeground(Color.BLACK);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        // Input field styling
+        inputField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        inputField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(206, 212, 218), 1),
+            new EmptyBorder(12, 15, 12, 15)
+        ));
+        inputField.setMaximumSize(new Dimension(320, 45));
+        inputField.setPreferredSize(new Dimension(320, 45));
+
+        panel.add(label);
+        panel.add(inputField);
+
+        return panel;
+    }
+
+    private JPanel createButtonsPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setMaximumSize(new Dimension(320, 150));
+
+        // Sign up button
+        signUp = createStyledButton("Create Account", new Color(40, 167, 69));
+        signUp.setMaximumSize(new Dimension(320, 45));
+        signUp.setPreferredSize(new Dimension(320, 45));
+
+        // To login button
+        toLogin = createStyledButton("Back to Login", new Color(0, 123, 255));
+        toLogin.setMaximumSize(new Dimension(320, 45));
+        toLogin.setPreferredSize(new Dimension(320, 45));
+
+        // Cancel button
+        cancel = createStyledButton("Cancel", new Color(108, 117, 125));
+        cancel.setMaximumSize(new Dimension(320, 45));
+        cancel.setPreferredSize(new Dimension(320, 45));
+
+        panel.add(signUp);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(toLogin);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(cancel);
+
+        return panel;
+    }
+
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.BLACK);
+        button.setBackground(backgroundColor);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(backgroundColor.darker(), 1),
+            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor.darker());
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(backgroundColor.darker().darker(), 1),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(backgroundColor.darker(), 1),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+        });
+
+        return button;
+    }
+
+    private void setupActionListeners() {
         signUp.addActionListener(
                 // This creates an anonymous subclass of ActionListener and instantiates it.
                 new ActionListener() {
@@ -134,14 +288,6 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         addUsernameListener();
         addPasswordListener();
         addRepeatPasswordListener();
-
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        this.add(title);
-        this.add(usernameInfo);
-        this.add(passwordInfo);
-        this.add(repeatPasswordInfo);
-        this.add(buttons);
     }
 
     private void addUsernameListener() {

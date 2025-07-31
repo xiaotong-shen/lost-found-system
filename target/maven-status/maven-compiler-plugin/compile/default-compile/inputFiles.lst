@@ -19,6 +19,10 @@
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_password/ChangePasswordPresenter.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_password/LoggedInState.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_password/LoggedInViewModel.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_username/ChangeUsernameController.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_username/ChangeUsernamePresenter.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_username/ChangeUsernameState.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/change_username/ChangeUsernameViewModel.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/dashboard/DashboardController.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/dashboard/DashboardPresenter.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/interface_adapter/dashboard/DashboardState.java
@@ -43,6 +47,12 @@
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_password/ChangePasswordOutputBoundary.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_password/ChangePasswordOutputData.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_password/ChangePasswordUserDataAccessInterface.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameInputBoundary.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameInputData.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameInteractor.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameOutputBoundary.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameOutputData.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/change_username/ChangeUsernameUserDataAccessInterface.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/dashboard/DashboardInputBoundary.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/dashboard/DashboardInputData.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/dashboard/DashboardInteractor.java
@@ -73,6 +83,8 @@
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/signup/SignupOutputBoundary.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/signup/SignupOutputData.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/use_case/signup/SignupUserDataAccessInterface.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/view/AccountView.java
+/Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/view/DMsView.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/view/DashboardView.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/view/LabelTextPanel.java
 /Users/linmiao/Downloads/CSC207-Miao-Miao-1/main/java/view/LoggedInView.java

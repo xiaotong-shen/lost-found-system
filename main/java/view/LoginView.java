@@ -5,13 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.awt.*;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -29,14 +26,14 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
     private final LoginViewModel loginViewModel;
     private final ViewManagerModel viewManagerModel;
 
-    private final JTextField usernameInputField = new JTextField(15);
+    private final JTextField usernameInputField = new JTextField(20);
     private final JLabel usernameErrorField = new JLabel();
 
-    private final JPasswordField passwordInputField = new JPasswordField(15);
+    private final JPasswordField passwordInputField = new JPasswordField(20);
     private final JLabel passwordErrorField = new JLabel();
 
-    private final JButton logIn;
-    private final JButton cancel;
+    private JButton logIn;
+    private JButton cancel;
     private LoginController loginController;
 
     public LoginView(LoginViewModel loginViewModel, ViewManagerModel viewManagerModel) {
@@ -45,20 +42,178 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.viewManagerModel = viewManagerModel;
         this.loginViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Login Screen");
+        // Set up the main panel with gradient background
+        this.setLayout(new BorderLayout());
+        this.setBackground(new Color(240, 242, 245)); // Light gray background
+        
+        // Create the main content panel
+        JPanel mainContentPanel = createMainContentPanel();
+        this.add(mainContentPanel, BorderLayout.CENTER);
+
+        // Set up action listeners
+        setupActionListeners();
+    }
+
+    private JPanel createMainContentPanel() {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setOpaque(false);
+        mainPanel.setBorder(new EmptyBorder(50, 50, 50, 50));
+
+        // Create the login card
+        JPanel loginCard = createLoginCard();
+        mainPanel.add(loginCard);
+
+        return mainPanel;
+    }
+
+    private JPanel createLoginCard() {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            new EmptyBorder(40, 40, 40, 40)
+        ));
+        card.setMaximumSize(new Dimension(400, 500));
+        card.setPreferredSize(new Dimension(400, 500));
+
+        // Title with modern styling
+        JLabel title = new JLabel("Welcome Back");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.BLACK);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel("Username"), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
+        // Subtitle
+        JLabel subtitle = new JLabel("Sign in to your account");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitle.setForeground(Color.BLACK);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitle.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
-        buttons.add(logIn);
-        cancel = new JButton("cancel");
-        buttons.add(cancel);
+        // Username field
+        JPanel usernamePanel = createInputPanel("Username", usernameInputField, usernameErrorField);
+        
+        // Password field
+        JPanel passwordPanel = createInputPanel("Password", passwordInputField, passwordErrorField);
 
+        // Buttons panel
+        JPanel buttonsPanel = createButtonsPanel();
+
+        // Add components to card
+        card.add(title);
+        card.add(subtitle);
+        card.add(usernamePanel);
+        card.add(Box.createVerticalStrut(20));
+        card.add(passwordPanel);
+        card.add(Box.createVerticalStrut(30));
+        card.add(buttonsPanel);
+
+        return card;
+    }
+
+    private JPanel createInputPanel(String labelText, JTextField inputField, JLabel errorLabel) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setMaximumSize(new Dimension(320, 80));
+
+        // Label
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        label.setForeground(Color.BLACK);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        // Input field styling
+        inputField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        inputField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(206, 212, 218), 1),
+            new EmptyBorder(12, 15, 12, 15)
+        ));
+        inputField.setMaximumSize(new Dimension(320, 45));
+        inputField.setPreferredSize(new Dimension(320, 45));
+
+        // Error label
+        errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        errorLabel.setForeground(new Color(220, 53, 69));
+        errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        errorLabel.setBorder(new EmptyBorder(5, 0, 0, 0));
+
+        panel.add(label);
+        panel.add(inputField);
+        panel.add(errorLabel);
+
+        return panel;
+    }
+
+    private JPanel createButtonsPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setMaximumSize(new Dimension(320, 120));
+
+        // Login button
+        logIn = createStyledButton("Sign In", new Color(0, 123, 255));
+        logIn.setMaximumSize(new Dimension(320, 45));
+        logIn.setPreferredSize(new Dimension(320, 45));
+
+        // Cancel button
+        cancel = createStyledButton("Cancel", new Color(108, 117, 125));
+        cancel.setMaximumSize(new Dimension(320, 45));
+        cancel.setPreferredSize(new Dimension(320, 45));
+
+        // Sign up link
+        JLabel signUpLabel = new JLabel("Don't have an account? Click here to sign up");
+        signUpLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        signUpLabel.setForeground(new Color(0, 123, 255));
+        signUpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        signUpLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        signUpLabel.setBorder(new EmptyBorder(15, 0, 0, 0));
+
+        panel.add(logIn);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(cancel);
+        panel.add(signUpLabel);
+
+        return panel;
+    }
+
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.BLACK);
+        button.setBackground(backgroundColor);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(backgroundColor.darker(), 1),
+            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor.darker());
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(backgroundColor.darker().darker(), 1),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(backgroundColor.darker(), 1),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+        });
+
+        return button;
+    }
+
+    private void setupActionListeners() {
         logIn.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
@@ -100,8 +255,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
             }
         });
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -125,12 +278,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 documentListenerHelper();
             }
         });
-
-        this.add(title);
-        this.add(usernameInfo);
-        this.add(usernameErrorField);
-        this.add(passwordInfo);
-        this.add(buttons);
     }
 
     /**

@@ -38,4 +38,18 @@ public interface DashboardUserDataAccessInterface {
      * @return the created post
      */
     Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author);
+    
+    /**
+     * Updates an existing post.
+     * @param post the post to update
+     * @return true if update was successful, false otherwise
+     */
+    boolean updatePost(Post post);
+    
+    /**
+     * Deletes a post.
+     * @param postId the ID of the post to delete
+     * @return true if deletion was successful, false otherwise
+     */
+    boolean deletePost(int postId);
 } 

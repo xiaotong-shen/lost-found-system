@@ -89,9 +89,10 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // thought question: is the hard dependency below a problem?
-    private final FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
+    private final FirebasePostDataAccessObject firebasePostDataAccessObject = new FirebasePostDataAccessObject();
     // private final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
     // private final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+    private final FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
 
@@ -109,6 +110,7 @@ public class AppBuilder {
     private ChangeUsernameController changeUsernameController;
     private ChangeUsernameViewModel changeUsernameViewModel;
     private DMsView dmsView;
+    private DashboardController dashboardController;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -147,6 +149,10 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
+        // Wire dashboardController if it exists
+        if (dashboardController != null) {
+            loggedInView.setDashboardController(dashboardController);
+        }
         return this;
     }
 
@@ -198,8 +204,11 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addSignupUseCase() {
+        if (dashboardController == null) {
+            addDashboardUseCase();
+        }
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
-                signupViewModel, loginViewModel);
+                signupViewModel, loginViewModel, dashboardController);
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
                 userDataAccessObject, signupOutputBoundary, userFactory);
 
@@ -213,8 +222,11 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addLoginUseCase() {
+        if (dashboardController == null) {
+            addDashboardUseCase();
+        }
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
+                loggedInViewModel, loginViewModel, dashboardController);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDataAccessObject, loginOutputBoundary);
 
@@ -277,8 +289,13 @@ public class AppBuilder {
     public AppBuilder addDashboardUseCase() {
         final DashboardOutputBoundary dashboardOutputBoundary = new DashboardPresenter(dashboardViewModel);
         final DashboardInputBoundary dashboardInteractor = new DashboardInteractor(dashboardDataAccessObject, dashboardOutputBoundary);
-        final DashboardController dashboardController = new DashboardController(dashboardInteractor, viewManagerModel);
+        this.dashboardController = new DashboardController(dashboardInteractor, viewManagerModel);
         dashboardView.setDashboardController(dashboardController);
+        dashboardController.setDashboardView(dashboardView);
+        // Wire into loggedInView if it exists
+        if (loggedInView != null) {
+            loggedInView.setDashboardController(dashboardController);
+        }
         return this;
     }
 
