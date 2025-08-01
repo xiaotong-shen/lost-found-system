@@ -3,10 +3,12 @@ package entity;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
  * Represents a chat between users.
  */
+@IgnoreExtraProperties
 public class Chat {
 
 
@@ -34,7 +36,7 @@ public class Chat {
         this.chatId = chatId;
         this.participants = participants;
         this.messages = messages;
-        this.createdAt = createdAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        this.createdAt = createdAt.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     public String getChatId() {
@@ -61,15 +63,12 @@ public class Chat {
         this.messages = messages;
     }
 
-    public LocalDateTime getCreatedAt() {
-        if (createdAt == null || createdAt.isEmpty()) {
-            return null;
-        }
-        return LocalDateTime.parse(createdAt, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    public String getCreatedAt() {
+        return this.createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getCreatedAtString() {

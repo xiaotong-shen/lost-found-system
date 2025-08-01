@@ -38,25 +38,39 @@ public class DMsInteractor implements DMsInputBoundary {
             List<User> participants = inputData.getParticipants();
             if (participants == null || participants.isEmpty()) {
                 System.out.println("DEBUG: No participants specified");
-                DMsOutputData outputData = new DMsOutputData(null, null, null, "No participants specified");
+                DMsOutputData outputData = new DMsOutputData(null, null, null,"No participants specified");
                 dmsOutputBoundary.prepareCreateChatView(outputData);
                 return;
             }
 
             System.out.println("DEBUG: Creating chat with " + participants.size() + " participants");
+            for (User participant : participants) {
+                System.out.println("DEBUG: Participant: " + participant.getName());
+            }
+
             Chat chat = dmsUserDataAccessInterface.createChat(participants);
             System.out.println("DEBUG: Chat created with ID: " + (chat != null ? chat.getChatId() : "null"));
 
-            // After creating the chat, load the updated chat list for the current user
-            if (participants.size() > 0) {
+            if (chat != null) {
+                // Successfully created chat, now load the updated chat list
                 String currentUsername = participants.get(0).getName();
                 System.out.println("DEBUG: Loading updated chats for user: " + currentUsername);
+
+                // Add a small delay to allow Firebase to save the chat
+                try {
+                    Thread.sleep(1000); // Wait 1 second for Firebase to save
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
                 List<Chat> updatedChats = dmsUserDataAccessInterface.getChatsForUser(currentUsername);
                 System.out.println("DEBUG: Found " + updatedChats.size() + " chats for user");
+
+                // Create output data with the updated chat list
                 DMsOutputData outputData = new DMsOutputData(updatedChats, null, null, null);
                 dmsOutputBoundary.prepareLoadChatsView(outputData);
             } else {
-                DMsOutputData outputData = new DMsOutputData(null, null, chat, null);
+                DMsOutputData outputData = new DMsOutputData(null, null, null, "Failed to create chat");
                 dmsOutputBoundary.prepareCreateChatView(outputData);
             }
         } catch (Exception e) {

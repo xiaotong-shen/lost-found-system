@@ -14,17 +14,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface {
 
     private final DatabaseReference chatsRef;
     private final DatabaseReference messagesRef;
     private final FirebaseUserDataAccessObject userDAO;
+    private final DateTimeFormatter dateFormatter;
 
     public FirebaseChatDataAccessObject() {
         this.chatsRef = FirebaseDatabase.getInstance().getReference("chats");
         this.messagesRef = FirebaseDatabase.getInstance().getReference("messages");
         this.userDAO = new FirebaseUserDataAccessObject();
+        this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     }
 
     @Override
@@ -40,6 +43,7 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
                 List<Chat> chats = new ArrayList<>();
                 for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
                     Chat chat = chatSnapshot.getValue(Chat.class);
+                    System.out.println(chat);
                     if (chat != null && chat.getParticipants() != null) {
                         // Check if the user is a participant in this chat
                         boolean isParticipant = false;
@@ -77,7 +81,7 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
     public Chat createChat(List<User> participants) {
         System.out.println("\n=== DEBUG: FirebaseChatDataAccessObject.createChat() called ===");
         System.out.println("DEBUG: Creating chat with participants: " + participants.size());
-        
+
         for (User participant : participants) {
             System.out.println("DEBUG: Participant: " + participant.getName());
         }
@@ -86,27 +90,23 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
         LocalDateTime createdAt = LocalDateTime.now();
         Chat chat = new Chat(chatId, participants, new ArrayList<>(), createdAt);
 
-        CompletableFuture<Chat> future = new CompletableFuture<>();
+        System.out.println("DEBUG: About to save chat to Firebase with ID: " + chatId);
 
+        // Use a simpler approach - just save and return the chat
         chatsRef.child(chatId).setValue(chat, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError != null) {
                     System.err.println("DEBUG: Firebase error creating chat: " + databaseError.getMessage());
-                    future.completeExceptionally(new RuntimeException("Failed to create chat: " + databaseError.getMessage()));
                 } else {
                     System.out.println("DEBUG: Firebase chat created successfully: " + chatId);
-                    future.complete(chat);
                 }
             }
         });
 
-        try {
-            return future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.err.println("DEBUG: Error creating chat: " + e.getMessage());
-            return chat; // Return the chat object even if Firebase save fails
-        }
+        // Return the chat immediately - Firebase operations are asynchronous
+        System.out.println("DEBUG: Returning chat object with ID: " + chatId);
+        return chat;
     }
 
     @Override

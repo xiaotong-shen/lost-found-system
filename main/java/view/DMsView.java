@@ -14,7 +14,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -188,11 +187,15 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         }
 
         if (state.getCurrentChat() != null) {
+            System.out.println("DEBUG: Setting current chat: " + state.getCurrentChat().getChatId());
             selectedChatId = state.getCurrentChat().getChatId();
+
+            // If this is a newly created chat, refresh the chat list
             if (dmsController != null && currentUsername != null) {
+                dmsController.loadChats(currentUsername);
                 dmsController.loadMessages(selectedChatId, currentUsername);
             }
-        }
+            }
     }
 
     private void updateChatsList(List<Chat> chats) {
@@ -268,10 +271,9 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         chatArea.setText("");
         if (messages != null && !messages.isEmpty()) {
             StringBuilder chatText = new StringBuilder();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
             for (Message message : messages) {
-                String time = message.getSentAt().format(formatter);
+                String time = message.getSentAt();
                 String senderName = message.getSender().getName();
                 String content = message.getContent();
 

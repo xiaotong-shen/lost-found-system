@@ -2,10 +2,13 @@ package entity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import com.google.firebase.database.IgnoreExtraProperties;
+
 
 /**
  * Represents a message in a chat.
  */
+@IgnoreExtraProperties
 public class Message {
     private String messageId;
     private User sender;
@@ -62,15 +65,12 @@ public class Message {
         this.content = content;
     }
 
-    public LocalDateTime getSentAt() {
-        if (sentAt == null || sentAt.isEmpty()) {
-            return null;
-        }
-        return LocalDateTime.parse(sentAt, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    public String getSentAt() {
+        return this.sentAt;
     }
 
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    public void setSentAt(String sentAt) {
+        this.sentAt = sentAt;
     }
 
     public String getSentAtString() {
