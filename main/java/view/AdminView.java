@@ -197,10 +197,10 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
 
     private void showEditDialog() {
         if (selectedPostId == null) {
-            JOptionPane.showMessageDialog(this, 
-                "Please select a post to edit first", 
-                "No Post Selected", 
-                JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Please select a post to edit first",
+                    "No Post Selected",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -210,13 +210,13 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
             titleField.setText(post.getTitle());
             descriptionArea.setText(post.getDescription());
             locationField.setText(post.getLocation());
-            tagsField.setText(String.join(", ", post.getTags()));
+            // Add null check for tags
+            tagsField.setText(post.getTags() != null ? String.join(", ", post.getTags()) : "");
             isLostCheckBox.setSelected(post.isLost());
         }
 
         editDialog.setVisible(true);
     }
-
     private void saveEdit() {
         List<String> tags = Arrays.asList(tagsField.getText().split("\\s*,\\s*"));
 
@@ -476,7 +476,9 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         detailsPanel.add(new JLabel(post.getTimestamp()));
 
         detailsPanel.add(new JLabel("Tags:"));
-        detailsPanel.add(new JLabel(String.join(", ", post.getTags())));
+        // Add null check for tags
+        String tagsText = post.getTags() != null ? String.join(", ", post.getTags()) : "";
+        detailsPanel.add(new JLabel(tagsText));
 
         detailsPanel.add(new JLabel("Likes:"));
         detailsPanel.add(new JLabel(String.valueOf(post.getNumberOfLikes())));

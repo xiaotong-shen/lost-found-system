@@ -11,7 +11,6 @@ public class AdminOutputData {
     private final Post selectedPost;
     private final String error;
     private final String successMessage;
-
     public AdminOutputData(List<Post> posts) {
         this.posts = posts;
         this.selectedPost = null;

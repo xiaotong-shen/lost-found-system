@@ -75,6 +75,7 @@ public class AdminInteractor implements AdminInputBoundary {
                         // Get updated post list after edit
                         List<Post> updatedPosts = adminDataAccessObject.getAllPosts();
                         AdminOutputData editOutputData = new AdminOutputData("Post edited successfully!", true);
+                        editOutputData.getPosts();
                         adminOutputBoundary.prepareSuccessView(editOutputData);
                     } else {
                         adminOutputBoundary.prepareFailView(new AdminOutputData("Failed to edit post"));
