@@ -334,16 +334,20 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     }
 
     private void showPostDetails(Post post) {
+        if (post == null) {
+            return;
+        }
+
         postDetailPanel.removeAll();
         postDetailPanel.setLayout(new BorderLayout());
 
         // Title
-        JLabel titleLabel = new JLabel(post.getTitle());
+        JLabel titleLabel = new JLabel(post.getTitle() != null ? post.getTitle() : "");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Content
-        JTextArea contentArea = new JTextArea(post.getDescription());
+        JTextArea contentArea = new JTextArea(post.getDescription() != null ? post.getDescription() : "");
         contentArea.setLineWrap(true);
         contentArea.setWrapStyleWord(true);
         contentArea.setEditable(false);
@@ -355,10 +359,10 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         detailsPanel.add(new JLabel("Author:"));
-        detailsPanel.add(new JLabel(post.getAuthor()));
+        detailsPanel.add(new JLabel(post.getAuthor() != null ? post.getAuthor() : ""));
 
         detailsPanel.add(new JLabel("Location:"));
-        detailsPanel.add(new JLabel(post.getLocation()));
+        detailsPanel.add(new JLabel(post.getLocation() != null ? post.getLocation() : ""));
 
         detailsPanel.add(new JLabel("Type:"));
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
@@ -367,10 +371,14 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(typeLabel);
 
         detailsPanel.add(new JLabel("Posted:"));
-        detailsPanel.add(new JLabel(post.getTimestamp()));
+        detailsPanel.add(new JLabel(post.getTimestamp() != null ? post.getTimestamp() : ""));
 
         detailsPanel.add(new JLabel("Tags:"));
-        detailsPanel.add(new JLabel(String.join(", ", post.getTags())));
+        String tagsText = "";
+        if (post.getTags() != null && !post.getTags().isEmpty()) {
+            tagsText = String.join(", ", post.getTags());
+        }
+        detailsPanel.add(new JLabel(tagsText));
 
         detailsPanel.add(new JLabel("Likes:"));
         detailsPanel.add(new JLabel(String.valueOf(post.getNumberOfLikes())));
