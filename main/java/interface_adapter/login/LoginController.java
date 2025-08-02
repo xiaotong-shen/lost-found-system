@@ -20,7 +20,7 @@ public class LoginController {
      * @param password the password of the user logging in
      */
     public void execute(String username, String password, boolean admin) {
-        final LoginInputData loginInputData = new LoginInputData(
+        LoginInputData loginInputData = new LoginInputData(
                 username, password, admin);
 
         loginUseCaseInteractor.execute(loginInputData);

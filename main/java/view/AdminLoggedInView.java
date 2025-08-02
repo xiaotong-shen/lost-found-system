@@ -13,6 +13,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import interface_adapter.adminloggedIn.AdminLoggedInState;
+import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.LoggedInState;
 import interface_adapter.change_password.LoggedInViewModel;
@@ -22,10 +24,10 @@ import interface_adapter.ViewManagerModel;
 /**
  * The View for when the user is logged into the program.
  */
-public class LoggedInView extends JPanel implements PropertyChangeListener {
+public class AdminLoggedInView extends JPanel implements PropertyChangeListener {
 
-    private final String viewName = "logged in";
-    private final LoggedInViewModel loggedInViewModel;
+    private final String viewName = "admin logged in";
+    private final AdminLoggedInViewModel adminloggedInViewModel;
     private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController;
     private LogoutController logoutController;
@@ -37,11 +39,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JButton searchButton = new JButton("Search");
     private final JButton accountButton = new JButton("Account");
     private final JButton dmsButton = new JButton("DMs");
+    private final JButton adminButton = new JButton("AdminDashboard");
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
-        this.loggedInViewModel = loggedInViewModel;
+
+    public AdminLoggedInView(AdminLoggedInViewModel adminloggedInViewModel, ViewManagerModel viewManagerModel) {
+        this.adminloggedInViewModel = adminloggedInViewModel;
         this.viewManagerModel = viewManagerModel;
-        this.loggedInViewModel.addPropertyChangeListener(this);
+        this.adminloggedInViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel("Logged In Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -54,6 +58,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         buttons.add(searchButton);
         buttons.add(accountButton);
         buttons.add(dmsButton);
+        buttons.add(adminButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -81,6 +86,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        adminButton.addActionListener(evt -> {
+            if (evt.getSource().equals(adminButton)) {
+                viewManagerModel.pushView("admin");
+            }
+        });
+
         this.add(title);
         this.add(usernameInfo);
         this.add(username);
@@ -90,11 +101,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
-            final LoggedInState state = (LoggedInState) evt.getNewValue();
+            final AdminLoggedInState state = (AdminLoggedInState) evt.getNewValue();
             username.setText(state.getUsername());
         }
         else if (evt.getPropertyName().equals("password")) {
-            final LoggedInState state = (LoggedInState) evt.getNewValue();
+            final AdminLoggedInState state = (AdminLoggedInState) evt.getNewValue();
         }
 
     }

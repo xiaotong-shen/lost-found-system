@@ -12,6 +12,7 @@ import data_access.FirebaseUserDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.ChangePasswordPresenter;
 import interface_adapter.change_password.LoggedInViewModel;
@@ -109,6 +110,8 @@ public class AppBuilder {
     private DMsView dmsView;
     private AdminView adminView;
     private AdminViewModel adminViewModel;
+    private AdminLoggedInView adminloggedInView;
+    private AdminLoggedInViewModel adminloggedInViewModel;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -147,6 +150,13 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addAdminLoggedInView() {
+        adminloggedInViewModel = new AdminLoggedInViewModel();
+        adminloggedInView = new AdminLoggedInView(adminloggedInViewModel, viewManagerModel);
+        cardPanel.add(adminloggedInView, adminloggedInView.getViewName());
         return this;
     }
 
@@ -222,7 +232,7 @@ public class AppBuilder {
      */
     public AppBuilder addLoginUseCase() {
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
+                loggedInViewModel, loginViewModel, adminloggedInView, adminloggedInViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDataAccessObject, loginOutputBoundary);
 
