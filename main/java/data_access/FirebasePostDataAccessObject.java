@@ -139,12 +139,12 @@ public class FirebasePostDataAccessObject implements
     }
 
     @Override
-    public boolean editPost(String currentTitle, String newTitle, String description,
+    public boolean editPost(String postId, String newTitle, String description,
                             String location, List<String> tags, boolean isLost) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
-
+        int intPostId = Integer.parseInt(postId);
         // Query for the post with matching title
-        postsRef.orderByChild("title").equalTo(newTitle)
+        postsRef.orderByChild("postID").equalTo(intPostId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -183,7 +183,7 @@ public class FirebasePostDataAccessObject implements
                             }
                         }
                         // If we get here, no post was found
-                        System.err.println("Post not found with title: " + newTitle);
+                        System.err.println("Post not found with postid: " + postId);
                         future.complete(false);
                     }
 
