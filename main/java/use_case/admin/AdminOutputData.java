@@ -7,10 +7,11 @@ import java.util.List;
  * Output data for the dashboard use case.
  */
 public class AdminOutputData {
-    private final List<Post> posts;
-    private final Post selectedPost;
+    private List<Post> posts;
+    private Post selectedPost;
     private final String error;
     private final String successMessage;
+
     public AdminOutputData(List<Post> posts) {
         this.posts = posts;
         this.selectedPost = null;
@@ -46,4 +47,12 @@ public class AdminOutputData {
     public String getSuccessMessage() { return successMessage; }
     public boolean hasError() { return error != null; }
     public boolean hasSuccess() { return successMessage != null; }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+    public void setSelectedPost(Post post) {
+        this.selectedPost = post;
+    }
+
 }
