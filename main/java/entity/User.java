@@ -17,4 +17,10 @@ public interface User {
      */
     String getPassword();
 
+    /**
+     * Returns if it's an admin
+     * @return true if they are admin
+     */
+    boolean isAdmin();
+
 }

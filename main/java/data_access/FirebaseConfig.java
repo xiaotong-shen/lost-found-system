@@ -36,11 +36,10 @@ public class FirebaseConfig {
             }
             
             String projectId = properties.getProperty("firebase.project.id", "csc207-cfda3");
-            String databaseUrl = properties.getProperty("firebase.database.url", 
-                "https://csc207-cfda3-default-rtdb.firebaseio.com");
-            String serviceAccountPath = properties.getProperty("firebase.service.account.path", 
-                "main/resources/csc207-cfda3-firebase-adminsdk-fbsvc-5f9167c0b2.json");
-            
+            String databaseUrl = properties.getProperty("firebase.database.url",
+                    "https://csc207-cfda3-default-rtdb.firebaseio.com");
+            String serviceAccountPath = properties.getProperty("firebase.service.account.path",
+                    "main/resources/csc207-cfda3-firebase-adminsdk-fbsvc-5f9167c0b2.json");
             // Load service account key file
             try (FileInputStream serviceAccount = new FileInputStream(serviceAccountPath)) {
                 FirebaseOptions options = FirebaseOptions.builder()

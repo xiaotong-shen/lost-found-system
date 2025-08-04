@@ -553,42 +553,10 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     }
 
     private void showPostDetails(Post post) {
-        currentPost = post; // Store the current post
-        postDetailPanel.removeAll();
-        postDetailPanel.setLayout(new BorderLayout());
-
-        // Title as bold heading
-        JLabel titleLabel = new JLabel(post.getTitle());
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        titleLabel.setForeground(Color.BLACK);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Details panel (vertical)
-        JPanel detailsPanel = new JPanel();
-        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-        detailsPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        detailsPanel.setOpaque(false);
 
         Font detailFont = new Font("Segoe UI", Font.PLAIN, 14);
         Font labelFont = new Font("Segoe UI", Font.BOLD, 14);
 
-        // Content/Description
-        JLabel contentLabel = new JLabel("Content: " + post.getDescription());
-        contentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentLabel.setFont(detailFont);
-        contentLabel.setForeground(Color.BLACK);
-        detailsPanel.add(contentLabel);
-        detailsPanel.add(Box.createVerticalStrut(12));
-
-        // Tags
-        String tags = (post.getTags() != null && !post.getTags().isEmpty()) ? String.join(", ", post.getTags()) : "None";
-        JLabel tagsLabel = new JLabel("Tags: " + tags);
-        tagsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        tagsLabel.setForeground(new Color(0, 123, 255));
-        tagsLabel.setFont(detailFont);
-        detailsPanel.add(tagsLabel);
-        detailsPanel.add(Box.createVerticalStrut(12));
 
         // Location
         JLabel locationLabel = new JLabel("Location: " + post.getLocation());
@@ -606,21 +574,6 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(typeLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
-        // Posted date/time
-        JLabel postedLabel = new JLabel("Posted: " + formatTimestamp(post.getTimestamp()));
-        postedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        postedLabel.setFont(detailFont);
-        postedLabel.setForeground(Color.BLACK);
-        detailsPanel.add(postedLabel);
-        detailsPanel.add(Box.createVerticalStrut(12));
-
-        // Author
-        JLabel authorLabel = new JLabel("Author: " + post.getAuthor());
-        authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        authorLabel.setFont(detailFont);
-        authorLabel.setForeground(Color.BLACK);
-        detailsPanel.add(authorLabel);
-        detailsPanel.add(Box.createVerticalStrut(12));
 
         // Likes
         JLabel likesLabel = new JLabel("Likes: " + post.getNumberOfLikes());

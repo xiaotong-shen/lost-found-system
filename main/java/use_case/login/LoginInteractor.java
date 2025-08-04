@@ -21,6 +21,7 @@ public class LoginInteractor implements LoginInputBoundary {
         System.out.println("\n=== DEBUG: LoginInteractor.execute() called ===");
         final String username = loginInputData.getUsername();
         final String password = loginInputData.getPassword();
+        final boolean admin = loginInputData.getAdmin();
         
         System.out.println("DEBUG: Login attempt:");
         System.out.println("DEBUG:   - Username: '" + username + "'");
@@ -48,7 +49,7 @@ public class LoginInteractor implements LoginInputBoundary {
                 final User user = userDataAccessObject.get(loginInputData.getUsername());
 
                 userDataAccessObject.setCurrentUsername(user.getName());
-                final LoginOutputData loginOutputData = new LoginOutputData(user.getName(), false);
+                final LoginOutputData loginOutputData = new LoginOutputData(user.getName(), false, user.isAdmin());
                 loginPresenter.prepareSuccessView(loginOutputData);
             }
         }

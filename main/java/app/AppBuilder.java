@@ -6,15 +6,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import data_access.APIPostDataAccessObject;
-import data_access.DBUserDataAccessObject;
-import data_access.InMemoryUserDataAccessObject;
 import data_access.FirebaseConfig;
 import data_access.FirebasePostDataAccessObject;
 import data_access.FirebaseUserDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.ChangePasswordPresenter;
 import interface_adapter.change_password.LoggedInViewModel;
@@ -29,9 +27,24 @@ import interface_adapter.search.SearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.dashboard.DashboardController;
+import interface_adapter.dashboard.DashboardPresenter;
+import interface_adapter.dashboard.DashboardViewModel;
+import interface_adapter.change_username.ChangeUsernameController;
+import interface_adapter.change_username.ChangeUsernamePresenter;
+import interface_adapter.change_username.ChangeUsernameViewModel;
+import interface_adapter.admin.AdminController;
+import interface_adapter.admin.AdminPresenter;
+import interface_adapter.admin.AdminViewModel;
+import use_case.admin.AdminInputBoundary;
+import use_case.admin.AdminInteractor;
+import use_case.admin.AdminOutputBoundary;
+import use_case.admin.AdminUserDataAccessInterface;
+import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
+import use_case.delete_post.DeletePostDataAccessInterface;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -45,29 +58,20 @@ import use_case.search.SearchUserDataAccessInterface;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.LoggedInView;
-import view.LoginView;
-import view.SearchView;
-import view.SignupView;
-import view.ViewManager;
-import interface_adapter.dashboard.DashboardController;
-import interface_adapter.dashboard.DashboardPresenter;
-import interface_adapter.dashboard.DashboardViewModel;
 import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardInteractor;
 import use_case.dashboard.DashboardOutputBoundary;
 import use_case.dashboard.DashboardUserDataAccessInterface;
-import view.DashboardView;
-import view.AccountView;
-import interface_adapter.change_username.ChangeUsernameController;
-import interface_adapter.change_username.ChangeUsernamePresenter;
-import interface_adapter.change_username.ChangeUsernameViewModel;
-import interface_adapter.change_username.ChangeUsernameState;
 import use_case.change_username.ChangeUsernameInputBoundary;
 import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
-import view.DMsView;
+import view.*;
+import interface_adapter.delete_post.DeletePostController;
+import interface_adapter.delete_post.DeletePostPresenter;
+import use_case.delete_post.DeletePostInputBoundary;
+import use_case.delete_post.DeletePostInteractor;
+import use_case.delete_post.DeletePostOutputBoundary;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -95,6 +99,8 @@ public class AppBuilder {
     private final FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
+    private final AdminUserDataAccessInterface adminDataAccessObject = new FirebasePostDataAccessObject();
+    private final DeletePostDataAccessInterface deletePostDataAccessObject = new FirebasePostDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -111,6 +117,10 @@ public class AppBuilder {
     private ChangeUsernameViewModel changeUsernameViewModel;
     private DMsView dmsView;
     private DashboardController dashboardController;
+    private AdminView adminView;
+    private AdminViewModel adminViewModel;
+    private AdminLoggedInView adminloggedInView;
+    private AdminLoggedInViewModel adminloggedInViewModel;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -156,6 +166,13 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addAdminLoggedInView() {
+        adminloggedInViewModel = new AdminLoggedInViewModel();
+        adminloggedInView = new AdminLoggedInView(adminloggedInViewModel, viewManagerModel);
+        cardPanel.add(adminloggedInView, adminloggedInView.getViewName());
+        return this;
+    }
+
     /**
      * Adds the Search View to the application.
      * @return this builder
@@ -175,6 +192,14 @@ public class AppBuilder {
         dashboardViewModel = new DashboardViewModel();
         dashboardView = new DashboardView(dashboardViewModel);
         cardPanel.add(dashboardView, dashboardView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addAdminView() {
+        adminViewModel = new AdminViewModel();
+
+        adminView = new AdminView(adminViewModel);
+        cardPanel.add(adminView, adminView.getViewName());
         return this;
     }
 
@@ -226,7 +251,7 @@ public class AppBuilder {
             addDashboardUseCase();
         }
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel, dashboardController);
+                loggedInViewModel, loginViewModel, dashboardController, adminloggedInView, adminloggedInViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDataAccessObject, loginOutputBoundary);
 
@@ -299,6 +324,14 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addAdminUseCase() {
+        final AdminOutputBoundary adminOutputBoundary = new AdminPresenter(adminViewModel);
+        final AdminInputBoundary adminInteractor = new AdminInteractor(adminDataAccessObject, adminOutputBoundary);
+        final AdminController adminController = new AdminController(adminInteractor, viewManagerModel);
+        adminView.setAdminController(adminController);
+        return this;
+    }
+
     /**
      * Adds the Change Username Use Case to the application.
      * @return this builder
@@ -313,6 +346,19 @@ public class AppBuilder {
             accountView.setChangeUsernameController(changeUsernameController);
             accountView.setChangeUsernameViewModel(changeUsernameViewModel);
         }
+        return this;
+    }
+
+    public AppBuilder addDeletePostUseCase() {
+        final DeletePostOutputBoundary deletePostOutputBoundary = 
+                new DeletePostPresenter(adminViewModel);
+        final DeletePostInputBoundary deletePostInteractor = 
+                new DeletePostInteractor(deletePostDataAccessObject, deletePostOutputBoundary);
+        final DeletePostController deletePostController = 
+                new DeletePostController(deletePostInteractor);
+        
+        // Add the controller to admin view
+        adminView.setDeletePostController(deletePostController);
         return this;
     }
 

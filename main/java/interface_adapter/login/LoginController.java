@@ -19,9 +19,9 @@ public class LoginController {
      * @param username the username of the user logging in
      * @param password the password of the user logging in
      */
-    public void execute(String username, String password) {
-        final LoginInputData loginInputData = new LoginInputData(
-                username, password);
+    public void execute(String username, String password, boolean admin) {
+        LoginInputData loginInputData = new LoginInputData(
+                username, password, admin);
 
         loginUseCaseInteractor.execute(loginInputData);
     }

@@ -7,6 +7,7 @@ public class LoginState {
     private String username = "";
     private String loginError;
     private String password = "";
+    private boolean admin = false;
 
     public String getUsername() {
         return username;
@@ -20,6 +21,10 @@ public class LoginState {
         return password;
     }
 
+    public boolean getAdmin() {
+        return admin;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -30,6 +35,10 @@ public class LoginState {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
 }

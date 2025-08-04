@@ -8,11 +8,14 @@ public class SignupInputData {
     private final String username;
     private final String password;
     private final String repeatPassword;
+    private final boolean admin;
+    // might have to handle the previous user wh doesnt have this state
 
-    public SignupInputData(String username, String password, String repeatPassword) {
+    public SignupInputData(String username, String password, String repeatPassword, boolean admin) {
         this.username = username;
         this.password = password;
         this.repeatPassword = repeatPassword;
+        this.admin = admin;
     }
 
     String getUsername() {
@@ -21,6 +24,10 @@ public class SignupInputData {
 
     String getPassword() {
         return password;
+    }
+
+    boolean getAdmin() {
+        return admin;
     }
 
     public String getRepeatPassword() {

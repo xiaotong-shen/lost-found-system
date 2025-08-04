@@ -16,17 +16,21 @@ public class Main {
                                             .addLoginView()
                                             .addSignupView()
                                             .addLoggedInView()
+                                            .addAdminLoggedInView()
                                             .addAccountView()
                                             .addChangeUsernameUseCase()
                                             .addSearchView()
                                             .addDashboardView()
                                             .addDMsView()
+                                            .addAdminView()
                                             .addSignupUseCase()
                                             .addLoginUseCase()
                                             .addLogoutUseCase()
                                             .addChangePasswordUseCase()
                                             .addSearchUseCase()
                                             .addDashboardUseCase()
+                                            .addAdminUseCase()
+                                            .addDeletePostUseCase()
                                             .build();
 
         application.pack();

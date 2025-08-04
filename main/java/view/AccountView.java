@@ -78,7 +78,8 @@ public class AccountView extends JPanel implements PropertyChangeListener {
                 LoggedInState state = loggedInViewModel.getState();
                 String username = state.getUsername();
                 String password = passwordInputField.getText();
-                changePasswordController.execute(username, password);
+                boolean admin = state.getAdmin();
+                changePasswordController.execute(username, password, admin);
             }
         });
 
@@ -132,4 +133,4 @@ public class AccountView extends JPanel implements PropertyChangeListener {
     public String getViewName() {
         return viewName;
     }
-} 
+}

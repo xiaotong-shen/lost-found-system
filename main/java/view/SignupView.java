@@ -3,16 +3,11 @@ package view;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.border.EmptyBorder;
@@ -33,9 +28,6 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     private final SignupViewModel signupViewModel;
     private final ViewManagerModel viewManagerModel;
-    private final JTextField usernameInputField = new JTextField(20);
-    private final JPasswordField passwordInputField = new JPasswordField(20);
-    private final JPasswordField repeatPasswordInputField = new JPasswordField(20);
     private SignupController signupController;
 
     private JButton signUp;
@@ -90,12 +82,6 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        // Subtitle
-        JLabel subtitle = new JLabel("Join our community today");
-        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        subtitle.setForeground(Color.BLACK);
-        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        subtitle.setBorder(new EmptyBorder(0, 0, 30, 0));
 
         // Username field
         JPanel usernamePanel = createInputPanel("Username", usernameInputField);
@@ -268,7 +254,8 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                             signupController.execute(
                                     currentState.getUsername(),
                                     currentState.getPassword(),
-                                    currentState.getRepeatPassword()
+                                    currentState.getRepeatPassword(),
+                                    currentState.getAdmin()
                             );
                         }
                     }
@@ -367,6 +354,15 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
             }
         });
     }
+
+    private void addAdminCheckboxListener() {
+        isAdminCheckbox.addItemListener(e -> {
+            SignupState currentState = signupViewModel.getState();
+            currentState.setAdmin(e.getStateChange() == ItemEvent.SELECTED);
+            signupViewModel.setState(currentState);
+        });
+    }
+
 
     private String getPasswordStrength(String password) {
         boolean hasLetter = password.matches(".*[a-zA-Z].*");
