@@ -477,6 +477,9 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     }
 
     private static String formatTimestamp(String timestamp) {
+        if (timestamp == null || timestamp.trim().isEmpty()) {
+            return "Unknown time";
+        }
         try {
             LocalDateTime dt = LocalDateTime.parse(timestamp);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
@@ -667,7 +670,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             commentsListPanel.add(Box.createVerticalStrut(8));
         }
         JScrollPane commentsScrollPane = new JScrollPane(commentsListPanel);
-        commentsScrollPane.setPreferredSize(new java.awt.Dimension(400, 150)); // Reduced from 220 to 150
+        commentsScrollPane.setPreferredSize(new java.awt.Dimension(400, 100)); // Reduced from 150 to 100
         commentsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         commentsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         commentSection.add(commentsScrollPane, BorderLayout.CENTER);
@@ -699,7 +702,20 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         // Layout: details at top, comment section (comments + input bar) at bottom
         postDetailPanel.add(titleLabel, BorderLayout.NORTH);
         postDetailPanel.add(detailsPanel, BorderLayout.CENTER);
-        postDetailPanel.add(commentSection, BorderLayout.SOUTH);
+        
+        // Create a bottom container with spacing and comment section
+        JPanel bottomContainer = new JPanel(new BorderLayout());
+        bottomContainer.setOpaque(false);
+        
+        // Add some spacing between details and comment section
+        JPanel spacerPanel = new JPanel();
+        spacerPanel.setPreferredSize(new Dimension(400, 15));
+        spacerPanel.setOpaque(false);
+        
+        bottomContainer.add(spacerPanel, BorderLayout.NORTH);
+        bottomContainer.add(commentSection, BorderLayout.CENTER);
+        
+        postDetailPanel.add(bottomContainer, BorderLayout.SOUTH);
         postDetailPanel.revalidate();
         postDetailPanel.repaint();
     }
@@ -800,6 +816,10 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     }
 
     private void updateMyPostsList(List<Post> allPosts) {
+        if (allPosts == null) {
+            System.out.println("DEBUG: updateMyPostsList() called with null posts list");
+            return;
+        }
         System.out.println("DEBUG: updateMyPostsList() called with " + allPosts.size() + " posts, currentUser: '" + currentUser + "'");
         if (myPostsPanel == null || currentUser == null) {
             System.out.println("DEBUG: Skipping updateMyPostsList - myPostsPanel: " + (myPostsPanel == null) + ", currentUser: " + (currentUser == null));
