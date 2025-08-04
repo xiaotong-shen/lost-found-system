@@ -99,8 +99,8 @@ public class AppBuilder {
     private final FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
-    private final AdminUserDataAccessInterface adminDataAccessObject = new FirebasePostDataAccessObject();
-    private final DeletePostDataAccessInterface deletePostDataAccessObject = new FirebasePostDataAccessObject();
+    private final FirebasePostDataAccessObject adminDataAccessObject = new FirebasePostDataAccessObject();
+    private final FirebasePostDataAccessObject deletePostDataAccessObject = new FirebasePostDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;

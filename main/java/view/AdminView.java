@@ -519,8 +519,8 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO Auto-generated method stub
-
+        // Handle any general action events if needed
+        // Currently not used as specific action listeners are used for buttons
     }
 
     private Post getCurrentlySelectedPost() {

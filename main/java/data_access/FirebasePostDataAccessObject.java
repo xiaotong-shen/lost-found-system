@@ -1,8 +1,5 @@
 package data_access;
 
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
 import com.google.firebase.database.*;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
@@ -13,16 +10,16 @@ import com.google.cloud.firestore.WriteResult;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import entity.Comment;
 import entity.Post;
-import use_case.admin.AdminUserDataAccessInterface;
 import use_case.dashboard.DashboardUserDataAccessInterface;
-import use_case.delete_post.DeletePostDataAccessInterface;
 import use_case.search.SearchUserDataAccessInterface;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Firebase implementation of data access for posts.
@@ -30,22 +27,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FirebasePostDataAccessObject implements
         DashboardUserDataAccessInterface,
         SearchUserDataAccessInterface,
-        AdminUserDataAccessInterface, DeletePostDataAccessInterface {
-
+        use_case.admin.AdminUserDataAccessInterface,
+        use_case.delete_post.DeletePostDataAccessInterface {
+    
     private final DatabaseReference postsRef;
     private final DateTimeFormatter dateFormatter;
-    private final FirebaseDatabase database;
-
+    
     public FirebasePostDataAccessObject() {
         this.postsRef = FirebaseConfig.getDatabase().getReference("posts");
         this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        this.database = FirebaseConfig.getDatabase();
     }
-
+    
     @Override
     public List<Post> getAllPosts() {
         System.out.println("\n=== DEBUG: getAllPosts() called ===");
         CompletableFuture<List<Post>> future = new CompletableFuture<>();
+        
+        System.out.println("DEBUG: Setting up Firebase listener...");
         postsRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -98,24 +96,24 @@ public class FirebasePostDataAccessObject implements
             return new ArrayList<>();
         }
     }
-
+    
     @Override
     public List<Post> searchPosts(String query) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
         String lowerQuery = query.toLowerCase();
-
+        
         for (Post post : allPosts) {
             // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
-                    post.getDescription().toLowerCase().contains(lowerQuery)) {
+                post.getDescription().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
             }
         }
-
+        
         return matchingPosts;
     }
-
+    
     @Override
     public Post getPostById(int postID) {
         CompletableFuture<Post> future = new CompletableFuture<>();
@@ -137,10 +135,23 @@ public class FirebasePostDataAccessObject implements
             return null;
         }
     }
-
+    
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
         String postId = postsRef.push().getKey();
+        Post newPost = new Post(
+            postId.hashCode(),
+            title,
+            content,
+            tags != null ? tags : new ArrayList<>(),
+            LocalDateTime.now(),
+            author,
+            location,
+            null, // image URL
+            isLost,
+            0, // likes
+            new HashMap<>() // reactions
+        );
         postsRef.child(postId).setValue(newPost, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -153,72 +164,7 @@ public class FirebasePostDataAccessObject implements
         });
         return newPost;
     }
-
-    @Override
-    public boolean editPost(String postId, String newTitle, String description,
-                            String location, List<String> tags, boolean isLost) {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-        int intPostId = Integer.parseInt(postId);
-        // Query for the post with matching title
-        postsRef.orderByChild("postID").equalTo(intPostId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Should only be one post with this title
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            Post existingPost = postSnapshot.getValue(Post.class);
-                            if (existingPost != null) {
-                                // Create updated post
-                                Post updatedPost = new Post(
-                                        existingPost.getPostID(),
-                                        newTitle,
-                                        description,
-                                        tags != null ? tags : existingPost.getTags(),
-                                        LocalDateTime.parse(existingPost.getTimestamp(), dateFormatter),
-                                        existingPost.getAuthor(),
-                                        location,
-                                        existingPost.getImageURL(),
-                                        isLost,
-                                        existingPost.getNumberOfLikes(),
-                                        existingPost.getReactions()
-                                );
-
-                                // Update in Firebase using the snapshot's key
-                                postsRef.child(postSnapshot.getKey())
-                                        .setValue(updatedPost, (databaseError, databaseReference) -> {
-                                            if (databaseError != null) {
-                                                System.err.println("Error updating post: " +
-                                                        databaseError.getMessage());
-                                                future.complete(false);
-                                            } else {
-                                                System.out.println("Post updated successfully!");
-                                                future.complete(true);
-                                            }
-                                        });
-                                return;  // Exit after finding and updating the post
-                            }
-                        }
-                        // If we get here, no post was found
-                        System.err.println("Post not found with postid: " + postId);
-                        future.complete(false);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("Error fetching post for update: " +
-                                databaseError.getMessage());
-                        future.complete(false);
-                    }
-                });
-
-        try {
-            return future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.err.println("Error during post update: " + e.getMessage());
-            return false;
-        }
-    }
-
+    
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         System.out.println("\n=== DEBUG: searchPostsByCriteria() called ===");
@@ -235,9 +181,9 @@ public class FirebasePostDataAccessObject implements
         List<Post> matchingPosts = new ArrayList<>();
 
         boolean allBlank = (title == null || title.isEmpty()) &&
-                (location == null || location.isEmpty()) &&
-                (tags == null || tags.isEmpty()) &&
-                (isLost == null);
+                           (location == null || location.isEmpty()) &&
+                           (tags == null || tags.isEmpty()) &&
+                           (isLost == null);
 
         System.out.println("DEBUG: All criteria blank? " + allBlank);
 
@@ -255,6 +201,10 @@ public class FirebasePostDataAccessObject implements
             System.out.println("\nDEBUG: Checking post " + postIndex + ": '" + post.getTitle() + "'");
             boolean matches = true;
 
+            if (title != null && !title.isEmpty()) {
+                boolean titleMatches = post.getTitle().toLowerCase().contains(title.toLowerCase());
+                System.out.println("DEBUG:   Title check - Query: '" + title + "' vs Post: '" + post.getTitle() + "' -> " + titleMatches);
+                if (!titleMatches) {
                     matches = false;
                 }
             }
@@ -318,3 +268,257 @@ public class FirebasePostDataAccessObject implements
         return matchingPosts;
     }
 
+    // Fetch comments for a post from Firebase
+    public List<Comment> getCommentsForPost(int postId) {
+        try {
+            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
+            CompletableFuture<List<Comment>> future = new CompletableFuture<>();
+            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<Comment> comments = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Comment comment = snapshot.getValue(Comment.class);
+                        if (comment != null) {
+                            comments.add(comment);
+                        }
+                    }
+                    future.complete(comments);
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    future.completeExceptionally(new RuntimeException("Failed to load comments: " + databaseError.getMessage()));
+                }
+            });
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    // Add a top-level comment to a post in Firebase
+    public void addCommentToPost(int postId, Comment comment) {
+        try {
+            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        List<Comment> comments = post.getComments();
+                        if (comments == null) comments = new ArrayList<>();
+                        comments.add(comment);
+                        post.setComments(comments);
+                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    System.err.println("Error saving comment: " + databaseError.getMessage());
+                                } else {
+                                    System.out.println("Comment saved successfully!");
+                                }
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    future.completeExceptionally(new RuntimeException("Failed to load post for comment: " + databaseError.getMessage()));
+                }
+            });
+            future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Like a comment (top-level only for now)
+    public void likeComment(int postId, String commentId) {
+        try {
+            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    if (post != null && post.getComments() != null) {
+                        for (Comment c : post.getComments()) {
+                            if (c.getId().equals(commentId)) {
+                                c.like();
+                                break;
+                            }
+                        }
+                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    System.err.println("Error saving liked comment: " + databaseError.getMessage());
+                                } else {
+                                    System.out.println("Comment liked successfully!");
+                                }
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    future.completeExceptionally(new RuntimeException("Failed to load post for like: " + databaseError.getMessage()));
+                }
+            });
+            future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Updates an existing post in Firebase.
+     * @param post the post to update
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updatePost(Post post) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        
+        DatabaseReference postRef = postsRef.child(String.valueOf(post.getPostID()));
+        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.err.println("Error updating post: " + databaseError.getMessage());
+                    future.complete(false);
+                } else {
+                    System.out.println("Post updated successfully");
+                    future.complete(true);
+                }
+            }
+        });
+        
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("Error updating post: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Deletes a post from Firebase.
+     * @param postId the ID of the post to delete
+     * @return true if deletion was successful, false otherwise
+     */
+    public boolean deletePost(int postId) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        
+        DatabaseReference postRef = postsRef.child(String.valueOf(postId));
+        postRef.removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.err.println("Error deleting post: " + databaseError.getMessage());
+                    future.complete(false);
+                } else {
+                    System.out.println("Post deleted successfully");
+                    future.complete(true);
+                }
+            }
+        });
+        
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("Error deleting post: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Admin methods
+    @Override
+    public boolean editPost(String postId, String title, String description, String location, List<String> tags, boolean isLost) {
+        try {
+            DatabaseReference postRef = postsRef.child(postId);
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            
+            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        post.setTitle(title);
+                        post.setDescription(description);
+                        post.setLocation(location);
+                        post.setTags(tags);
+                        post.setLost(isLost);
+                        
+                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    System.err.println("Error updating post: " + databaseError.getMessage());
+                                    future.complete(false);
+                                } else {
+                                    System.out.println("Post updated successfully");
+                                    future.complete(true);
+                                }
+                            }
+                        });
+                    } else {
+                        future.complete(false);
+                    }
+                }
+                
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
+                }
+            });
+            
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("Error editing post: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Delete post methods
+    @Override
+    public void deletePost(String postId) {
+        DatabaseReference postRef = postsRef.child(postId);
+        postRef.removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.err.println("Error deleting post: " + databaseError.getMessage());
+                } else {
+                    System.out.println("Post deleted successfully");
+                }
+            }
+        });
+    }
+    
+    @Override
+    public boolean existsPost(String postId) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        
+        DatabaseReference postRef = postsRef.child(postId);
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                future.complete(dataSnapshot.exists());
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                future.completeExceptionally(new RuntimeException("Failed to check post existence: " + databaseError.getMessage()));
+            }
+        });
+        
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("Error checking post existence: " + e.getMessage());
+            return false;
+        }
+    }
+} 

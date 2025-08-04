@@ -1,39 +1,52 @@
 package app;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-/**
- * The Main class of our application.
- */
 public class Main {
-    /**
-     * Builds and runs the CA architecture of the application.
-     * @param args unused arguments
-     */
     public static void main(String[] args) {
-        final AppBuilder appBuilder = new AppBuilder();
-        final JFrame application = appBuilder
-                                            .addLoginView()
-                                            .addSignupView()
-                                            .addLoggedInView()
-                                            .addAdminLoggedInView()
-                                            .addAccountView()
-                                            .addChangeUsernameUseCase()
-                                            .addSearchView()
-                                            .addDashboardView()
-                                            .addDMsView()
-                                            .addAdminView()
-                                            .addSignupUseCase()
-                                            .addLoginUseCase()
-                                            .addLogoutUseCase()
-                                            .addChangePasswordUseCase()
-                                            .addSearchUseCase()
-                                            .addDashboardUseCase()
-                                            .addAdminUseCase()
-                                            .addDeletePostUseCase()
-                                            .build();
+        SwingUtilities.invokeLater(() -> {
+            AppBuilder builder = new AppBuilder();
+            builder
+                    .addSignupView()
+                    .addLoginView()
+                    .addLoggedInView()
+                    .addAdminLoggedInView()
+                    .addSearchView()
+                    .addDashboardView()
+                    .addAdminView()
+                    .addAccountView()
+                    .addDMsView()
+                    .addSignupUseCase()
+                    .addLoginUseCase()
+                    .addChangePasswordUseCase()
+                    .addLogoutUseCase()
+                    .addSearchUseCase()
+                    .addDashboardUseCase()
+                    .addAdminUseCase()
+                    .addChangeUsernameUseCase()
+                    .addDeletePostUseCase();
 
-        application.pack();
-        application.setVisible(true);
+            JFrame application = builder.build();
+            
+            // Add shutdown hook to properly close Firebase connections
+            application.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    System.out.println("Shutting down application...");
+                    try {
+                        data_access.FirebaseConfig.shutdown();
+                    } catch (Exception ex) {
+                        System.err.println("Error during shutdown: " + ex.getMessage());
+                    }
+                    System.exit(0);
+                }
+            });
+
+            application.setSize(1000, 700);
+            application.setVisible(true);
+        });
     }
 }
