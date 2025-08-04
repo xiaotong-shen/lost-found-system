@@ -188,7 +188,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         return postsTab;
     }
 
-    private void addFormRow(JPanel panel, String label, Component component, 
+    private void addFormRow(JPanel panel, String label, Component component,
                           GridBagConstraints gbc, int row) {
         gbc.gridy = row;
         gbc.gridx = 0;
@@ -399,11 +399,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Add delete button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setBackground(Color.WHITE);
         JButton deleteButton = createDeleteButton(String.valueOf(post.getPostID()));
-        buttonPanel.add(deleteButton);
-        panel.add(buttonPanel);
 
         // Preview of content
         String contentPreview = post.getDescription();
@@ -435,6 +431,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         panel.add(contentLabel);
         panel.add(Box.createVerticalStrut(5));
         panel.add(detailsPanel);
+        panel.add(deleteButton);
 
         // Add click listener to show post details
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -523,7 +520,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
     @Override
     public void actionPerformed(ActionEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private Post getCurrentlySelectedPost() {

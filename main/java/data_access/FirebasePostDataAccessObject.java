@@ -268,52 +268,98 @@ public class FirebasePostDataAccessObject implements
 
     @Override
     public void deletePost(String postId) {
+        System.out.println("Attempting to delete post with ID: " + postId);
         DatabaseReference postsRef = database.getReference("posts");
-        DatabaseReference postRef = postsRef.child(postId);
+        CountDownLatch deleteLatch = new CountDownLatch(1);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        postRef.removeValue((error, ref) -> {
-            if (error != null) {
-                throw new RuntimeException("Failed to delete post: " + error.getMessage());
-            }
-            latch.countDown();
-        });
+        // First find the post by its postID field
+        postsRef.orderByChild("postID").equalTo(Integer.parseInt(postId))
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        System.out.println("Found " + dataSnapshot.getChildrenCount() + " matching posts");
+
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            // Get the actual Firebase key
+                            String firebaseKey = postSnapshot.getKey();
+                            System.out.println("Deleting post with Firebase key: " + firebaseKey);
+
+                            // Delete using the Firebase key
+                            postsRef.child(firebaseKey).removeValue((error, ref) -> {
+                                if (error != null) {
+                                    System.err.println("Error deleting post: " + error.getMessage());
+                                } else {
+                                    System.out.println("Post successfully deleted");
+                                }
+                                deleteLatch.countDown();
+                            });
+                            return; // Only delete the first matching post
+                        }
+
+                        // If no matching post was found
+                        System.out.println("No matching post found to delete");
+                        deleteLatch.countDown();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.err.println("Delete operation cancelled: " + databaseError.getMessage());
+                        deleteLatch.countDown();
+                    }
+                });
 
         try {
-            latch.await(); // Wait for the operation to complete
+            boolean completed = deleteLatch.await(5, TimeUnit.SECONDS);
+            if (!completed) {
+                throw new RuntimeException("Delete operation timed out");
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Operation interrupted while deleting post");
         }
     }
 
-
     @Override
     public boolean existsPost(String postId) {
-        DatabaseReference postRef = database.getReference("posts").child(postId);
+        System.out.println("\nChecking existence for postId: " + postId);
+        DatabaseReference postsRef = database.getReference("posts");
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean exists = new AtomicBoolean(false);
 
-        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                exists.set(dataSnapshot.exists());
-                latch.countDown();
-            }
+        postsRef.orderByChild("postID").equalTo(Integer.parseInt(postId))
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        exists.set(dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0);
+                        System.out.println("DataSnapshot exists: " + exists.get());
+                        if (exists.get()) {
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                System.out.println("Found post with ID: " + child.child("postID").getValue());
+                            }
+                        }
+                        latch.countDown();
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                latch.countDown();
-            }
-        });
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.err.println("Database error: " + databaseError.getMessage());
+                        latch.countDown();
+                    }
+                });
 
         try {
-            latch.await(); // Wait for the operation to complete
+            boolean completed = latch.await(5, TimeUnit.SECONDS);
+            if (!completed) {
+                System.err.println("Database operation timed out");
+                return false;
+            }
         } catch (InterruptedException e) {
+            System.err.println("Operation interrupted: " + e.getMessage());
             Thread.currentThread().interrupt();
             return false;
         }
 
-        return exists.get();
-    }
-}
+        boolean result = exists.get();
+        System.out.println("Final result: post exists = " + result);
+        return result;
+    }}
