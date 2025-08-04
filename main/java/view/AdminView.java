@@ -3,6 +3,7 @@ package view;
 import entity.Post;
 import interface_adapter.admin.*;
 import interface_adapter.admin.AdminViewModel;
+import interface_adapter.delete_post.DeletePostController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,6 +43,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
     private final JTabbedPane tabbedPane;
 
     private AdminController adminController;
+    private DeletePostController deletePostController;
 
     public AdminView(AdminViewModel adminViewModel) {
 
@@ -396,6 +398,13 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        // Add delete button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(Color.WHITE);
+        JButton deleteButton = createDeleteButton(String.valueOf(post.getPostID()));
+        buttonPanel.add(deleteButton);
+        panel.add(buttonPanel);
+
         // Preview of content
         String contentPreview = post.getDescription();
         if (contentPreview.length() > 100) {
@@ -528,5 +537,23 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         }
 
         return null;
+    }
+    public void setDeletePostController(DeletePostController controller) {
+        this.deletePostController = controller;
+    }
+
+    // Add this method to create a delete button for each post
+    private JButton createDeleteButton(String postId) {
+        JButton deleteButton = new JButton("Delete Post");
+        deleteButton.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this post?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                deletePostController.deletePost(postId);
+            }
+        });
+        return deleteButton;
     }
 }

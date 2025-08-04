@@ -44,6 +44,7 @@ import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
+import use_case.delete_post.DeletePostDataAccessInterface;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -66,6 +67,11 @@ import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 import view.*;
+import interface_adapter.delete_post.DeletePostController;
+import interface_adapter.delete_post.DeletePostPresenter;
+import use_case.delete_post.DeletePostInputBoundary;
+import use_case.delete_post.DeletePostInteractor;
+import use_case.delete_post.DeletePostOutputBoundary;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
@@ -93,6 +99,7 @@ public class AppBuilder {
     private final SearchUserDataAccessInterface postDataAccessObject = new FirebasePostDataAccessObject();
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
     private final AdminUserDataAccessInterface adminDataAccessObject = new FirebasePostDataAccessObject();
+    private final DeletePostDataAccessInterface deletePostDataAccessObject = new FirebasePostDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -322,6 +329,19 @@ public class AppBuilder {
             accountView.setChangeUsernameController(changeUsernameController);
             accountView.setChangeUsernameViewModel(changeUsernameViewModel);
         }
+        return this;
+    }
+
+    public AppBuilder addDeletePostUseCase() {
+        final DeletePostOutputBoundary deletePostOutputBoundary = 
+                new DeletePostPresenter(adminViewModel);
+        final DeletePostInputBoundary deletePostInteractor = 
+                new DeletePostInteractor(deletePostDataAccessObject, deletePostOutputBoundary);
+        final DeletePostController deletePostController = 
+                new DeletePostController(deletePostInteractor);
+        
+        // Add the controller to admin view
+        adminView.setDeletePostController(deletePostController);
         return this;
     }
 

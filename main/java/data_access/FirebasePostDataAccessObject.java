@@ -1,33 +1,37 @@
 package data_access;
 
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.database.*;
 import entity.Post;
 import use_case.admin.AdminUserDataAccessInterface;
 import use_case.dashboard.DashboardUserDataAccessInterface;
+import use_case.delete_post.DeletePostDataAccessInterface;
 import use_case.search.SearchUserDataAccessInterface;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Firebase implementation of data access for posts.
  */
-public class FirebasePostDataAccessObject implements 
-        DashboardUserDataAccessInterface, 
+public class FirebasePostDataAccessObject implements
+        DashboardUserDataAccessInterface,
         SearchUserDataAccessInterface,
-        AdminUserDataAccessInterface {
+        AdminUserDataAccessInterface, DeletePostDataAccessInterface {
 
     private final DatabaseReference postsRef;
     private final DateTimeFormatter dateFormatter;
+    private final FirebaseDatabase database;
 
     public FirebasePostDataAccessObject() {
         this.postsRef = FirebaseConfig.getDatabase().getReference("posts");
         this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        this.database = FirebaseConfig.getDatabase();
     }
 
     @Override
@@ -70,7 +74,7 @@ public class FirebasePostDataAccessObject implements
         for (Post post : allPosts) {
             // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
-                post.getDescription().toLowerCase().contains(lowerQuery)) {
+                    post.getDescription().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
             }
         }
@@ -110,17 +114,17 @@ public class FirebasePostDataAccessObject implements
         System.out.println("Post ID: " + postId);
         System.out.println("Post ID: " + postId.hashCode());
         Post newPost = new Post(
-            postId.hashCode(), // Use hash code instead of parsing
-            title,
-            content,
-            tags != null ? tags : new ArrayList<>(),
-            LocalDateTime.now(),
-            author,
-            location,
-            null, // image URL
-            isLost,
-            0, // likes
-            new HashMap<>() // reactions
+                postId.hashCode(), // Use hash code instead of parsing
+                title,
+                content,
+                tags != null ? tags : new ArrayList<>(),
+                LocalDateTime.now(),
+                author,
+                location,
+                null, // image URL
+                isLost,
+                0, // likes
+                new HashMap<>() // reactions
         );
 
         // Save to Firebase
@@ -202,15 +206,16 @@ public class FirebasePostDataAccessObject implements
             return false;
         }
     }
+
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
 
         boolean allBlank = (title == null || title.isEmpty()) &&
-                           (location == null || location.isEmpty()) &&
-                           (tags == null || tags.isEmpty()) &&
-                           (isLost == null);
+                (location == null || location.isEmpty()) &&
+                (tags == null || tags.isEmpty()) &&
+                (isLost == null);
 
         if (allBlank) {
             // Return all posts sorted alphabetically by title
@@ -222,12 +227,12 @@ public class FirebasePostDataAccessObject implements
             boolean matches = true;
 
             if (title != null && !title.isEmpty() &&
-                !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                    !post.getTitle().toLowerCase().contains(title.toLowerCase())) {
                 matches = false;
             }
 
             if (location != null && !location.isEmpty() &&
-                !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
+                    !post.getLocation().toLowerCase().contains(location.toLowerCase())) {
                 matches = false;
             }
 
@@ -259,5 +264,56 @@ public class FirebasePostDataAccessObject implements
         // Always sort the result alphabetically by title
         matchingPosts.sort(Comparator.comparing(Post::getTitle, String.CASE_INSENSITIVE_ORDER));
         return matchingPosts;
+    }
+
+    @Override
+    public void deletePost(String postId) {
+        DatabaseReference postsRef = database.getReference("posts");
+        DatabaseReference postRef = postsRef.child(postId);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        postRef.removeValue((error, ref) -> {
+            if (error != null) {
+                throw new RuntimeException("Failed to delete post: " + error.getMessage());
+            }
+            latch.countDown();
+        });
+
+        try {
+            latch.await(); // Wait for the operation to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Operation interrupted while deleting post");
+        }
+    }
+
+
+    @Override
+    public boolean existsPost(String postId) {
+        DatabaseReference postRef = database.getReference("posts").child(postId);
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean exists = new AtomicBoolean(false);
+
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                exists.set(dataSnapshot.exists());
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                latch.countDown();
+            }
+        });
+
+        try {
+            latch.await(); // Wait for the operation to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+
+        return exists.get();
     }
 }

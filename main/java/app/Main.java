@@ -30,6 +30,7 @@ public class Main {
                                             .addSearchUseCase()
                                             .addDashboardUseCase()
                                             .addAdminUseCase()
+                                            .addDeletePostUseCase()
                                             .build();
 
         application.pack();
