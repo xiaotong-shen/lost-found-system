@@ -42,28 +42,28 @@ public class FirebaseConfig {
                 "main/resources/csc207-cfda3-firebase-adminsdk-fbsvc-5f9167c0b2.json");
             
             // Load service account key file
-            FileInputStream serviceAccount = new FileInputStream(serviceAccountPath);
-            
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setDatabaseUrl(databaseUrl)
-                    .build();
-            
-            // Only initialize if not already initialized
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
+            try (FileInputStream serviceAccount = new FileInputStream(serviceAccountPath)) {
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .setDatabaseUrl(databaseUrl)
+                        .build();
+                
+                // Only initialize if not already initialized
+                if (FirebaseApp.getApps().isEmpty()) {
+                    FirebaseApp.initializeApp(options);
+                }
+                
+                database = FirebaseDatabase.getInstance();
+                initialized = true;
+                
+                // Firestore initialization
+                firestore = FirestoreOptions.getDefaultInstance().toBuilder()
+                        .setProjectId(projectId)
+                        .build()
+                        .getService();
+                
+                System.out.println("Firebase initialized successfully for project: " + projectId);
             }
-            
-            database = FirebaseDatabase.getInstance();
-            initialized = true;
-            
-            // Firestore initialization
-            firestore = FirestoreOptions.getDefaultInstance().toBuilder()
-                    .setProjectId(projectId)
-                    .build()
-                    .getService();
-            
-            System.out.println("Firebase initialized successfully for project: " + projectId);
         } catch (IOException e) {
             System.err.println("Error loading Firebase service account: " + e.getMessage());
             System.err.println("Using mock data instead...");
@@ -77,6 +77,9 @@ public class FirebaseConfig {
         if (!initialized) {
             initializeFirebase();
         }
+        if (database == null) {
+            throw new RuntimeException("Firebase database not initialized. Check your configuration.");
+        }
         return database;
     }
     
@@ -89,5 +92,28 @@ public class FirebaseConfig {
             initializeFirebase();
         }
         return firestore;
+    }
+    
+    /**
+     * Shutdown Firebase connections properly.
+     */
+    public static void shutdown() {
+        if (initialized && database != null) {
+            try {
+                database.goOffline();
+                System.out.println("Firebase database connections closed.");
+            } catch (Exception e) {
+                System.err.println("Error shutting down Firebase: " + e.getMessage());
+            }
+        }
+        if (firestore != null) {
+            try {
+                firestore.close();
+                System.out.println("Firestore connections closed.");
+            } catch (Exception e) {
+                System.err.println("Error shutting down Firestore: " + e.getMessage());
+            }
+        }
+        initialized = false;
     }
 } 
