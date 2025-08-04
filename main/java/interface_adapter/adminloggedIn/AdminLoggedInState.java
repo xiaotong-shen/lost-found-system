@@ -1,5 +1,8 @@
 package interface_adapter.adminloggedIn;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The State information representing the logged-in user.
  */
@@ -9,6 +12,10 @@ public class AdminLoggedInState {
     private String password = "";
     private boolean admin = false;
     private String passwordError;
+    private String deleteUserMessage = "";
+    private String deleteUserError = "";
+    private List<String> usersList = new ArrayList<>();
+
 
     public AdminLoggedInState(AdminLoggedInState copy) {
         username = copy.username;
@@ -49,5 +56,30 @@ public class AdminLoggedInState {
     public void setPasswordError(String passwordError) {
         this.passwordError = passwordError;
     }
+
+    public String getDeleteUserMessage() {
+        return deleteUserMessage;
+    }
+
+    public void setDeleteUserMessage(String deleteUserMessage) {
+        this.deleteUserMessage = deleteUserMessage;
+    }
+
+    public String getDeleteUserError() {
+        return deleteUserError;
+    }
+
+    public void setDeleteUserError(String deleteUserError) {
+        this.deleteUserError = deleteUserError;
+    }
+
+    public List<String> getUsersList() {
+        return usersList;
+    }
+
+    public void setUsersList(List<String> usersList) {
+        this.usersList = usersList;
+    }
+
 
 }

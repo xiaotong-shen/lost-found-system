@@ -9,12 +9,15 @@ import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Firebase implementation of data access for user authentication.
@@ -29,7 +32,10 @@ public class FirebaseUserDataAccessObject implements
     private DatabaseReference usersRef;
     private boolean useMockData;
     private final Map<String, User> mockUsers = new HashMap<>();
-    
+//    private final FirebaseDatabase firebaseDatabase;
+    private final Map<String, User> accounts = new HashMap<>();
+    private String currentUsername = null;
+
     public FirebaseUserDataAccessObject() {
         System.out.println("DEBUG: FirebaseUserDataAccessObject constructor called");
         // Try to initialize Firebase
@@ -48,7 +54,10 @@ public class FirebaseUserDataAccessObject implements
             System.out.println("DEBUG: Mock users created: " + mockUsers.keySet());
         }
     }
-    
+//    public FirebaseUserDataAccessObject(FirebaseDatabase firebaseDatabase) {
+//        this.firebaseDatabase = firebaseDatabase;
+//    }
+
     @Override
     public boolean existsByName(String identifier) {
         System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.existsByName() called ===");
@@ -164,7 +173,7 @@ public class FirebaseUserDataAccessObject implements
         this.currentUsername = username;
     }
     
-    private String currentUsername = null;
+//    private String currentUsername = null;
     
     @Override
     public void changePassword(User user) {
@@ -256,4 +265,27 @@ public class FirebaseUserDataAccessObject implements
             return false;
         }
     }
-} 
+
+//    public void deleteUser(String username) {
+//        DatabaseReference userRef = database.getReference("users").child(username);
+//        try {
+//            userRef.removeValueAsync().get(5, TimeUnit.SECONDS);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to delete user: " + e.getMessage());
+//        }
+//    }
+//
+//    public List<String> getAllUsers() {
+//        List<String> users = new ArrayList<>();
+//        DatabaseReference usersRef = database.getReference("users");
+//        try {
+//            DataSnapshot snapshot = usersRef.get().get(5, TimeUnit.SECONDS);
+//            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+//                users.add(userSnapshot.getKey());
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to get users: " + e.getMessage());
+//        }
+//        return users;
+//    }
+}
