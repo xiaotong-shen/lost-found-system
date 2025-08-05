@@ -106,9 +106,9 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
     }
 
     @Override
-    public Message sendMessage(String chatId, User sender, String content) {
+    public Message sendMessage(String chatId, String sender, String content) {
         System.out.println("\n=== DEBUG: FirebaseChatDataAccessObject.sendMessage() called ===");
-        System.out.println("DEBUG: Sending message to chat: '" + chatId + "' from: '" + sender.getName() + "'");
+        System.out.println("DEBUG: Sending message to chat: '" + chatId + "' from: '" + sender + "'");
 
         String messageId = generateMessageId();
         LocalDateTime sentAt = LocalDateTime.now();

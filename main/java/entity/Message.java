@@ -12,7 +12,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class Message {
     private String messageId;
     private String chatId; // Link to the chat this message belongs to
-    private User sender;
+    private String sender; // Now a username string instead of User object
     private String content;
     private String sentAt; // Store as string for Firebase compatibility
     private boolean isRead;
@@ -24,12 +24,12 @@ public class Message {
      * Constructs a Message entity.
      * @param messageId Unique identifier for the message
      * @param chatId The ID of the chat this message belongs to
-     * @param sender The user who sent the message
+     * @param sender The username of the user who sent the message
      * @param content The message content
      * @param sentAt The date and time the message was sent
      * @param isRead Whether the message has been read
      */
-    public Message(String messageId, String chatId, User sender, String content, LocalDateTime sentAt, boolean isRead) {
+    public Message(String messageId, String chatId, String sender, String content, LocalDateTime sentAt, boolean isRead) {
         this.messageId = messageId;
         this.chatId = chatId;
         this.sender = sender;
@@ -54,11 +54,11 @@ public class Message {
         this.chatId = chatId;
     }
 
-    public User getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void setSender(User sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 

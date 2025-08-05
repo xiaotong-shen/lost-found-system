@@ -39,6 +39,9 @@ public class DMsView extends JPanel implements PropertyChangeListener {
     private String selectedChatId;
 
     public DMsView(ViewManagerModel viewManagerModel, DMsViewModel dMsViewModel) {
+        this.dmsViewModel = dMsViewModel;
+        this.dmsViewModel.addPropertyChangeListener(this);
+
         // Set up the main layout
         this.setLayout(new BorderLayout());
 
@@ -65,11 +68,6 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         dmsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         dmsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         dmsScrollPane.setPreferredSize(new Dimension(300, 600));
-
-        // Placeholder for DMs
-        JLabel placeholderLabel = new JLabel("No DMs available.", SwingConstants.CENTER);
-        placeholderLabel.setFont(new Font("Arial", Font.ITALIC, 14));
-        dmsListPanel.add(placeholderLabel);
 
         // Add component listener to detect when view becomes visible
         this.addComponentListener(new ComponentAdapter() {
@@ -171,7 +169,11 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println("DEBUG: DMsView propertyChange called with property: " + evt.getPropertyName());
         DMsState state = (DMsState) evt.getNewValue();
+        System.out.println("DEBUG: State received - chats: " + (state.getChats() != null ? state.getChats().size() : "null") +
+                ", messages: " + (state.getMessages() != null ? state.getMessages().size() : "null") +
+                ", currentChat: " + (state.getCurrentChat() != null ? state.getCurrentChat().getChatId() : "null"));
 
         if (state.getError() != null) {
             JOptionPane.showMessageDialog(this, state.getError(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -189,24 +191,22 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         if (state.getCurrentChat() != null) {
             System.out.println("DEBUG: Setting current chat: " + state.getCurrentChat().getChatId());
             selectedChatId = state.getCurrentChat().getChatId();
-
-            // If this is a newly created chat, refresh the chat list
-            if (dmsController != null && currentUsername != null) {
-                dmsController.loadChats(currentUsername);
-                dmsController.loadMessages(selectedChatId, currentUsername);
-            }
         }
     }
 
     private void updateChatsList(List<Chat> chats) {
+        System.out.println("DEBUG: updateChatsList called with " + (chats != null ? chats.size() : "null") + " chats");
         dmsListPanel.removeAll();
 
-        if (chats.isEmpty()) {
+        if (chats == null || chats.isEmpty()) {
+            System.out.println("DEBUG: No chats to display, showing placeholder");
             JLabel placeholderLabel = new JLabel("No DMs available.", SwingConstants.CENTER);
             placeholderLabel.setFont(new Font("Arial", Font.ITALIC, 14));
             dmsListPanel.add(placeholderLabel);
         } else {
+            System.out.println("DEBUG: Adding " + chats.size() + " chat items to the list");
             for (Chat chat : chats) {
+                System.out.println("DEBUG: Adding chat with ID: " + chat.getChatId() + ", participants: " + chat.getParticipants());
                 JPanel chatItem = createChatListItem(chat);
                 dmsListPanel.add(chatItem);
             }
@@ -214,6 +214,7 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
         dmsListPanel.revalidate();
         dmsListPanel.repaint();
+        System.out.println("DEBUG: updateChatsList completed");
     }
 
     private JPanel createChatListItem(Chat chat) {
@@ -267,7 +268,7 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
             for (Message message : messages) {
                 String time = message.getSentAt();
-                String senderName = message.getSender().getName();
+                String senderName = message.getSender(); // Now directly a String username
                 String content = message.getContent();
 
                 chatText.append(String.format("[%s] %s: %s\n", time, senderName, content));

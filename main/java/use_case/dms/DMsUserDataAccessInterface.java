@@ -24,11 +24,11 @@ public interface DMsUserDataAccessInterface {
     /**
      * Sends a message to a specific chat.
      * @param chatId the ID of the chat to send the message to
-     * @param sender the user sending the message
+     * @param sender the username of the user sending the message
      * @param content the message content
      * @return the sent message
      */
-    Message sendMessage(String chatId, User sender, String content);
+    Message sendMessage(String chatId, String sender, String content);
 
     /**
      * Gets all messages for a specific chat.

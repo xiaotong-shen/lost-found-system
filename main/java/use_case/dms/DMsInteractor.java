@@ -39,7 +39,7 @@ public class DMsInteractor implements DMsInputBoundary {
             List<User> participants = inputData.getParticipants();
             List<String> participantNames = new ArrayList<>();
             for (User participant : participants) {
-                 participantNames.add(participant.getName());
+                participantNames.add(participant.getName());
             }
 
             if (participants == null || participants.isEmpty()) {
@@ -101,15 +101,8 @@ public class DMsInteractor implements DMsInputBoundary {
                 return;
             }
 
-            // Get the current user from the data access layer
-            User sender = dmsUserDataAccessInterface.getUserByUsername(username);
-            if (sender == null) {
-                DMsOutputData outputData = new DMsOutputData(null, null, null, "User not found");
-                dmsOutputBoundary.prepareSendMessageView(outputData);
-                return;
-            }
-
-            Message message = dmsUserDataAccessInterface.sendMessage(chatId, sender, messageContent);
+            // Send the message directly with the username
+            Message message = dmsUserDataAccessInterface.sendMessage(chatId, username, messageContent);
             List<Message> messages = dmsUserDataAccessInterface.getMessagesForChat(chatId);
             DMsOutputData outputData = new DMsOutputData(null, messages, null, null);
             dmsOutputBoundary.prepareSendMessageView(outputData);
