@@ -131,6 +131,13 @@ public class DMsView extends JPanel implements PropertyChangeListener {
                     return;
                 }
 
+                // Check if a chat already exists with this user (server-side check)
+                if (dmsController.chatExistsBetweenUsers(currentUsername, targetUsername)) {
+                    JOptionPane.showMessageDialog(this, "A chat with '" + targetUsername + "' already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                    newDMField.setText(""); // Clear the field
+                    return;
+                }
+
                 // Create a new chat with the current user and target user
                 List<User> participants = new ArrayList<>();
 

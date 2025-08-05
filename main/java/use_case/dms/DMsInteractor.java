@@ -148,4 +148,14 @@ public class DMsInteractor implements DMsInputBoundary {
             return null;
         }
     }
+
+    @Override
+    public boolean chatExistsBetweenUsers(String user1, String user2) {
+        try {
+            return dmsUserDataAccessInterface.chatExistsBetweenUsers(user1, user2);
+        } catch (Exception e) {
+            System.err.println("DEBUG: Error checking chat existence: " + e.getMessage());
+            return false;
+        }
+    }
 }

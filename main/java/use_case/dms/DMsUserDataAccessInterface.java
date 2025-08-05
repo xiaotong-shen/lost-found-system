@@ -50,4 +50,12 @@ public interface DMsUserDataAccessInterface {
      * @return the user, or null if not found
      */
     User getUserByUsername(String username);
+
+    /**
+     * Checks if a chat already exists between two users.
+     * @param user1 the first username
+     * @param user2 the second username
+     * @return true if a chat exists between these users, false otherwise
+     */
+    boolean chatExistsBetweenUsers(String user1, String user2);
 }

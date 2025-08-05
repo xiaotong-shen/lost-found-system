@@ -62,4 +62,14 @@ public class DMsController {
     public User getUserByUsername(String username) {
         return dMsInputBoundary.getUserByUsername(username);
     }
+
+    /**
+     * Checks if a chat already exists between two users.
+     * @param user1 the first username
+     * @param user2 the second username
+     * @return true if a chat exists between these users, false otherwise
+     */
+    public boolean chatExistsBetweenUsers(String user1, String user2) {
+        return dMsInputBoundary.chatExistsBetweenUsers(user1, user2);
+    }
 }

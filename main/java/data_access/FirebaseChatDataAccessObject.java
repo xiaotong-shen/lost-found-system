@@ -206,4 +206,47 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
     public User getUserByUsername(String username) {
         return userDAO.get(username);
     }
+
+    @Override
+    public boolean chatExistsBetweenUsers(String user1, String user2) {
+        System.out.println("\n=== DEBUG: FirebaseChatDataAccessObject.chatExistsBetweenUsers() called ===");
+        System.out.println("DEBUG: Checking if chat exists between: '" + user1 + "' and '" + user2 + "'");
+
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        // Get all chats and check if any contain both users
+        chatsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean exists = false;
+                for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
+                    Chat chat = chatSnapshot.getValue(Chat.class);
+                    if (chat != null && chat.getParticipants() != null) {
+                        List<String> participants = chat.getParticipants();
+                        if (participants.size() == 2 &&
+                                participants.contains(user1) &&
+                                participants.contains(user2)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+                System.out.println("DEBUG: Chat exists between users: " + exists);
+                future.complete(exists);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("DEBUG: Firebase error checking chat existence: " + databaseError.getMessage());
+                future.completeExceptionally(new RuntimeException("Failed to check chat existence: " + databaseError.getMessage()));
+            }
+        });
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.err.println("DEBUG: Error checking chat existence: " + e.getMessage());
+            return false;
+        }
+    }
 }
