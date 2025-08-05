@@ -43,8 +43,8 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
                     if (chat != null && chat.getParticipants() != null) {
                         // Check if the user is a participant in this chat
                         boolean isParticipant = false;
-                        for (User participant : chat.getParticipants()) {
-                            if (participant.getName().equals(username)) {
+                        for (String participant : chat.getParticipants()) {
+                            if (participant.equals(username)) {
                                 isParticipant = true;
                                 break;
                             }
@@ -74,21 +74,17 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
     }
 
     @Override
-    public Chat createChat(List<User> participants) {
+    public Chat createChat(List<String> participants) {
         System.out.println("\n=== DEBUG: FirebaseChatDataAccessObject.createChat() called ===");
         System.out.println("DEBUG: Creating chat with participants: " + participants.size());
 
-        for (User participant : participants) {
-            System.out.println("DEBUG: Participant: " + participant.getName());
+        for (String participant : participants) {
+            System.out.println("DEBUG: Participant: " + participant);
         }
 
         String chatId = generateChatId();
         LocalDateTime createdAt = LocalDateTime.now();
-        Message newMessage = new Message(generateMessageId(), participants.get(0),
-                "", LocalDateTime.now(), false);
-        List<Message> initialMessages = new ArrayList<>();
-        initialMessages.add(newMessage);
-        Chat chat = new Chat(chatId, participants, initialMessages, createdAt);
+        Chat chat = new Chat(chatId, participants, createdAt);
 
         System.out.println("DEBUG: About to save chat to Firebase with ID: " + chatId);
 
@@ -116,7 +112,7 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
 
         String messageId = generateMessageId();
         LocalDateTime sentAt = LocalDateTime.now();
-        Message message = new Message(messageId, sender, content, sentAt, false);
+        Message message = new Message(messageId, chatId, sender, content, sentAt, false);
 
         messagesRef.child(chatId).child(messageId).setValue(message, new DatabaseReference.CompletionListener() {
             @Override

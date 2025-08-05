@@ -4,6 +4,7 @@ import entity.Chat;
 import entity.Message;
 import entity.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +37,11 @@ public class DMsInteractor implements DMsInputBoundary {
         try {
             System.out.println("DEBUG: DMsInteractor.createChat() called");
             List<User> participants = inputData.getParticipants();
+            List<String> participantNames = new ArrayList<>();
+            for (User participant : participants) {
+                 participantNames.add(participant.getName());
+            }
+
             if (participants == null || participants.isEmpty()) {
                 System.out.println("DEBUG: No participants specified");
                 DMsOutputData outputData = new DMsOutputData(null, null, null,"No participants specified");
@@ -48,7 +54,7 @@ public class DMsInteractor implements DMsInputBoundary {
                 System.out.println("DEBUG: Participant: " + participant.getName());
             }
 
-            Chat chat = dmsUserDataAccessInterface.createChat(participants);
+            Chat chat = dmsUserDataAccessInterface.createChat(participantNames);
             System.out.println("DEBUG: Chat created with ID: " + (chat != null ? chat.getChatId() : "null"));
 
             if (chat != null) {

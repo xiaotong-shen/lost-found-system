@@ -195,7 +195,7 @@ public class DMsView extends JPanel implements PropertyChangeListener {
                 dmsController.loadChats(currentUsername);
                 dmsController.loadMessages(selectedChatId, currentUsername);
             }
-            }
+        }
     }
 
     private void updateChatsList(List<Chat> chats) {
@@ -223,9 +223,9 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
         // Get the other participant's name (not the current user)
         String otherParticipantName = "";
-        for (User participant : chat.getParticipants()) {
-            if (!participant.getName().equals(currentUsername)) {
-                otherParticipantName = participant.getName();
+        for (String participant : chat.getParticipants()) {
+            if (!participant.equals(currentUsername)) {
+                otherParticipantName = participant;
                 break;
             }
         }
@@ -233,15 +233,8 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         JLabel nameLabel = new JLabel(otherParticipantName);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        // Get the last message if available
-        String lastMessage = "No messages yet";
-        if (chat.getMessages() != null && !chat.getMessages().isEmpty()) {
-            Message lastMsg = chat.getMessages().get(chat.getMessages().size() - 1);
-            lastMessage = lastMsg.getContent();
-            if (lastMessage.length() > 30) {
-                lastMessage = lastMessage.substring(0, 27) + "...";
-            }
-        }
+        // Since messages are now stored separately, show a placeholder
+        String lastMessage = "Click to view messages";
 
         JLabel messageLabel = new JLabel(lastMessage);
         messageLabel.setFont(new Font("Arial", Font.PLAIN, 12));

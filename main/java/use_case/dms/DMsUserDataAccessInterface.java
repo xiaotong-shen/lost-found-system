@@ -19,7 +19,7 @@ public interface DMsUserDataAccessInterface {
      * @param participants list of users to include in the chat
      * @return the created chat
      */
-    Chat createChat(List<User> participants);
+    Chat createChat(List<String> participants);
 
     /**
      * Sends a message to a specific chat.

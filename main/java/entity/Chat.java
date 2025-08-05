@@ -12,8 +12,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class Chat {
 
     private String chatId;
-    private List<User> participants;
-    private List<Message> messages;
+    private List<String> participants; // Now a list of usernames
     private String createdAt; // Store as string for Firebase compatibility
 
     // Firebase requires a no-arg constructor for deserialization
@@ -22,14 +21,12 @@ public class Chat {
     /**
      * Constructs a Chat entity.
      * @param chatId Unique identifier for the chat
-     * @param participants List of users in the chat
-     * @param messages List of messages in the chat
+     * @param participants List of usernames in the chat
      * @param createdAt Creation time of the chat
      */
-    public Chat(String chatId, List<User> participants, List<Message> messages, LocalDateTime createdAt) {
+    public Chat(String chatId, List<String> participants, LocalDateTime createdAt) {
         this.chatId = chatId;
         this.participants = participants;
-        this.messages = messages;
         this.createdAt = createdAt.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
@@ -41,20 +38,12 @@ public class Chat {
         this.chatId = chatId;
     }
 
-    public List<User> getParticipants() {
+    public List<String> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(List<String> participants) {
         this.participants = participants;
-    }
-
-    public List<Message> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
     }
 
     public String getCreatedAt() {
