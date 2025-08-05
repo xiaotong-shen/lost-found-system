@@ -6,18 +6,10 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import java.awt.*;
 
 import interface_adapter.signup.SignupController;
@@ -37,6 +29,10 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     private final JPasswordField passwordInputField = new JPasswordField(20);
     private final JPasswordField repeatPasswordInputField = new JPasswordField(20);
     private SignupController signupController;
+    // ... existing fields ...
+    private final JTextField adminCodeField = new JTextField(20);
+    private final JCheckBox isAdminCheckBox = new JCheckBox("Sign up as Admin");
+    private static final String ADMIN_CODE = "csc207";
 
     private JButton signUp;
     private JButton cancel;
@@ -106,6 +102,9 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         // Repeat password field
         JPanel repeatPasswordPanel = createInputPanel("Confirm Password", repeatPasswordInputField);
 
+        // Create admin section panel
+        JPanel adminPanel = createAdminPanel();
+        
         // Buttons panel
         JPanel buttonsPanel = createButtonsPanel();
 
@@ -117,10 +116,65 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         card.add(passwordPanel);
         card.add(Box.createVerticalStrut(20));
         card.add(repeatPasswordPanel);
+        card.add(Box.createVerticalStrut(20));
+        card.add(adminPanel);           // Add admin panel
         card.add(Box.createVerticalStrut(30));
         card.add(buttonsPanel);
 
         return card;
+    }
+
+    private JPanel createAdminPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setMaximumSize(new Dimension(320, 100));
+
+        // Admin checkbox
+        isAdminCheckBox.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        isAdminCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Admin code field panel
+        JPanel adminCodePanel = createInputPanel("Admin Code", adminCodeField);
+        adminCodePanel.setVisible(false);  // Initially hidden
+
+        // Add listener to checkbox to control adminCodePanel visibility
+        isAdminCheckBox.addActionListener(e -> {
+            adminCodePanel.setVisible(isAdminCheckBox.isSelected());
+            panel.revalidate();
+            panel.repaint();
+        });
+
+        panel.add(isAdminCheckBox);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(adminCodePanel);
+
+        return panel;
+    }
+
+    private void toggleAdminCodeField() {
+        // Find the admin code panel and toggle its visibility
+        Component[] components = this.getComponents();
+        for (Component component : components) {
+            if (component instanceof JPanel) {
+                Component[] cardComponents = ((JPanel) component).getComponents();
+                for (Component cardComponent : cardComponents) {
+                    if (cardComponent instanceof JPanel) {
+                        Component[] panelComponents = ((JPanel) cardComponent).getComponents();
+                        for (Component panelComponent : panelComponents) {
+                            if (panelComponent instanceof JPanel && 
+                                ((JPanel) panelComponent).getComponent(0) instanceof JLabel && 
+                                ((JLabel) ((JPanel) panelComponent).getComponent(0)).getText().equals("Admin Code")) {
+                                panelComponent.setVisible(isAdminCheckBox.isSelected());
+                                this.revalidate();
+                                this.repaint();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private JPanel createInputPanel(String labelText, JTextField inputField) {
@@ -215,66 +269,79 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     }
 
     private void setupActionListeners() {
-        signUp.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(signUp)) {
-                            final SignupState currentState = signupViewModel.getState();
-                            String password = currentState.getPassword();
-                            if (password == null || password.isEmpty()) {
-                                JOptionPane.showMessageDialog(
-                                    SignupView.this,
-                                    "Password cannot be blank.",
-                                    "Invalid Password",
-                                    JOptionPane.ERROR_MESSAGE
-                                );
-                                return;
-                            }
-                            String strength = getPasswordStrength(password);
-                            if ("weak".equals(strength)) {
-                                int result = JOptionPane.showConfirmDialog(
-                                    SignupView.this,
-                                    "Your password is weak. Do you want to use it anyway?",
-                                    "Weak Password",
-                                    JOptionPane.YES_NO_OPTION
-                                );
-                                if (result != JOptionPane.YES_OPTION) {
-                                    return;
-                                }
-                            } else if ("medium".equals(strength)) {
-                                Object[] options = {"Use Password", "Change Password"};
-                                int result = JOptionPane.showOptionDialog(
-                                    SignupView.this,
-                                    "Your password is medium strength. Do you want to reconsider?",
-                                    "Medium Password",
-                                    JOptionPane.DEFAULT_OPTION,
-                                    JOptionPane.QUESTION_MESSAGE,
-                                    null,
-                                    options,
-                                    options[0]
-                                );
-                                if (result != 0) { // 0 = Use Password, 1 = Change Password
-                                    return;
-                                }
-                            } else if ("strong".equals(strength)) {
-                                JOptionPane.showMessageDialog(
-                                    SignupView.this,
-                                    "Your password is strong! Good job!",
-                                    "Strong Password",
-                                    JOptionPane.INFORMATION_MESSAGE
-                                );
-                            }
-                            signupController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword(),
-                                    currentState.getRepeatPassword(),
-                                    false // Default to non-admin user
+        signUp.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                if (evt.getSource().equals(signUp)) {
+                    SignupState currentState = signupViewModel.getState();
+                    
+                    // Check admin code if trying to sign up as admin
+                    if (isAdminCheckBox.isSelected()) {
+                        String enteredCode = adminCodeField.getText();
+                        if (!ADMIN_CODE.equals(enteredCode)) {
+                            JOptionPane.showMessageDialog(
+                                SignupView.this,
+                                "Invalid admin code.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
                             );
+                            return;
                         }
                     }
+
+                    // This creates an anonymous subclass of ActionListener and instantiates it.
+                    String password = currentState.getPassword();
+                    if (password == null || password.isEmpty()) {
+                        JOptionPane.showMessageDialog(
+                            SignupView.this,
+                            "Password cannot be blank.",
+                            "Invalid Password",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        return;
+                    }
+                    String strength = getPasswordStrength(password);
+                    if ("weak".equals(strength)) {
+                        int result = JOptionPane.showConfirmDialog(
+                            SignupView.this,
+                            "Your password is weak. Do you want to use it anyway?",
+                            "Weak Password",
+                            JOptionPane.YES_NO_OPTION
+                        );
+                        if (result != JOptionPane.YES_OPTION) {
+                            return;
+                        }
+                    } else if ("medium".equals(strength)) {
+                        Object[] options = {"Use Password", "Change Password"};
+                        int result = JOptionPane.showOptionDialog(
+                            SignupView.this,
+                            "Your password is medium strength. Do you want to reconsider?",
+                            "Medium Password",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.QUESTION_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                        );
+                        if (result != 0) { // 0 = Use Password, 1 = Change Password
+                            return;
+                        }
+                    } else if ("strong".equals(strength)) {
+                        JOptionPane.showMessageDialog(
+                            SignupView.this,
+                            "Your password is strong! Good job!",
+                            "Strong Password",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
+                    signupController.execute(
+                        currentState.getUsername(),
+                        currentState.getPassword(),
+                        currentState.getRepeatPassword(),
+                        isAdminCheckBox.isSelected()  // Pass admin status
+                    );
                 }
-        );
+            }
+        });
 
         toLogin.addActionListener(
                 new ActionListener() {
