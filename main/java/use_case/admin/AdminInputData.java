@@ -66,6 +66,19 @@ public class AdminInputData {
         this.author = author;
     }
 
+    public AdminInputData(String action, String postId, boolean isDeleted) {
+        this.action = action;
+        this.searchQuery = null;
+        this.postId = postId;
+        this.postTitle = null;
+        this.postContent = null;
+        this.postTags = null;
+        this.postLocation = null;
+        this.isLost = false;
+        this.author = null;
+    }
+
+
     // Getters
     public String getAction() { return action; }
     public String getSearchQuery() { return searchQuery; }

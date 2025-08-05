@@ -77,16 +77,6 @@ public class DashboardInteractor implements DashboardInputBoundary {
                     }
                     break;
 
-                case "delete_post":
-                    boolean deleteSuccess = dashboardDataAccessObject.deletePost(dashboardInputData.getPostId());
-                    if (deleteSuccess) {
-                        DashboardOutputData deletePostOutputData = new DashboardOutputData("Post deleted successfully!", true);
-                        dashboardOutputBoundary.prepareSuccessView(deletePostOutputData);
-                    } else {
-                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Failed to delete post."));
-                    }
-                    break;
-
                 default:
                     dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Invalid action."));
                     break;

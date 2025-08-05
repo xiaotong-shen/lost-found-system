@@ -73,9 +73,23 @@ public class AdminController {
     }
 
     public void deletePost(String postId) {
-        System.out.println("AdminController: Attempting to delete post with ID: " + postId);
-        AdminInputData inputData = new AdminInputData("delete_post", postId);
-        adminInteractor.execute(inputData);
+        System.out.println("\nAdminController: Starting delete operation");
+        System.out.println("AdminController: Post ID to delete: " + postId);
+        
+        if (postId == null || postId.trim().isEmpty()) {
+            System.err.println("AdminController: Invalid post ID (null or empty)");
+            return;
+        }
+        
+        try {
+            System.out.println("AdminController: Creating AdminInputData for delete operation");
+            AdminInputData inputData = new AdminInputData("delete_post", postId, true);
+            System.out.println("AdminController: Executing delete operation through interactor");
+            adminInteractor.execute(inputData);
+        } catch (Exception e) {
+            System.err.println("AdminController: Exception during delete operation: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
         /**

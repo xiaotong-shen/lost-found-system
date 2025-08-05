@@ -3,7 +3,6 @@ package view;
 import entity.Post;
 import interface_adapter.admin.*;
 import interface_adapter.admin.AdminViewModel;
-import interface_adapter.delete_post.DeletePostController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +42,6 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
     private final JTabbedPane tabbedPane;
 
     private AdminController adminController;
-    private DeletePostController deletePostController;
 
     public AdminView(AdminViewModel adminViewModel) {
 
@@ -535,20 +533,34 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
 
         return null;
     }
-    public void setDeletePostController(DeletePostController controller) {
-        this.deletePostController = controller;
-    }
 
     // Add this method to create a delete button for each post
     private JButton createDeleteButton(String postId) {
         JButton deleteButton = new JButton("Delete Post");
         deleteButton.addActionListener(e -> {
+            System.out.println("\n=== Delete Operation Started ===");
+            System.out.println("AdminView: Delete button clicked for post ID: " + postId);
+        
             int result = JOptionPane.showConfirmDialog(this,
                     "Are you sure you want to delete this post?",
                     "Confirm Delete",
                     JOptionPane.YES_NO_OPTION);
+                
+            System.out.println("AdminView: User confirmation result: " + 
+                          (result == JOptionPane.YES_OPTION ? "YES" : "NO"));
+                          
             if (result == JOptionPane.YES_OPTION) {
-                deletePostController.deletePost(postId);
+                try {
+                    System.out.println("AdminView: Initiating delete operation through controller");
+                    adminController.deletePost(postId);
+                } catch (Exception ex) {
+                    System.err.println("AdminView: Error during delete operation: " + ex.getMessage());
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this,
+                    "Failed to delete post: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         return deleteButton;

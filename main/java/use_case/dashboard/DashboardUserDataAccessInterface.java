@@ -51,5 +51,4 @@ public interface DashboardUserDataAccessInterface {
      * @param postId the ID of the post to delete
      * @return true if deletion was successful, false otherwise
      */
-    boolean deletePost(int postId);
-} 
+}

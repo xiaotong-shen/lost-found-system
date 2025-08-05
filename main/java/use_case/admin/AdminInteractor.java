@@ -2,7 +2,6 @@ package use_case.admin;
 
 import data_access.FirebasePostDataAccessObject;
 import entity.Post;
-import use_case.delete_post.DeletePostOutputData;
 
 import java.util.List;
 
@@ -99,27 +98,44 @@ public class AdminInteractor implements AdminInputBoundary {
                     break;
 
                 case "delete_post":
-                    System.out.println("AdminInteractor: Processing delete_post action");
-                    System.out.println("AdminInteractor: Attempting to delete post: " + adminInputData.getPostId());
-
-                    if (!adminDataAccessObject.existsPost(adminInputData.getPostId())) {
-                        AdminOutputData dpoutputData = new AdminOutputData("Post does not exist", false);
-                        adminOutputBoundary.prepareFailView(dpoutputData);
+                    System.out.println("\nAdminInteractor: Processing delete_post action");
+                    String postIdToDelete = adminInputData.getPostId();
+                    
+                    System.out.println("AdminInteractor: Validating post ID: " + postIdToDelete);
+                    if (postIdToDelete == null || postIdToDelete.trim().isEmpty()) {
+                        System.err.println("AdminInteractor: Invalid post ID detected");
+                        adminOutputBoundary.prepareFailView(new AdminOutputData("Invalid post ID"));
                         return;
                     }
 
                     try {
-                        adminDataAccessObject.deletePost(adminInputData.getPostId());
-                        AdminOutputData dpoutputData = new AdminOutputData("Post successfully deleted", true);
-                        adminOutputBoundary.prepareSuccessView(dpoutputData);
+                        System.out.println("AdminInteractor: Checking if post exists");
+                        boolean exists = adminDataAccessObject.existsPost(postIdToDelete);
+                        System.out.println("AdminInteractor: Post exists check result: " + exists);
+
+                        if (!exists) {
+                            System.err.println("AdminInteractor: Post not found for deletion");
+                            adminOutputBoundary.prepareFailView(new AdminOutputData("Post not found"));
+                            return;
+                        }
+
+                        System.out.println("AdminInteractor: Initiating delete operation in DAO");
+                        adminDataAccessObject.deletePost(postIdToDelete);
+                        
+                        System.out.println("AdminInteractor: Delete operation completed, preparing success view");
+                        List<Post> remainingPosts = adminDataAccessObject.getAllPosts();
+                        System.out.println("AdminInteractor: Retrieved " + remainingPosts.size() + " remaining posts");
+                        
+                        AdminOutputData deleteOutputData = new AdminOutputData("Post deleted successfully!", true);
+                        deleteOutputData.setPosts(remainingPosts);
+                        adminOutputBoundary.prepareSuccessView(deleteOutputData);
+                        
                     } catch (Exception e) {
-                        AdminOutputData dppoutputData = new AdminOutputData(
-                                "Failed to delete post: " + e.getMessage(), false);
-                        adminOutputBoundary.prepareFailView(dppoutputData);
+                        System.err.println("AdminInteractor: Error during delete operation: " + e.getMessage());
+                        e.printStackTrace();
+                        adminOutputBoundary.prepareFailView(new AdminOutputData("Error deleting post: " + e.getMessage()));
                     }
-
-
-                break;
+                    break;
 
                 default:
                     adminOutputBoundary.prepareFailView(new AdminOutputData("Invalid action."));
