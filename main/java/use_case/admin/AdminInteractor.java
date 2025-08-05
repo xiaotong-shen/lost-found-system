@@ -1,6 +1,9 @@
 package use_case.admin;
 
+import data_access.FirebasePostDataAccessObject;
 import entity.Post;
+import use_case.delete_post.DeletePostOutputData;
+
 import java.util.List;
 
 /**
@@ -8,10 +11,10 @@ import java.util.List;
  * Implements the business logic for admin operations.
  */
 public class AdminInteractor implements AdminInputBoundary {
-    private final AdminUserDataAccessInterface adminDataAccessObject;
+    private final FirebasePostDataAccessObject adminDataAccessObject;
     private final AdminOutputBoundary adminOutputBoundary;
 
-    public AdminInteractor(AdminUserDataAccessInterface adminDataAccessObject,
+    public AdminInteractor(FirebasePostDataAccessObject adminDataAccessObject,
                                AdminOutputBoundary adminOutputBoundary) {
         this.adminDataAccessObject = adminDataAccessObject;
         this.adminOutputBoundary = adminOutputBoundary;
@@ -62,6 +65,9 @@ public class AdminInteractor implements AdminInputBoundary {
                     break;
 
                 case "edit_post":
+                    System.out.println("AdminInteractor: Processing edit_post action");
+                    System.out.println("AdminInteractor: Post ID: " + adminInputData.getPostId());
+                    
                     boolean editSuccess = adminDataAccessObject.editPost(
                             adminInputData.getPostId(),
                             adminInputData.getPostTitle(),
@@ -71,20 +77,49 @@ public class AdminInteractor implements AdminInputBoundary {
                             adminInputData.isLost()
                     );
 
+                    System.out.println("AdminInteractor: Edit operation result: " + (editSuccess ? "Success" : "Failed"));
+
                     if (editSuccess) {
                         // Get updated post list after edit
                         List<Post> updatedPosts = adminDataAccessObject.getAllPosts();
+                        System.out.println("AdminInteractor: Retrieved " + updatedPosts.size() + " posts after edit");
+                        
                         // Get the updated version of the edited post
                         Post updatedPost = adminDataAccessObject.getPostById(Integer.parseInt(adminInputData.getPostId()));
+                        System.out.println("AdminInteractor: Retrieved updated post: " + 
+                                          (updatedPost != null ? "Success" : "Failed"));
                         
                         AdminOutputData editOutputData = new AdminOutputData("Post edited successfully!", true);
-                        editOutputData.setPosts(updatedPosts);  // Set the updated posts list
-                        editOutputData.setSelectedPost(updatedPost);  // Set the updated post
+                        editOutputData.setPosts(updatedPosts);
+                        editOutputData.setSelectedPost(updatedPost);
                         adminOutputBoundary.prepareSuccessView(editOutputData);
                     } else {
                         adminOutputBoundary.prepareFailView(new AdminOutputData("Failed to edit post"));
                     }
                     break;
+
+                case "delete_post":
+                    System.out.println("AdminInteractor: Processing delete_post action");
+                    System.out.println("AdminInteractor: Attempting to delete post: " + adminInputData.getPostId());
+
+                    if (!adminDataAccessObject.existsPost(adminInputData.getPostId())) {
+                        AdminOutputData dpoutputData = new AdminOutputData("Post does not exist", false);
+                        adminOutputBoundary.prepareFailView(dpoutputData);
+                        return;
+                    }
+
+                    try {
+                        adminDataAccessObject.deletePost(adminInputData.getPostId());
+                        AdminOutputData dpoutputData = new AdminOutputData("Post successfully deleted", true);
+                        adminOutputBoundary.prepareSuccessView(dpoutputData);
+                    } catch (Exception e) {
+                        AdminOutputData dppoutputData = new AdminOutputData(
+                                "Failed to delete post: " + e.getMessage(), false);
+                        adminOutputBoundary.prepareFailView(dppoutputData);
+                    }
+
+
+                break;
 
                 default:
                     adminOutputBoundary.prepareFailView(new AdminOutputData("Invalid action."));

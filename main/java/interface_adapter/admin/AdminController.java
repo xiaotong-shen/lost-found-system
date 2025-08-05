@@ -63,8 +63,18 @@ public class AdminController {
     // Add edit functionality
     public void editPost(String postId, String title, String description,
                          String location, List<String> tags, boolean isLost) {
+        System.out.println("AdminController: Attempting to edit post with ID: " + postId);
+        System.out.println("AdminController: Edit details - Title: " + title + ", Description length: " + 
+                      (description != null ? description.length() : "null") + 
+                      ", Tags: " + tags + ", Location: " + location);
+    
         AdminInputData inputData = new AdminInputData("edit_post", postId, title, description, tags, location, isLost, currentUser);
+        adminInteractor.execute(inputData);
+    }
 
+    public void deletePost(String postId) {
+        System.out.println("AdminController: Attempting to delete post with ID: " + postId);
+        AdminInputData inputData = new AdminInputData("delete_post", postId);
         adminInteractor.execute(inputData);
     }
 
