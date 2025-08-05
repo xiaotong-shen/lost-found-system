@@ -64,10 +64,15 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
         // DMs list on the left
         dmsListPanel.setLayout(new BoxLayout(dmsListPanel, BoxLayout.Y_AXIS));
+        dmsListPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        dmsListPanel.setBackground(new Color(245, 245, 245)); // Light gray background
+
         dmsScrollPane = new JScrollPane(dmsListPanel);
         dmsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         dmsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         dmsScrollPane.setPreferredSize(new Dimension(300, 600));
+        dmsScrollPane.setBorder(BorderFactory.createTitledBorder("Direct Messages"));
+        dmsScrollPane.getViewport().setBackground(new Color(245, 245, 245));
 
         // Add component listener to detect when view becomes visible
         this.addComponentListener(new ComponentAdapter() {
@@ -105,6 +110,10 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(dmsScrollPane, BorderLayout.WEST);
         mainPanel.add(chatPanel, BorderLayout.CENTER);
+
+        // Set minimum sizes to ensure proper layout
+        dmsScrollPane.setMinimumSize(new Dimension(250, 400));
+        chatPanel.setMinimumSize(new Dimension(400, 400));
 
         // Add components to main panel
         this.add(toolbarPanel, BorderLayout.NORTH);
@@ -202,25 +211,43 @@ public class DMsView extends JPanel implements PropertyChangeListener {
             System.out.println("DEBUG: No chats to display, showing placeholder");
             JLabel placeholderLabel = new JLabel("No DMs available.", SwingConstants.CENTER);
             placeholderLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+            placeholderLabel.setForeground(Color.GRAY);
+            placeholderLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
             dmsListPanel.add(placeholderLabel);
         } else {
             System.out.println("DEBUG: Adding " + chats.size() + " chat items to the list");
-            for (Chat chat : chats) {
+            for (int i = 0; i < chats.size(); i++) {
+                Chat chat = chats.get(i);
                 System.out.println("DEBUG: Adding chat with ID: " + chat.getChatId() + ", participants: " + chat.getParticipants());
                 JPanel chatItem = createChatListItem(chat);
                 dmsListPanel.add(chatItem);
+
+                // Add spacing between items (except after the last one)
+                if (i < chats.size() - 1) {
+                    dmsListPanel.add(Box.createVerticalStrut(2));
+                }
             }
         }
 
+        // Add some padding at the bottom
+        dmsListPanel.add(Box.createVerticalStrut(10));
+
         dmsListPanel.revalidate();
         dmsListPanel.repaint();
+        dmsScrollPane.revalidate();
+        dmsScrollPane.repaint();
         System.out.println("DEBUG: updateChatsList completed");
     }
 
     private JPanel createChatListItem(Chat chat) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         panel.setBackground(Color.WHITE);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80)); // Fixed height for consistency
+        panel.setPreferredSize(new Dimension(280, 80));
 
         // Get the other participant's name (not the current user)
         String otherParticipantName = "";
@@ -233,6 +260,7 @@ public class DMsView extends JPanel implements PropertyChangeListener {
 
         JLabel nameLabel = new JLabel(otherParticipantName);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        nameLabel.setForeground(new Color(50, 50, 50));
 
         // Since messages are now stored separately, show a placeholder
         String lastMessage = "Click to view messages";
@@ -242,13 +270,26 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         messageLabel.setForeground(Color.GRAY);
 
         JPanel textPanel = new JPanel(new BorderLayout());
+        textPanel.setOpaque(false);
         textPanel.add(nameLabel, BorderLayout.NORTH);
         textPanel.add(messageLabel, BorderLayout.SOUTH);
 
         panel.add(textPanel, BorderLayout.CENTER);
 
-        // Add click listener
+        // Add hover effect
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                panel.setBackground(new Color(240, 248, 255)); // Light blue on hover
+                panel.repaint();
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                panel.setBackground(Color.WHITE);
+                panel.repaint();
+            }
+
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 selectedChatId = chat.getChatId();
