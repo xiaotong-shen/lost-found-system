@@ -11,19 +11,13 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class Chat {
 
-
     private String chatId;
     private List<User> participants;
     private List<Message> messages;
     private String createdAt; // Store as string for Firebase compatibility
 
     // Firebase requires a no-arg constructor for deserialization
-    public Chat() {
-        this.chatId = "";
-        this.participants = null;
-        this.messages = null;
-        this.createdAt = "";
-    }
+    private Chat() {}
 
     /**
      * Constructs a Chat entity.
@@ -68,14 +62,6 @@ public class Chat {
     }
 
     public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getCreatedAtString() {
-        return createdAt;
-    }
-
-    public void setCreatedAtString(String createdAt) {
         this.createdAt = createdAt;
     }
 }

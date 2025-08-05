@@ -14,20 +14,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface {
 
     private final DatabaseReference chatsRef;
     private final DatabaseReference messagesRef;
     private final FirebaseUserDataAccessObject userDAO;
-    private final DateTimeFormatter dateFormatter;
 
     public FirebaseChatDataAccessObject() {
         this.chatsRef = FirebaseDatabase.getInstance().getReference("chats");
         this.messagesRef = FirebaseDatabase.getInstance().getReference("messages");
         this.userDAO = new FirebaseUserDataAccessObject();
-        this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     }
 
     @Override
@@ -43,7 +40,6 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
                 List<Chat> chats = new ArrayList<>();
                 for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
                     Chat chat = chatSnapshot.getValue(Chat.class);
-                    System.out.println(chat);
                     if (chat != null && chat.getParticipants() != null) {
                         // Check if the user is a participant in this chat
                         boolean isParticipant = false;
@@ -88,7 +84,11 @@ public class FirebaseChatDataAccessObject implements DMsUserDataAccessInterface 
 
         String chatId = generateChatId();
         LocalDateTime createdAt = LocalDateTime.now();
-        Chat chat = new Chat(chatId, participants, new ArrayList<>(), createdAt);
+        Message newMessage = new Message(generateMessageId(), participants.get(0),
+                "", LocalDateTime.now(), false);
+        List<Message> initialMessages = new ArrayList<>();
+        initialMessages.add(newMessage);
+        Chat chat = new Chat(chatId, participants, initialMessages, createdAt);
 
         System.out.println("DEBUG: About to save chat to Firebase with ID: " + chatId);
 

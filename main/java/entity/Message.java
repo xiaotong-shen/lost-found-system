@@ -17,13 +17,7 @@ public class Message {
     private boolean isRead;
 
     // Firebase requires a no-arg constructor for deserialization
-    public Message() {
-        this.messageId = "";
-        this.sender = null;
-        this.content = "";
-        this.sentAt = "";
-        this.isRead = false;
-    }
+    private Message() {}
 
     /**
      * Constructs a Message entity.
@@ -70,14 +64,6 @@ public class Message {
     }
 
     public void setSentAt(String sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    public String getSentAtString() {
-        return sentAt;
-    }
-
-    public void setSentAtString(String sentAt) {
         this.sentAt = sentAt;
     }
 
