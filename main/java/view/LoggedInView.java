@@ -35,6 +35,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private LogoutController logoutController;
     private ViewManagerModel viewManagerModel;
     private DashboardController dashboardController;
+    private DMsView dmsView;
 
     private JLabel username;
 
@@ -96,7 +97,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         usernameInfo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         usernameInfo.setForeground(Color.BLACK);
         usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         username = new JLabel();
         username.setFont(new Font("Segoe UI", Font.BOLD, 16));
         username.setForeground(new Color(0, 123, 255));
@@ -160,7 +161,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // Add hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -208,6 +209,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         dmsButton.addActionListener(evt -> {
             if (evt.getSource().equals(dmsButton)) {
+                if (dmsView != null) {
+                    dmsView.setCurrentUsername(username.getText());
+                }
                 viewManagerModel.pushView("dms");
             }
         });
@@ -239,5 +243,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     public void setDashboardController(DashboardController dashboardController) {
         this.dashboardController = dashboardController;
+    }
+
+    public void setDMsView(DMsView dmsView) {
+        this.dmsView = dmsView;
     }
 }

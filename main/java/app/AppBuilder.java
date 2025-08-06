@@ -67,10 +67,24 @@ import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardInteractor;
 import use_case.dashboard.DashboardOutputBoundary;
 import use_case.dashboard.DashboardUserDataAccessInterface;
+import view.DashboardView;
+import view.AccountView;
+import interface_adapter.change_username.ChangeUsernameController;
+import interface_adapter.change_username.ChangeUsernamePresenter;
+import interface_adapter.change_username.ChangeUsernameViewModel;
 import use_case.change_username.ChangeUsernameInputBoundary;
 import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
+import view.DMsView;
+import interface_adapter.dms.DMsController;
+import interface_adapter.dms.DMsPresenter;
+import interface_adapter.dms.DMsViewModel;
+import use_case.dms.DMsInputBoundary;
+import use_case.dms.DMsInteractor;
+import use_case.dms.DMsOutputBoundary;
+import use_case.dms.DMsUserDataAccessInterface;
+import data_access.FirebaseChatDataAccessObject;
 import view.*;
 
 /**
@@ -101,6 +115,7 @@ public class AppBuilder {
     private final DashboardUserDataAccessInterface dashboardDataAccessObject = new FirebasePostDataAccessObject();
     private final FirebasePostDataAccessObject adminDataAccessObject = new FirebasePostDataAccessObject();
     private final FirebasePostDataAccessObject deletePostDataAccessObject = new FirebasePostDataAccessObject();
+    private final DMsUserDataAccessInterface dmsDataAccessObject = new FirebaseChatDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -125,6 +140,7 @@ public class AppBuilder {
     private DeleteUserView deleteUserView;
     private DeleteUserController deleteUserController;
     private DeleteUserInputBoundary deleteUserUseCaseInteractor;
+    private DMsViewModel dmsViewModel;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -223,7 +239,8 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addDMsView() {
-        dmsView = new DMsView(viewManagerModel);
+        dmsViewModel = new DMsViewModel();
+        dmsView = new DMsView(viewManagerModel, dmsViewModel);
         cardPanel.add(dmsView, dmsView.getViewName());
         return this;
     }
@@ -360,6 +377,19 @@ public class AppBuilder {
             accountView.setChangeUsernameController(changeUsernameController);
             accountView.setChangeUsernameViewModel(changeUsernameViewModel);
         }
+        return this;
+    }
+
+    /**
+     * Adds the DMs Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addDMsUseCase() {
+        final DMsOutputBoundary dMsOutputBoundary = new DMsPresenter(dmsViewModel);
+        final DMsInputBoundary dMsInteractor = new DMsInteractor(dmsDataAccessObject, dMsOutputBoundary);
+        final DMsController dMsController = new DMsController(dMsInteractor);
+        dmsView.setDMsController(dMsController);
+        loggedInView.setDMsView(dmsView);
         return this;
     }
 

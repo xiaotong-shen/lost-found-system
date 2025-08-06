@@ -29,10 +29,11 @@ public class Main {
                     .addAdminUseCase()
                     .addChangeUsernameUseCase()
                     .addDeletePostUseCase()
-                    .addDeleteUserUseCase();
+                    .addDeleteUserUseCase()
+                    .addDMsUseCase();
 
             JFrame application = builder.build();
-            
+
             // Add shutdown hook to properly close Firebase connections
             application.addWindowListener(new WindowAdapter() {
                 @Override
