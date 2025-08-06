@@ -16,6 +16,9 @@ import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.ChangePasswordPresenter;
 import interface_adapter.change_password.LoggedInViewModel;
+import interface_adapter.delete_user.DeleteUserController;
+import interface_adapter.delete_user.DeleteUserPresenter;
+import interface_adapter.delete_user.DeleteUserViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
@@ -44,6 +47,9 @@ import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
+import use_case.deleteUser.DeleteUserInputBoundary;
+import use_case.deleteUser.DeleteUserInteractor;
+import use_case.deleteUser.DeleteUserOutputBoundary;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -115,6 +121,10 @@ public class AppBuilder {
     private AdminViewModel adminViewModel;
     private AdminLoggedInView adminloggedInView;
     private AdminLoggedInViewModel adminloggedInViewModel;
+    private DeleteUserViewModel deleteUserViewModel;
+    private DeleteUserView deleteUserView;
+    private DeleteUserController deleteUserController;
+    private DeleteUserInputBoundary deleteUserUseCaseInteractor;
 
     public AppBuilder() {
         // Initialize Firebase
@@ -215,6 +225,14 @@ public class AppBuilder {
     public AppBuilder addDMsView() {
         dmsView = new DMsView(viewManagerModel);
         cardPanel.add(dmsView, dmsView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addDeleteUserView() {
+        deleteUserViewModel = new DeleteUserViewModel();
+        // Initially create view with null controller
+        deleteUserView = new DeleteUserView(deleteUserViewModel, null, viewManagerModel);
+        cardPanel.add(deleteUserView, deleteUserView.getViewName());
         return this;
     }
 
@@ -356,6 +374,26 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addDeleteUserUseCase() {
+        // Create all necessary components
+        FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
+        DeleteUserOutputBoundary deleteUserPresenter = new DeleteUserPresenter(deleteUserViewModel);
+        deleteUserUseCaseInteractor = new DeleteUserInteractor(userDataAccessObject, deleteUserPresenter);
+        
+        // Create controller with the interactor and set it to the view
+        deleteUserController = new DeleteUserController(deleteUserUseCaseInteractor);
+        
+        // This line is crucial - it connects the controller to the view
+        deleteUserView.setDeleteUserController(deleteUserController);
+        
+        // Add debug logging
+        System.out.println("DEBUG: DeleteUserUseCase initialized - Controller: " + (deleteUserController != null) + 
+                         ", Interactor: " + (deleteUserUseCaseInteractor != null));
+        
+        return this;
+    }
+
+
     /**
      * Creates the JFrame for the application and initially sets the SignupView to be displayed.
      * @return the application
@@ -371,4 +409,6 @@ public class AppBuilder {
 
         return application;
     }
+
+
 }

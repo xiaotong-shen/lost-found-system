@@ -11,11 +11,13 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class DeleteUserView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "delete users";
     private final DeleteUserViewModel deleteUserViewModel;
-    private final DeleteUserController deleteUserController;
+    private DeleteUserController deleteUserController;
     private final ViewManagerModel viewManagerModel;
     
     private final JPanel usersPanel;
@@ -25,6 +27,7 @@ public class DeleteUserView extends JPanel implements ActionListener, PropertyCh
     public DeleteUserView(DeleteUserViewModel deleteUserViewModel,
                          DeleteUserController deleteUserController,
                          ViewManagerModel viewManagerModel) {
+        System.out.println("DEBUG: DeleteUserView constructor called");
         this.deleteUserViewModel = deleteUserViewModel;
         this.deleteUserController = deleteUserController;
         this.viewManagerModel = viewManagerModel;
@@ -34,7 +37,7 @@ public class DeleteUserView extends JPanel implements ActionListener, PropertyCh
         setLayout(new BorderLayout());
 
         // Create title
-        titleLabel = new JLabel("Delete Users", SwingConstants.CENTER);
+        titleLabel = new JLabel("All Users", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
@@ -61,23 +64,46 @@ public class DeleteUserView extends JPanel implements ActionListener, PropertyCh
 
         // Initial update of users list
         updateUsersList(deleteUserViewModel.getState().getUsersList());
+
+        // Add a component listener to load users when the view becomes visible
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                System.out.println("DEBUG: DeleteUserView became visible");
+                if (deleteUserController != null) {
+                    System.out.println("DEBUG: Calling loadUsers from componentShown");
+                    deleteUserController.loadUsers();
+                } else {
+                    System.out.println("DEBUG: deleteUserController is null in componentShown");
+                }
+            }
+        });
+
+        System.out.println("DEBUG: DeleteUserView constructor completed");
     }
 
     private void updateUsersList(List<String> users) {
+        System.out.println("DEBUG: updateUsersList called with users: " + (users != null ? users.size() : "null"));
+        System.out.println("DEBUG: Current thread: " + Thread.currentThread().getName()); // Add thread info
         usersPanel.removeAll();
 
         if (users != null && !users.isEmpty()) {
+            System.out.println("DEBUG: Users to display: " + users);
+            System.out.println("DEBUG: First user in list: " + users.get(0)); // Show first user for verification
             for (String username : users) {
                 JPanel userPanel = createUserPanel(username);
                 usersPanel.add(userPanel);
                 usersPanel.add(Box.createVerticalStrut(5));
+                System.out.println("DEBUG: Added user panel for: " + username);
             }
         } else {
+            System.out.println("DEBUG: No users to display. Users list is " + (users == null ? "null" : "empty"));
             JLabel noUsersLabel = new JLabel("No users found", SwingConstants.CENTER);
             noUsersLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             usersPanel.add(noUsersLabel);
         }
 
+        System.out.println("DEBUG: Finished updating users list panel");
         usersPanel.revalidate();
         usersPanel.repaint();
     }
@@ -129,8 +155,11 @@ public class DeleteUserView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println("DEBUG: PropertyChange event received: " + evt.getPropertyName());
         if (evt.getPropertyName().equals("state")) {
-            updateUsersList(deleteUserViewModel.getState().getUsersList());
+            List<String> usersList = deleteUserViewModel.getState().getUsersList();
+            System.out.println("DEBUG: PropertyChange updating users list: " + usersList);
+            updateUsersList(usersList);
             
             String errorMessage = deleteUserViewModel.getState().getError();
             if (errorMessage != null && !errorMessage.isEmpty()) {
@@ -154,6 +183,11 @@ public class DeleteUserView extends JPanel implements ActionListener, PropertyCh
                 deleteUserViewModel.getState().setSuccessMessage("");
             }
         }
+    }
+
+    public void setDeleteUserController(DeleteUserController deleteUserController) {
+        System.out.println("DEBUG: Setting deleteUserController: " + (deleteUserController != null));
+        this.deleteUserController = deleteUserController;
     }
 
     public String getViewName() {

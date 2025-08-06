@@ -17,7 +17,7 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
         String username = deleteUserInputData.getUsername();
 
         try {
-//            userDataAccessObject.deleteUser(username);
+            userDataAccessObject.deleteUser(username);
             DeleteUserOutputData deleteUserOutputData = new DeleteUserOutputData(true,
                     "Successfully deleted user: " + username);
             deleteUserPresenter.prepareSuccessView(deleteUserOutputData);
@@ -31,10 +31,13 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
 
     @Override
     public void loadUsers() {
+        System.out.println("DEBUG: DeleteUserInteractor.loadUsers called");
         try {
-//            var users = userDataAccessObject.getAllUsers();
-//            deleteUserPresenter.presentUsersList(users);
+            var users = userDataAccessObject.getAllUsers();
+            System.out.println("DEBUG: Retrieved users from DAO: " + users);
+            deleteUserPresenter.presentUsersList(users);
         } catch (Exception e) {
+            System.err.println("DEBUG: Error in loadUsers: " + e.getMessage());
             deleteUserPresenter.prepareFailView("Failed to load users: " + e.getMessage());
         }
     }

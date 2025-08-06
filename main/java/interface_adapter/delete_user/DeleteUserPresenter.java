@@ -1,35 +1,41 @@
 package interface_adapter.delete_user;
 
-import interface_adapter.adminloggedIn.AdminLoggedInState;
-import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import use_case.deleteUser.DeleteUserOutputBoundary;
 import use_case.deleteUser.DeleteUserOutputData;
-
 import java.util.List;
 
 public class DeleteUserPresenter implements DeleteUserOutputBoundary {
-    private final AdminLoggedInViewModel adminLoggedInViewModel;
+    private final DeleteUserViewModel deleteUserViewModel;
 
-    public DeleteUserPresenter(AdminLoggedInViewModel adminLoggedInViewModel) {
-        this.adminLoggedInViewModel = adminLoggedInViewModel;
+    public DeleteUserPresenter(DeleteUserViewModel deleteUserViewModel) {
+        this.deleteUserViewModel = deleteUserViewModel;
     }
 
     @Override
-    public void prepareSuccessView(DeleteUserOutputData response) {
-        AdminLoggedInState state = adminLoggedInViewModel.getState();
-        state.setDeleteUserMessage(response.getMessage());
-        adminLoggedInViewModel.firePropertyChanged();
+    public void prepareSuccessView(DeleteUserOutputData data) {
+        DeleteUserState state = deleteUserViewModel.getState();
+        state.setSuccessMessage(data.getMessage());
+        state.setError("");
+        deleteUserViewModel.setState(state);
+        deleteUserViewModel.firePropertyChanged();
     }
 
     @Override
     public void prepareFailView(String error) {
-        AdminLoggedInState state = adminLoggedInViewModel.getState();
-        state.setDeleteUserError(error);
-        adminLoggedInViewModel.firePropertyChanged();
+        DeleteUserState state = deleteUserViewModel.getState();
+        state.setError(error);
+        state.setSuccessMessage("");
+        deleteUserViewModel.setState(state);
+        deleteUserViewModel.firePropertyChanged();
     }
 
     @Override
     public void presentUsersList(List<String> users) {
-
+        System.out.println("DEBUG: DeleteUserPresenter.presentUsersList called with users: " + users);
+        DeleteUserState state = deleteUserViewModel.getState();
+        state.setUsersList(users);
+        deleteUserViewModel.setState(state);
+        deleteUserViewModel.firePropertyChanged();
+        System.out.println("DEBUG: DeleteUserPresenter finished updating state");
     }
 }

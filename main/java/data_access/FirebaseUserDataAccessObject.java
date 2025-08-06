@@ -22,19 +22,19 @@ import java.util.Map;
 /**
  * Firebase implementation of data access for user authentication.
  */
-public class FirebaseUserDataAccessObject implements 
-        LoginUserDataAccessInterface, 
+public class FirebaseUserDataAccessObject implements
+        LoginUserDataAccessInterface,
         SignupUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
         LogoutUserDataAccessInterface,
         ChangeUsernameUserDataAccessInterface {
-    
+
     private DatabaseReference usersRef;
     private boolean useMockData;
     private final Map<String, User> mockUsers = new HashMap<>();
-//    private final FirebaseDatabase firebaseDatabase;
     private final Map<String, User> accounts = new HashMap<>();
     private String currentUsername = null;
+    private FirebaseDatabase database;
 
     public FirebaseUserDataAccessObject() {
         System.out.println("DEBUG: FirebaseUserDataAccessObject constructor called");
@@ -44,6 +44,7 @@ public class FirebaseUserDataAccessObject implements
             this.usersRef = FirebaseConfig.getDatabase().getReference("users");
             this.useMockData = false;
             System.out.println("DEBUG: ✅ Using Firebase for user authentication");
+            this.database = FirebaseConfig.getDatabase();
         } catch (Exception e) {
             System.err.println("DEBUG: ❌ Firebase not available for users, using mock data: " + e.getMessage());
             this.usersRef = null;
@@ -63,16 +64,16 @@ public class FirebaseUserDataAccessObject implements
         System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.existsByName() called ===");
         System.out.println("DEBUG: Checking if user exists: '" + identifier + "'");
         System.out.println("DEBUG: Using mock data: " + useMockData);
-        
+
         if (useMockData) {
             // Mock data for testing
             boolean exists = mockUsers.containsKey(identifier);
             System.out.println("DEBUG: Mock user exists: " + exists);
             return exists;
         }
-        
+
         CompletableFuture<Boolean> future = new CompletableFuture<>();
-        
+
         usersRef.child(identifier).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -80,14 +81,14 @@ public class FirebaseUserDataAccessObject implements
                 System.out.println("DEBUG: Firebase user exists: " + exists);
                 future.complete(exists);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 System.out.println("DEBUG: Firebase error checking user existence: " + databaseError.getMessage());
                 future.completeExceptionally(new RuntimeException("Failed to check user existence: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             // Add timeout to prevent blocking indefinitely
             return future.get(5, TimeUnit.SECONDS);
@@ -96,19 +97,19 @@ public class FirebaseUserDataAccessObject implements
             return false;
         }
     }
-    
+
     @Override
     public void save(User user) {
         System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.save() called ===");
         System.out.println("DEBUG: Saving user: '" + user.getName() + "'");
         System.out.println("DEBUG: Using mock data: " + useMockData);
-        
+
         if (useMockData) {
             mockUsers.put(user.getName(), user);
             System.out.println("DEBUG: Mock user saved: " + user.getName());
             return;
         }
-        
+
         usersRef.child(user.getName()).setValue(user, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -120,21 +121,21 @@ public class FirebaseUserDataAccessObject implements
             }
         });
     }
-    
+
     @Override
     public User get(String username) {
         System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.get() called ===");
         System.out.println("DEBUG: Getting user: '" + username + "'");
         System.out.println("DEBUG: Using mock data: " + useMockData);
-        
+
         if (useMockData) {
             User user = mockUsers.get(username);
             System.out.println("DEBUG: Mock user retrieved: " + (user != null ? user.getName() : "null"));
             return user;
         }
-        
+
         CompletableFuture<User> future = new CompletableFuture<>();
-        
+
         usersRef.child(username).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -142,14 +143,14 @@ public class FirebaseUserDataAccessObject implements
                 System.out.println("DEBUG: Firebase user retrieved: " + (user != null ? user.getName() : "null"));
                 future.complete(user);
             }
-            
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 System.out.println("DEBUG: Firebase error getting user: " + databaseError.getMessage());
                 future.completeExceptionally(new RuntimeException("Failed to get user: " + databaseError.getMessage()));
             }
         });
-        
+
         try {
             // Add timeout to prevent blocking indefinitely
             return future.get(5, TimeUnit.SECONDS);
@@ -158,7 +159,7 @@ public class FirebaseUserDataAccessObject implements
             return null;
         }
     }
-    
+
     @Override
     public String getCurrentUsername() {
         System.out.println("DEBUG: getCurrentUsername() called - returning: " + currentUsername);
@@ -166,27 +167,27 @@ public class FirebaseUserDataAccessObject implements
         // In a production app, you might use Firebase Auth or session management
         return currentUsername;
     }
-    
+
     @Override
     public void setCurrentUsername(String username) {
         System.out.println("DEBUG: setCurrentUsername() called with: '" + username + "'");
         this.currentUsername = username;
     }
-    
+
 //    private String currentUsername = null;
-    
+
     @Override
     public void changePassword(User user) {
         System.out.println("\n=== DEBUG: FirebaseUserDataAccessObject.changePassword() called ===");
         System.out.println("DEBUG: Changing password for user: '" + user.getName() + "'");
         System.out.println("DEBUG: Using mock data: " + useMockData);
-        
+
         if (useMockData) {
             mockUsers.put(user.getName(), user);
             System.out.println("DEBUG: Mock password changed for user: " + user.getName());
             return;
         }
-        
+
         // Update the user's password in Firebase
         usersRef.child(user.getName()).setValue(user, new DatabaseReference.CompletionListener() {
             @Override
@@ -265,27 +266,72 @@ public class FirebaseUserDataAccessObject implements
             return false;
         }
     }
+    public List<String> getAllUsers() {
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
 
-//    public void deleteUser(String username) {
-//        DatabaseReference userRef = database.getReference("users").child(username);
-//        try {
-//            userRef.removeValueAsync().get(5, TimeUnit.SECONDS);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to delete user: " + e.getMessage());
-//        }
-//    }
-//
-//    public List<String> getAllUsers() {
-//        List<String> users = new ArrayList<>();
-//        DatabaseReference usersRef = database.getReference("users");
-//        try {
-//            DataSnapshot snapshot = usersRef.get().get(5, TimeUnit.SECONDS);
-//            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-//                users.add(userSnapshot.getKey());
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to get users: " + e.getMessage());
-//        }
-//        return users;
-//    }
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> users = new ArrayList<>();
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String username = userSnapshot.child("username").getValue(String.class);
+                    if (username != null) {
+                        users.add(username);
+                    }
+                }
+                future.complete(users);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Failed to load users: " + error.getMessage()));
+            }
+        });
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching users: " + e.getMessage());
+        }
+    }
+
+    public void deleteUser(String username) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        // First find the user by username
+        usersRef.orderByChild("username").equalTo(username)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()) {
+                            future.completeExceptionally(new RuntimeException("User not found"));
+                            return;
+                        }
+
+                        // There should be only one user with this username
+                        DataSnapshot userSnapshot = dataSnapshot.getChildren().iterator().next();
+
+                        // Delete the user
+                        userSnapshot.getRef().removeValue((error, ref) -> {
+                            if (error != null) {
+                                future.completeExceptionally(new RuntimeException("Failed to delete user: " + error.getMessage()));
+                            } else {
+                                future.complete(null);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        future.completeExceptionally(new RuntimeException("Operation cancelled: " + error.getMessage()));
+                    }
+                });
+
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting user: " + e.getMessage());
+        }
+    }
+
 }

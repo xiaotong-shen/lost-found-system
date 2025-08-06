@@ -19,6 +19,7 @@ public class Main {
                     .addAdminView()
                     .addAccountView()
                     .addDMsView()
+                    .addDeleteUserView()
                     .addSignupUseCase()
                     .addLoginUseCase()
                     .addChangePasswordUseCase()
@@ -27,7 +28,8 @@ public class Main {
                     .addDashboardUseCase()
                     .addAdminUseCase()
                     .addChangeUsernameUseCase()
-                    .addDeletePostUseCase();
+                    .addDeletePostUseCase()
+                    .addDeleteUserUseCase();
 
             JFrame application = builder.build();
             
