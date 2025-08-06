@@ -230,8 +230,10 @@ public class AppBuilder {
 
     public AppBuilder addDeleteUserView() {
         deleteUserViewModel = new DeleteUserViewModel();
+        DeleteUserInputBoundary deleteUserUseCaseInteractor = new DeleteUserInteractor(userDataAccessObject, new DeleteUserPresenter(deleteUserViewModel));
+        DeleteUserController deleteUserController = new DeleteUserController(deleteUserUseCaseInteractor);
         // Initially create view with null controller
-        deleteUserView = new DeleteUserView(deleteUserViewModel, null, viewManagerModel);
+        deleteUserView = new DeleteUserView(deleteUserViewModel, deleteUserController, viewManagerModel);
         cardPanel.add(deleteUserView, deleteUserView.getViewName());
         return this;
     }
@@ -368,7 +370,7 @@ public class AppBuilder {
                 new AdminInteractor(deletePostDataAccessObject, deletePostOutputBoundary);
         final AdminController deletePostController =
                 new AdminController(deletePostInteractor,viewManagerModel);
-        
+
         // Add the controller to admin view
         adminView.setAdminController(deletePostController);
         return this;
@@ -379,17 +381,17 @@ public class AppBuilder {
         FirebaseUserDataAccessObject userDataAccessObject = new FirebaseUserDataAccessObject();
         DeleteUserOutputBoundary deleteUserPresenter = new DeleteUserPresenter(deleteUserViewModel);
         deleteUserUseCaseInteractor = new DeleteUserInteractor(userDataAccessObject, deleteUserPresenter);
-        
+
         // Create controller with the interactor and set it to the view
         deleteUserController = new DeleteUserController(deleteUserUseCaseInteractor);
-        
+
         // This line is crucial - it connects the controller to the view
         deleteUserView.setDeleteUserController(deleteUserController);
-        
+
         // Add debug logging
-        System.out.println("DEBUG: DeleteUserUseCase initialized - Controller: " + (deleteUserController != null) + 
+        System.out.println("DEBUG: DeleteUserUseCase initialized - Controller: " + (deleteUserController != null) +
                          ", Interactor: " + (deleteUserUseCaseInteractor != null));
-        
+
         return this;
     }
 

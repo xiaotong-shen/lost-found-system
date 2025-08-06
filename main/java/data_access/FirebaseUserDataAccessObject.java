@@ -34,8 +34,6 @@ public class FirebaseUserDataAccessObject implements
     private final Map<String, User> mockUsers = new HashMap<>();
     private final Map<String, User> accounts = new HashMap<>();
     private String currentUsername = null;
-    private FirebaseDatabase database;
-
     public FirebaseUserDataAccessObject() {
         System.out.println("DEBUG: FirebaseUserDataAccessObject constructor called");
         // Try to initialize Firebase
@@ -44,7 +42,7 @@ public class FirebaseUserDataAccessObject implements
             this.usersRef = FirebaseConfig.getDatabase().getReference("users");
             this.useMockData = false;
             System.out.println("DEBUG: ✅ Using Firebase for user authentication");
-            this.database = FirebaseConfig.getDatabase();
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
         } catch (Exception e) {
             System.err.println("DEBUG: ❌ Firebase not available for users, using mock data: " + e.getMessage());
             this.usersRef = null;
@@ -266,15 +264,22 @@ public class FirebaseUserDataAccessObject implements
             return false;
         }
     }
+    
     public List<String> getAllUsers() {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
+        System.out.println("DEBUG: Starting to fetch users from Firebase");
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<String> users = new ArrayList<>();
+                System.out.println("DEBUG: Firebase snapshot exists: " + dataSnapshot.exists());
+                System.out.println("DEBUG: Firebase snapshot children count: " + dataSnapshot.getChildrenCount());
+
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    String username = userSnapshot.child("username").getValue(String.class);
+                    String username = userSnapshot.child("name").getValue(String.class);
+                    System.out.println("DEBUG: Processing user node: " + userSnapshot.getKey() +
+                            ", username field: " + username);
                     if (username != null) {
                         users.add(username);
                     }
@@ -284,54 +289,63 @@ public class FirebaseUserDataAccessObject implements
 
             @Override
             public void onCancelled(DatabaseError error) {
+                System.err.println("DEBUG: Firebase error: " + error.getMessage());
                 future.completeExceptionally(new RuntimeException("Failed to load users: " + error.getMessage()));
             }
         });
 
         try {
-            return future.get(5, TimeUnit.SECONDS);
+            List<String> result = future.get(5, TimeUnit.SECONDS);
+            System.out.println("DEBUG: Successfully retrieved users from Firebase: " + result);
+            return result;
         } catch (Exception e) {
+            System.err.println("DEBUG: Error fetching users: " + e.getMessage());
             throw new RuntimeException("Error fetching users: " + e.getMessage());
         }
     }
 
+
     public void deleteUser(String username) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        // First find the user by username
-        usersRef.orderByChild("username").equalTo(username)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (!dataSnapshot.exists()) {
-                            future.completeExceptionally(new RuntimeException("User not found"));
-                            return;
-                        }
+        System.out.println("DEBUG: Attempting to delete user: " + username);
 
-                        // There should be only one user with this username
-                        DataSnapshot userSnapshot = dataSnapshot.getChildren().iterator().next();
+        // Direct reference to the user node using the username as the key
+        DatabaseReference userRef = usersRef.child(username);
 
-                        // Delete the user
-                        userSnapshot.getRef().removeValue((error, ref) -> {
-                            if (error != null) {
-                                future.completeExceptionally(new RuntimeException("Failed to delete user: " + error.getMessage()));
-                            } else {
-                                future.complete(null);
-                            }
-                        });
-                    }
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    System.out.println("DEBUG: User node not found for: " + username);
+                    future.completeExceptionally(new RuntimeException("User not found"));
+                    return;
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        future.completeExceptionally(new RuntimeException("Operation cancelled: " + error.getMessage()));
+                // Delete the user node
+                userRef.removeValue((error, ref) -> {
+                    if (error != null) {
+                        System.err.println("DEBUG: Error deleting user: " + error.getMessage());
+                        future.completeExceptionally(new RuntimeException("Failed to delete user: " + error.getMessage()));
+                    } else {
+                        System.out.println("DEBUG: Successfully deleted user: " + username);
+                        future.complete(null);
                     }
                 });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("DEBUG: Delete operation cancelled: " + error.getMessage());
+                future.completeExceptionally(new RuntimeException("Operation cancelled: " + error.getMessage()));
+            }
+        });
 
         try {
             future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
+            System.err.println("DEBUG: Exception while deleting user: " + e.getMessage());
             throw new RuntimeException("Error deleting user: " + e.getMessage());
         }
     }
-
 }
