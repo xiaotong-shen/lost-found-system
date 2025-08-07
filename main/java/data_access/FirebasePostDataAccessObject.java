@@ -277,8 +277,6 @@ public class FirebasePostDataAccessObject implements
     public List<Post> fuzzySearch(String query) {
         throw new UnsupportedOperationException("Fuzzy search is not supported in FirebasePostDataAccessObject.");
     }
-}
-
 
     // Fetch comments for a post from Firebase
     public List<Comment> getCommentsForPost(int postId) {
