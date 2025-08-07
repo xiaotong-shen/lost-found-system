@@ -11,31 +11,26 @@ public class SearchInputData {
     private final String location;
     private final List<String> tags;
     private final Boolean isLost;
+    private final boolean isFuzzy;
 
-    public SearchInputData(String query) {
-        System.out.println("DEBUG: SearchInputData(String query) constructor called with: '" + query + "'");
+    // Constructor for basic search (query only)
+    public SearchInputData(String query, boolean isFuzzy) {
         this.query = query;
         this.title = null;
         this.location = null;
         this.tags = null;
         this.isLost = null;
+        this.isFuzzy = isFuzzy;
     }
 
+    // Constructor for advanced search with multiple fields
     public SearchInputData(String title, String location, List<String> tags, Boolean isLost) {
-        System.out.println("DEBUG: SearchInputData(String title, String location, List<String> tags, Boolean isLost) constructor called");
-        System.out.println("DEBUG:   - Title: '" + title + "'");
-        System.out.println("DEBUG:   - Location: '" + location + "'");
-        System.out.println("DEBUG:   - Tags: " + tags);
-        System.out.println("DEBUG:   - IsLost: " + isLost);
-        
-        // Handle null values gracefully
         this.query = null;
-        this.title = title != null ? title : "";
-        this.location = location != null ? location : "";
-        this.tags = tags; // Keep as null if null, this is valid
-        this.isLost = isLost; // Keep as null if null, this is valid
-        
-        System.out.println("DEBUG: SearchInputData created successfully");
+        this.title = title;
+        this.location = location;
+        this.tags = tags;
+        this.isLost = isLost;
+        this.isFuzzy = false; // default to false in advanced search
     }
 
     // Getters
@@ -44,4 +39,5 @@ public class SearchInputData {
     public String getLocation() { return location; }
     public List<String> getTags() { return tags; }
     public Boolean getIsLost() { return isLost; }
-} 
+    public boolean isFuzzy() { return isFuzzy; }
+}

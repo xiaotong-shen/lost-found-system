@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cee90c25-e7e9-472e-92f4-eb352449f6c4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/main/java/data_access/SearchDataAccessMemory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/search/util/FuzzyMatchHelper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/search/util/FuzzyMatcher.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/search/util/SynonymExpander.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/change_password/ChangePasswordInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/change_username/ChangeUsernameInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/dashboard/DashboardInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/login/LoginInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/logout/LogoutInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/search/SearchInteractorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/java/app/use_case/signup/SignupInteractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CSC207-Miao-Miao.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/homework-5.iml" beforeDir="false" afterPath="$PROJECT_DIR$/homework-5.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/data_access/APIPostDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/data_access/APIPostDataAccessObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/data_access/FirebasePostDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/data_access/FirebasePostDataAccessObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/interface_adapter/search/SearchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/interface_adapter/search/SearchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/use_case/search/SearchInputData.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/use_case/search/SearchInputData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/use_case/search/SearchUserDataAccessInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/use_case/search/SearchUserDataAccessInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/view/SearchView.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/view/SearchView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/app/AppBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/app/AppBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/app/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/app/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/APIPostDataAccessObject.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/APIPostDataAccessObject.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebasePostDataAccessObject.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject$4.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/FirebaseUserDataAccessObject.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/data_access/InMemoryUserDataAccessObject.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/data_access/InMemoryUserDataAccessObject.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/interface_adapter/search/SearchController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/interface_adapter/search/SearchController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/use_case/search/SearchInputData.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/use_case/search/SearchInputData.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/use_case/search/SearchUserDataAccessInterface.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/use_case/search/SearchUserDataAccessInterface.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/view/LoggedInView.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/view/LoggedInView.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/view/LoginView.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/view/LoginView.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/view/SearchView$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/view/SearchView$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/view/SearchView.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/view/SearchView.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Scarlett-Z-Best"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Ethan-Hapurne/CSC207-Miao-Miao",
+    "accountId": "00777ed4-e665-42cd-b94d-7ef97d764813"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="30QzN4olb8YPK9MwOpebEKQ2t67" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.ChangePasswordInteractorTest.executor": "Run",
+    "JUnit.ChangeUsernameInteractorTest.executor": "Run",
+    "JUnit.DashboardInteractorTest.executor": "Run",
+    "JUnit.LoginInteractorTest.executor": "Run",
+    "JUnit.LogoutInteractorTest.executor": "Run",
+    "JUnit.SearchInteractorTest.executor": "Run",
+    "JUnit.SignupInteractorTest.executor": "Run",
+    "Maven.homework-5 [clean].executor": "Run",
+    "Maven.homework-5 [compile].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "add-fuzzy-search"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="CSC207-Miao-Miao" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cee90c25-e7e9-472e-92f4-eb352449f6c4" name="Changes" comment="" />
+      <created>1753574543181</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753574543181</updated>
+    </task>
+    <servers />
+  </component>
+</project>

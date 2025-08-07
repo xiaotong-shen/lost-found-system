@@ -19,7 +19,7 @@ public class FirebaseConfig {
     private static FirebaseDatabase database;
     private static boolean initialized = false;
     private static Firestore firestore;
-    
+
     public static void initializeFirebase() {
         if (initialized) {
             return; // Already initialized
@@ -46,21 +46,21 @@ public class FirebaseConfig {
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .setDatabaseUrl(databaseUrl)
                         .build();
-                
+
                 // Only initialize if not already initialized
                 if (FirebaseApp.getApps().isEmpty()) {
                     FirebaseApp.initializeApp(options);
                 }
-                
+
                 database = FirebaseDatabase.getInstance();
                 initialized = true;
-                
+
                 // Firestore initialization
                 firestore = FirestoreOptions.getDefaultInstance().toBuilder()
                         .setProjectId(projectId)
                         .build()
                         .getService();
-                
+
                 System.out.println("Firebase initialized successfully for project: " + projectId);
             }
         } catch (IOException e) {
@@ -92,7 +92,7 @@ public class FirebaseConfig {
         }
         return firestore;
     }
-    
+
     /**
      * Shutdown Firebase connections properly.
      */
@@ -115,4 +115,4 @@ public class FirebaseConfig {
         }
         initialized = false;
     }
-} 
+}

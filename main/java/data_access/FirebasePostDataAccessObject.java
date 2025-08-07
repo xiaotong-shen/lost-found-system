@@ -36,7 +36,7 @@ public class FirebasePostDataAccessObject implements
         this.dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         this.database = FirebaseConfig.getDatabase();
     }
-
+    
     @Override
     public List<Post> getAllPosts() {
         System.out.println("\n=== DEBUG: getAllPosts() called ===");
@@ -61,13 +61,14 @@ public class FirebasePostDataAccessObject implements
                 System.out.println("DEBUG: Retrieved " + postCount + " posts from Firebase");
                 future.complete(posts);
             }
-
+            
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 System.out.println("DEBUG: Firebase onCancelled called with error: " + databaseError.getMessage());
                 future.completeExceptionally(new RuntimeException("Failed to load posts: " + databaseError.getMessage()));
             }
         });
+        
         try {
             System.out.println("DEBUG: Waiting for Firebase response (timeout: 5 seconds)...");
             List<Post> result = future.get(5, TimeUnit.SECONDS);
@@ -96,39 +97,41 @@ public class FirebasePostDataAccessObject implements
             return new ArrayList<>();
         }
     }
-
+    
     @Override
     public List<Post> searchPosts(String query) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
         String lowerQuery = query.toLowerCase();
-
+        
         for (Post post : allPosts) {
             // Search only in title and content (description) for now — tag search will be added later
             if (post.getTitle().toLowerCase().contains(lowerQuery) ||
-                    post.getDescription().toLowerCase().contains(lowerQuery)) {
+                post.getDescription().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
             }
         }
-
+        
         return matchingPosts;
     }
-
+    
     @Override
     public Post getPostById(int postID) {
         CompletableFuture<Post> future = new CompletableFuture<>();
+        
         postsRef.child(String.valueOf(postID)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Post post = dataSnapshot.getValue(Post.class);
                 future.complete(post);
             }
-
+            
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
             }
         });
+        
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -136,10 +139,11 @@ public class FirebasePostDataAccessObject implements
             return null;
         }
     }
-
+    
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
         String postId = postsRef.push().getKey();
+        
         Post newPost = new Post(
                 postId.hashCode(),
                 title,
@@ -148,10 +152,10 @@ public class FirebasePostDataAccessObject implements
                 LocalDateTime.now(),
                 author,
                 location,
-                null, // image URL
+                null,
                 isLost,
-                0, // likes
-                new HashMap<>() // reactions
+                0,
+                new HashMap<>()
         );
         postsRef.child(postId).setValue(newPost, new DatabaseReference.CompletionListener() {
             @Override
@@ -165,7 +169,7 @@ public class FirebasePostDataAccessObject implements
         });
         return newPost;
     }
-
+    
     @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         System.out.println("\n=== DEBUG: searchPostsByCriteria() called ===");
@@ -182,9 +186,9 @@ public class FirebasePostDataAccessObject implements
         List<Post> matchingPosts = new ArrayList<>();
 
         boolean allBlank = (title == null || title.isEmpty()) &&
-                (location == null || location.isEmpty()) &&
-                (tags == null || tags.isEmpty()) &&
-                (isLost == null);
+                           (location == null || location.isEmpty()) &&
+                           (tags == null || tags.isEmpty()) &&
+                           (isLost == null);
 
         System.out.println("DEBUG: All criteria blank? " + allBlank);
 
@@ -268,6 +272,13 @@ public class FirebasePostDataAccessObject implements
         System.out.println("DEBUG: Returning " + matchingPosts.size() + " posts");
         return matchingPosts;
     }
+
+    @Override
+    public List<Post> fuzzySearch(String query) {
+        throw new UnsupportedOperationException("Fuzzy search is not supported in FirebasePostDataAccessObject.");
+    }
+}
+
 
     // Fetch comments for a post from Firebase
     public List<Comment> getCommentsForPost(int postId) {
@@ -486,20 +497,20 @@ public class FirebasePostDataAccessObject implements
     public void deletePost(String postId) {
         System.out.println("\n=== Firebase Delete Operation ===");
         System.out.println("FirebaseDAO: Starting delete operation for post ID: " + postId);
-        
+
         DatabaseReference postsRef = database.getReference("posts");
         CountDownLatch deleteLatch = new CountDownLatch(1);
 
         try {
             System.out.println("FirebaseDAO: Converting post ID to integer: " + postId);
             int intPostId = Integer.parseInt(postId);
-            
+
             System.out.println("FirebaseDAO: Querying for post with ID: " + intPostId);
             postsRef.orderByChild("postID").equalTo(intPostId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        System.out.println("FirebaseDAO: Query returned " + 
+                        System.out.println("FirebaseDAO: Query returned " +
                                          dataSnapshot.getChildrenCount() + " matches");
 
                         if (!dataSnapshot.exists()) {
@@ -514,7 +525,7 @@ public class FirebasePostDataAccessObject implements
 
                             postsRef.child(firebaseKey).removeValue((error, ref) -> {
                                 if (error != null) {
-                                    System.err.println("FirebaseDAO: Error deleting post: " + 
+                                    System.err.println("FirebaseDAO: Error deleting post: " +
                                                      error.getMessage());
                                 } else {
                                     System.out.println("FirebaseDAO: Post successfully deleted");
@@ -523,14 +534,14 @@ public class FirebasePostDataAccessObject implements
                             });
                             return;
                         }
-                        
+
                         System.out.println("FirebaseDAO: No posts to delete");
                         deleteLatch.countDown();
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("FirebaseDAO: Delete operation cancelled: " + 
+                        System.err.println("FirebaseDAO: Delete operation cancelled: " +
                                          databaseError.getMessage());
                         System.err.println("FirebaseDAO: Error Code: " + databaseError.getCode());
                         System.err.println("FirebaseDAO: Error Details: " + databaseError.getDetails());
@@ -541,7 +552,7 @@ public class FirebasePostDataAccessObject implements
         System.out.println("FirebaseDAO: Waiting for delete operation to complete...");
         boolean completed = deleteLatch.await(5, TimeUnit.SECONDS);
         System.out.println("FirebaseDAO: Operation completed: " + completed);
-        
+
         if (!completed) {
             System.err.println("FirebaseDAO: Delete operation timed out");
             throw new RuntimeException("Delete operation timed out");

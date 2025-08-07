@@ -66,14 +66,9 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         String lowerQuery = query.toLowerCase();
         
         for (Post post : allPosts) {
-            // Search in title
-            if (post.getTitle().toLowerCase().contains(lowerQuery)) {
-                matchingPosts.add(post);
-                continue;
-            }
-            
-            // Search in description
-            if (post.getDescription().toLowerCase().contains(lowerQuery)) {
+            if (post.getTitle().toLowerCase().contains(lowerQuery) ||
+                    post.getDescription().toLowerCase().contains(lowerQuery) ||
+                    post.getLocation().toLowerCase().contains(lowerQuery)) {
                 matchingPosts.add(post);
                 continue;
             }
@@ -85,24 +80,12 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
                     break;
                 }
             }
-            
-            // Search in location
-            if (post.getLocation().toLowerCase().contains(lowerQuery)) {
-                matchingPosts.add(post);
-            }
         }
         
         return matchingPosts;
     }
 
-    /**
-     * Searches posts by specific criteria.
-     * @param title title to search for
-     * @param location location to search for
-     * @param tags tags to search for
-     * @param isLost whether to search for lost or found items
-     * @return List of matching posts
-     */
+    @Override
     public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
         List<Post> allPosts = getAllPosts();
         List<Post> matchingPosts = new ArrayList<>();
@@ -152,10 +135,11 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         return matchingPosts;
     }
 
-    /**
-     * Parses JSON response from API into Post objects.
-     * Since we're using a mock API, we'll create realistic lost/found data.
-     */
+    @Override
+    public List<Post> fuzzySearch(String query) {
+        throw new UnsupportedOperationException("Fuzzy search not supported in APIPostDataAccessObject");
+    }
+
     private List<Post> parsePostsFromJSON(String jsonResponse) throws JSONException {
         List<Post> posts = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(jsonResponse);
@@ -187,88 +171,42 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
             
             // Create reactions (mock data)
             Map<Integer, String> reactions = new HashMap<>();
-            if (postId % 3 == 0) {
-                reactions.put(1, "like");
-            }
-            if (postId % 5 == 0) {
-                reactions.put(2, "helpful");
-            }
-            
-            Post post = new Post(postId, 
-                               "Lost: " + itemType + " in " + location, 
-                               description, 
-                               tags, 
-                               timestamp, 
-                               author, 
-                               location, 
-                               null, // no image URL for now
-                               isLost, 
-                               reactions.size(), 
-                               reactions);
-            
+            if (postId % 3 == 0) reactions.put(1, "like");
+            if (postId % 5 == 0) reactions.put(2, "helpful");
+
+            Post post = new Post(postId,
+                    "Lost: " + itemType + " in " + location,
+                    description,
+                    tags,
+                    timestamp,
+                    author,
+                    location,
+                    null,
+                    isLost,
+                    reactions.size(),
+                    reactions);
+
             posts.add(post);
         }
         
         return posts;
     }
 
-
-    /**
-     * Fetches all posts from the API.
-     * @return List of posts
-     */
-    private List<Post> fetchAllPostsFromAPI() {
-        try {
-            Request request = new Request.Builder()
-                    .url(BASE_URL + POSTS_ENDPOINT)
-                    .addHeader("Content-Type", CONTENT_TYPE_JSON)
-                    .build();
-
-            Response response = client.newCall(request).execute();
-            String responseBody = response.body().string();
-            
-            return parsePostsFromJSON(responseBody);
-        } catch (IOException | JSONException e) {
-            System.err.println("Error fetching posts from API: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
     @Override
     public Post getPostById(int postID) {
         List<Post> allPosts = getAllPosts();
         for (Post post : allPosts) {
-            if (post.getPostID() == postID) {
-                return post;
-            }
+            if (post.getPostID() == postID) return post;
         }
         return null;
     }
 
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
-        // In a real implementation, this would make an API call to create a post
-        // For now, we'll create a mock post
-        List<Post> allPosts = getAllPosts();
-        int newPostID = allPosts.size() + 1;
-        
-        Post newPost = new Post(
-            newPostID,
-            title,
-            content,
-            tags != null ? tags : new ArrayList<>(),
-            java.time.LocalDateTime.now(),
-            author,
-            location,
-            null, // no image URL for now
-            isLost,
-            0, // no likes initially
-            new HashMap<>() // no reactions initially
-        );
-        
-        return newPost;
+        int newPostID = getAllPosts().size() + 1;
+        return new Post(newPostID, title, content, tags, LocalDateTime.now(), author, location, null, isLost, 0, new HashMap<>());
     }
-    
+
     @Override
     public boolean updatePost(Post post) {
         // In a real implementation, this would make an API call to update a post
@@ -277,4 +215,4 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         return true;
     }
 
-} 
+}
