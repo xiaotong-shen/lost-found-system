@@ -542,10 +542,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setOpaque(false);
 
-        // SESSION CHANGE: Author label now shows 'By username'
-        JLabel authorLabel = new JLabel("By " + post.getAuthor());
-        authorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        authorLabel.setForeground(Color.BLACK);
+        // Author label with enhanced styling
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 " + authorText);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        authorLabel.setForeground(new Color(0, 123, 255)); // Blue color for prominence
         
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
         typeLabel.setForeground(post.isLost() ? new Color(220, 53, 69) : new Color(40, 167, 69));
@@ -639,10 +640,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(Box.createVerticalStrut(12));
 
         // Author
-        JLabel authorLabel = new JLabel("Author: " + post.getAuthor());
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        authorLabel.setFont(detailFont);
-        authorLabel.setForeground(Color.BLACK);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        authorLabel.setForeground(new Color(0, 123, 255));
         detailsPanel.add(authorLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
@@ -906,9 +908,15 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         topRow.add(titleLabel, BorderLayout.WEST);
         topRow.add(typeLabel, BorderLayout.EAST);
 
-        // Bottom row: timestamp and likes
+        // Bottom row: author, timestamp and likes
         JPanel bottomRow = new JPanel(new BorderLayout());
         bottomRow.setOpaque(false);
+        
+        // Author info
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 " + authorText);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        authorLabel.setForeground(new Color(0, 123, 255));
         
         JLabel timestampLabel = new JLabel("Posted: " + formatTimestamp(post.getTimestamp()));
         timestampLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -918,7 +926,14 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         likesLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         likesLabel.setForeground(Color.BLACK);
 
-        bottomRow.add(timestampLabel, BorderLayout.WEST);
+        // Create a left panel with author and timestamp
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        leftPanel.setOpaque(false);
+        leftPanel.add(authorLabel);
+        leftPanel.add(Box.createHorizontalStrut(15));
+        leftPanel.add(timestampLabel);
+
+        bottomRow.add(leftPanel, BorderLayout.WEST);
         bottomRow.add(likesLabel, BorderLayout.EAST);
 
         panel.add(topRow, BorderLayout.NORTH);
@@ -998,10 +1013,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(Box.createVerticalStrut(12));
 
         // Author
-        JLabel authorLabel = new JLabel("Author: " + post.getAuthor());
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        authorLabel.setFont(detailFont);
-        authorLabel.setForeground(Color.BLACK);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        authorLabel.setForeground(new Color(0, 123, 255));
         detailsPanel.add(authorLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
