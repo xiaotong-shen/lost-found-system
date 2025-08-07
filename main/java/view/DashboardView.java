@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Collections;
+
 
 /**
  * The View for the Dashboard (Piazza-like platform).
@@ -478,7 +480,19 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         postsPanel.removeAll();
 
         if (posts != null && !posts.isEmpty()) {
-            for (Post post : posts) {
+            // Sort posts by timestamp in descending order (most recent first)
+            List<Post> sortedPosts = new ArrayList<>(posts);
+            sortedPosts.sort((p1, p2) -> {
+                try {
+                    LocalDateTime dt1 = LocalDateTime.parse(p1.getTimestamp());
+                    LocalDateTime dt2 = LocalDateTime.parse(p2.getTimestamp());
+                    return dt2.compareTo(dt1); // Reverse order (most recent first)
+                } catch (Exception e) {
+                    return 0; // Keep original order if timestamps can't be parsed
+                }
+            });
+            
+            for (Post post : sortedPosts) {
                 postsPanel.add(createPostListItem(post));
                 postsPanel.add(Box.createVerticalStrut(8));
             }
@@ -870,6 +884,17 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             noPostsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             myPostsPanel.add(noPostsLabel);
         } else {
+            // Sort my posts by timestamp in descending order (most recent first)
+            myPosts.sort((p1, p2) -> {
+                try {
+                    LocalDateTime dt1 = LocalDateTime.parse(p1.getTimestamp());
+                    LocalDateTime dt2 = LocalDateTime.parse(p2.getTimestamp());
+                    return dt2.compareTo(dt1); // Reverse order (most recent first)
+                } catch (Exception e) {
+                    return 0; // Keep original order if timestamps can't be parsed
+                }
+            });
+            
             for (Post post : myPosts) {
                 JPanel postItem = createMyPostListItem(post);
                 myPostsPanel.add(postItem);
