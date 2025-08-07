@@ -50,6 +50,18 @@ public class DashboardInteractor implements DashboardInputBoundary {
                     }
                     break;
 
+                case "advanced_search":
+                    // Perform advanced search with specific criteria
+                    List<Post> advancedSearchResults = dashboardDataAccessObject.searchPostsByCriteria(
+                        dashboardInputData.getPostTitle(),     // title
+                        dashboardInputData.getPostLocation(),  // location
+                        dashboardInputData.getPostTags(),      // tags
+                        dashboardInputData.isLost() ? Boolean.TRUE : null  // isLost
+                    );
+                    DashboardOutputData advancedOutputData = new DashboardOutputData(advancedSearchResults);
+                    dashboardOutputBoundary.prepareSuccessView(advancedOutputData);
+                    break;
+
                 case "add_post":
                     if (dashboardInputData.getPostTitle() != null && !dashboardInputData.getPostTitle().trim().isEmpty() &&
                         dashboardInputData.getPostContent() != null && !dashboardInputData.getPostContent().trim().isEmpty()) {

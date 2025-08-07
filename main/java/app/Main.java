@@ -15,6 +15,7 @@ public class Main {
                     .addLoggedInView()
                     .addAdminLoggedInView()
                     .addSearchView()
+                    .addAdvancedSearchView()
                     .addDashboardView()
                     .addAdminView()
                     .addAccountView()

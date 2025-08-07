@@ -28,6 +28,16 @@ public interface DashboardUserDataAccessInterface {
     List<Post> fuzzySearch(String query);
 
     /**
+     * Searches posts by specific criteria.
+     * @param title title to search for (can be null/empty)
+     * @param location location to search for (can be null/empty)
+     * @param tags tags to search for (can be null/empty)
+     * @param isLost filter by lost (true), found (false), or all (null)
+     * @return List of matching posts
+     */
+    List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost);
+
+    /**
      * Gets a specific post by ID.
      * @param postID the ID of the post
      * @return the post, or null if not found

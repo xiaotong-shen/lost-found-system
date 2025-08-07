@@ -60,6 +60,20 @@ public class DashboardInputData {
         this.postId = 0;
     }
 
+    public DashboardInputData(String action, String title, String location, List<String> tags, Boolean isLost) {
+        this.action = action;
+        this.searchQuery = null;
+        this.isFuzzySearch = false;
+        this.postTitle = title;
+        this.postContent = null;
+        this.postTags = tags;
+        this.postLocation = location;
+        this.isLost = isLost != null ? isLost : false;
+        this.author = null;
+        this.post = null;
+        this.postId = 0;
+    }
+
     public DashboardInputData(String action, String postTitle, String postContent, 
                             List<String> postTags, String postLocation, boolean isLost) {
         this.action = action;

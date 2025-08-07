@@ -125,6 +125,7 @@ public class AppBuilder {
     private LoginView loginView;
     private SearchView searchView;
     private SearchViewModel searchViewModel;
+    private AdvancedSearchView advancedSearchView;
     private DashboardView dashboardView;
     private DashboardViewModel dashboardViewModel;
     private AccountView accountView;
@@ -201,6 +202,19 @@ public class AppBuilder {
         searchViewModel = new SearchViewModel();
         searchView = new SearchView(searchViewModel);
         cardPanel.add(searchView, searchView.getViewName());
+        return this;
+    }
+
+    /**
+     * Adds the Advanced Search View to the application.
+     * @return this builder
+     */
+    public AppBuilder addAdvancedSearchView() {
+        if (searchViewModel == null) {
+            searchViewModel = new SearchViewModel();
+        }
+        advancedSearchView = new AdvancedSearchView(searchViewModel);
+        cardPanel.add(advancedSearchView, advancedSearchView.getViewName());
         return this;
     }
 
@@ -335,6 +349,11 @@ public class AppBuilder {
         final SearchInputBoundary searchInteractor = new SearchInteractor(postDataAccessObject, searchOutputBoundary);
         final SearchController searchController = new SearchController(searchInteractor, viewManagerModel);
         searchView.setSearchController(searchController);
+        
+        // Also set the controller for AdvancedSearchView if it exists
+        if (advancedSearchView != null) {
+            advancedSearchView.setSearchController(searchController);
+        }
         return this;
     }
 

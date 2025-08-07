@@ -282,6 +282,63 @@ public class FirebasePostDataAccessObject implements
         return use_case.search.util.FuzzyMatchHelper.fuzzyMatchPosts(allPosts, query);
     }
 
+    @Override
+    public List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
+        // Get all posts from Firebase first
+        List<Post> allPosts = getAllPosts();
+        List<Post> matchingPosts = new ArrayList<>();
+        
+        for (Post post : allPosts) {
+            boolean matches = true;
+            
+            // Check title criteria
+            if (title != null && !title.trim().isEmpty()) {
+                if (post.getTitle() == null || !post.getTitle().toLowerCase().contains(title.toLowerCase().trim())) {
+                    matches = false;
+                }
+            }
+            
+            // Check location criteria
+            if (location != null && !location.trim().isEmpty()) {
+                if (post.getLocation() == null || !post.getLocation().toLowerCase().contains(location.toLowerCase().trim())) {
+                    matches = false;
+                }
+            }
+            
+            // Check tags criteria
+            if (tags != null && !tags.isEmpty()) {
+                boolean tagMatches = false;
+                if (post.getTags() != null) {
+                    for (String searchTag : tags) {
+                        for (String postTag : post.getTags()) {
+                            if (postTag != null && postTag.toLowerCase().contains(searchTag.toLowerCase().trim())) {
+                                tagMatches = true;
+                                break;
+                            }
+                        }
+                        if (tagMatches) break;
+                    }
+                }
+                if (!tagMatches) {
+                    matches = false;
+                }
+            }
+            
+            // Check lost/found criteria
+            if (isLost != null) {
+                if (post.isLost() != isLost) {
+                    matches = false;
+                }
+            }
+            
+            if (matches) {
+                matchingPosts.add(post);
+            }
+        }
+        
+        return matchingPosts;
+    }
+
     // Fetch comments for a post from Firebase
     public List<Comment> getCommentsForPost(int postId) {
         try {

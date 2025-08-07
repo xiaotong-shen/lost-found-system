@@ -33,6 +33,9 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private final DashboardViewModel dashboardViewModel;
     private final JTextField searchField = new JTextField(20);
     private final JCheckBox fuzzySearchCheckbox = new JCheckBox("Fuzzy Search");
+    private final JComboBox<String> searchCriteriaDropdown = new JComboBox<>(new String[]{
+        "General Search", "Title", "Location", "Tags", "Lost Items", "Found Items"
+    });
     private JButton searchButton;
     private JButton addPostButton;
     private JButton backButton;
@@ -139,11 +142,17 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         fuzzySearchCheckbox.setOpaque(false);
         fuzzySearchCheckbox.setFocusPainted(false);
         
+        // Style the search criteria dropdown
+        searchCriteriaDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        searchCriteriaDropdown.setPreferredSize(new Dimension(120, 35));
+        searchCriteriaDropdown.setBorder(BorderFactory.createLineBorder(new Color(206, 212, 218), 1));
+        
         searchButton = createStyledButton("Search", new Color(0, 123, 255));
         searchButton.setPreferredSize(new Dimension(80, 35));
 
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
+        searchPanel.add(searchCriteriaDropdown);
         searchPanel.add(fuzzySearchCheckbox);
         searchPanel.add(searchButton);
 
@@ -166,9 +175,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         // Add action listeners
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {
-                String searchQuery = searchField.getText();
+                String searchQuery = searchField.getText().trim();
                 boolean isFuzzySearch = fuzzySearchCheckbox.isSelected();
-                dashboardController.searchPosts(searchQuery, isFuzzySearch);
+                String selectedCriteria = (String) searchCriteriaDropdown.getSelectedItem();
+                
+                performCriteriaSearch(searchQuery, selectedCriteria, isFuzzySearch);
             }
         });
 
@@ -1180,6 +1191,56 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         cancelButton.addActionListener(e -> dialog.dispose());
 
         dialog.setVisible(true);
+    }
+
+    private void performCriteriaSearch(String searchQuery, String criteria, boolean isFuzzySearch) {
+        if (searchQuery.isEmpty()) {
+            // If no query, load all posts
+            dashboardController.loadPosts();
+            return;
+        }
+
+        switch (criteria) {
+            case "General Search":
+                // Use general search (existing functionality)
+                dashboardController.searchPosts(searchQuery, isFuzzySearch);
+                break;
+                
+            case "Title":
+                // Search specifically in titles using advanced search
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), null);
+                break;
+                
+            case "Location":
+                // Search specifically in locations using advanced search
+                dashboardController.executeAdvancedSearch("", searchQuery, new ArrayList<>(), null);
+                break;
+                
+            case "Tags":
+                // Search specifically in tags using advanced search
+                List<String> tagsList = Arrays.asList(searchQuery.split(","));
+                tagsList = tagsList.stream()
+                    .map(String::trim)
+                    .filter(tag -> !tag.isEmpty())
+                    .collect(java.util.stream.Collectors.toList());
+                dashboardController.executeAdvancedSearch("", "", tagsList, null);
+                break;
+                
+            case "Lost Items":
+                // Search for lost items only
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), true);
+                break;
+                
+            case "Found Items":
+                // Search for found items only
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), false);
+                break;
+                
+            default:
+                // Default to general search
+                dashboardController.searchPosts(searchQuery, isFuzzySearch);
+                break;
+        }
     }
 
     public String getViewName() {

@@ -70,6 +70,19 @@ public class DashboardController {
     }
 
     /**
+     * Executes advanced search with specific criteria.
+     * @param title title to search for
+     * @param location location to search for  
+     * @param tags tags to search for
+     * @param isLost whether to search for lost or found items
+     */
+    public void executeAdvancedSearch(String title, String location, java.util.List<String> tags, Boolean isLost) {
+        // Use a specific action for advanced search that the interactor can handle
+        DashboardInputData dashboardInputData = new DashboardInputData("advanced_search", title, location, tags, isLost);
+        dashboardInteractor.execute(dashboardInputData);
+    }
+
+    /**
      * Adds a new post.
      * @param title the post title
      * @param content the post content
