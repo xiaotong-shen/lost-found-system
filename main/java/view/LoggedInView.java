@@ -40,7 +40,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private JLabel username;
 
     private JButton dashboardButton;
-    private JButton searchButton;
     private JButton accountButton;
     private JButton dmsButton;
 
@@ -122,26 +121,23 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         panel.setOpaque(false);
         panel.setMaximumSize(new Dimension(400, 200));
 
-        // Create a grid of buttons (2x2)
-        JPanel buttonGrid = new JPanel(new GridLayout(2, 2, 15, 15));
+        // Create a grid of buttons (1x3)
+        JPanel buttonGrid = new JPanel(new GridLayout(1, 3, 15, 15));
         buttonGrid.setOpaque(false);
-        buttonGrid.setMaximumSize(new Dimension(400, 150));
+        buttonGrid.setMaximumSize(new Dimension(600, 75));
 
         // Style the buttons
         dashboardButton = createStyledButton("Dashboard", new Color(0, 123, 255));
-        searchButton = createStyledButton("Search by Criteria", new Color(40, 167, 69));
         accountButton = createStyledButton("Account", new Color(255, 193, 7));
         dmsButton = createStyledButton("DMs", new Color(220, 53, 69));
 
         // Set button sizes
         Dimension buttonSize = new Dimension(180, 50);
         dashboardButton.setPreferredSize(buttonSize);
-        searchButton.setPreferredSize(buttonSize);
         accountButton.setPreferredSize(buttonSize);
         dmsButton.setPreferredSize(buttonSize);
 
         buttonGrid.add(dashboardButton);
-        buttonGrid.add(searchButton);
         buttonGrid.add(accountButton);
         buttonGrid.add(dmsButton);
 
@@ -192,12 +188,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                     dashboardController.setCurrentUser(currentState.getUsername());
                 }
                 viewManagerModel.pushView("dashboard");
-            }
-        });
-
-        searchButton.addActionListener(evt -> {
-            if (evt.getSource().equals(searchButton)) {
-                viewManagerModel.pushView("search");
             }
         });
 

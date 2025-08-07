@@ -32,7 +32,14 @@ public class DashboardInteractor implements DashboardInputBoundary {
                 case "search_posts":
                     // SESSION CHANGE: If search query is blank, return all posts sorted alphabetically by title
                     if (dashboardInputData.getSearchQuery() != null && !dashboardInputData.getSearchQuery().trim().isEmpty()) {
-                        List<Post> searchResults = dashboardDataAccessObject.searchPosts(dashboardInputData.getSearchQuery().trim());
+                        List<Post> searchResults;
+                        if (dashboardInputData.isFuzzySearch()) {
+                            // Use fuzzy search
+                            searchResults = dashboardDataAccessObject.fuzzySearch(dashboardInputData.getSearchQuery().trim());
+                        } else {
+                            // Use regular search
+                            searchResults = dashboardDataAccessObject.searchPosts(dashboardInputData.getSearchQuery().trim());
+                        }
                         DashboardOutputData searchOutputData = new DashboardOutputData(searchResults);
                         dashboardOutputBoundary.prepareSuccessView(searchOutputData);
                     } else {
@@ -41,6 +48,18 @@ public class DashboardInteractor implements DashboardInputBoundary {
                         DashboardOutputData allPostsOutputData = new DashboardOutputData(allPosts);
                         dashboardOutputBoundary.prepareSuccessView(allPostsOutputData);
                     }
+                    break;
+
+                case "advanced_search":
+                    // Perform advanced search with specific criteria
+                    List<Post> advancedSearchResults = dashboardDataAccessObject.searchPostsByCriteria(
+                        dashboardInputData.getPostTitle(),     // title
+                        dashboardInputData.getPostLocation(),  // location
+                        dashboardInputData.getPostTags(),      // tags
+                        dashboardInputData.isLost() ? Boolean.TRUE : null  // isLost
+                    );
+                    DashboardOutputData advancedOutputData = new DashboardOutputData(advancedSearchResults);
+                    dashboardOutputBoundary.prepareSuccessView(advancedOutputData);
                     break;
 
                 case "add_post":

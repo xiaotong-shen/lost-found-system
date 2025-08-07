@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Collections;
+
 
 /**
  * The View for the Dashboard (Piazza-like platform).
@@ -32,6 +34,10 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private final String viewName = "dashboard";
     private final DashboardViewModel dashboardViewModel;
     private final JTextField searchField = new JTextField(20);
+    private final JCheckBox fuzzySearchCheckbox = new JCheckBox("Fuzzy Search");
+    private final JComboBox<String> searchCriteriaDropdown = new JComboBox<>(new String[]{
+        "General Search", "Title", "Location", "Tags", "Lost Items", "Found Items"
+    });
     private JButton searchButton;
     private JButton addPostButton;
     private JButton backButton;
@@ -71,7 +77,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     public DashboardView(DashboardViewModel dashboardViewModel) {
         this.dashboardViewModel = dashboardViewModel;
         this.dashboardViewModel.addPropertyChangeListener(this);
-        
+
         // Set up the main layout with modern styling
         this.setLayout(new BorderLayout());
         this.setBackground(new Color(248, 249, 250)); // Light gray background
@@ -132,11 +138,24 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         ));
         searchField.setPreferredSize(new Dimension(250, 35));
         
+        // Style the fuzzy search checkbox
+        fuzzySearchCheckbox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        fuzzySearchCheckbox.setForeground(new Color(108, 117, 125));
+        fuzzySearchCheckbox.setOpaque(false);
+        fuzzySearchCheckbox.setFocusPainted(false);
+        
+        // Style the search criteria dropdown
+        searchCriteriaDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        searchCriteriaDropdown.setPreferredSize(new Dimension(120, 35));
+        searchCriteriaDropdown.setBorder(BorderFactory.createLineBorder(new Color(206, 212, 218), 1));
+        
         searchButton = createStyledButton("Search", new Color(0, 123, 255));
         searchButton.setPreferredSize(new Dimension(80, 35));
 
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
+        searchPanel.add(searchCriteriaDropdown);
+        searchPanel.add(fuzzySearchCheckbox);
         searchPanel.add(searchButton);
 
         // Right side - buttons
@@ -158,7 +177,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         // Add action listeners
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {
-                dashboardController.searchPosts(searchField.getText());
+                String searchQuery = searchField.getText().trim();
+                boolean isFuzzySearch = fuzzySearchCheckbox.isSelected();
+                String selectedCriteria = (String) searchCriteriaDropdown.getSelectedItem();
+                
+                performCriteriaSearch(searchQuery, selectedCriteria, isFuzzySearch);
             }
         });
 
@@ -457,7 +480,19 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         postsPanel.removeAll();
 
         if (posts != null && !posts.isEmpty()) {
-            for (Post post : posts) {
+            // Sort posts by timestamp in descending order (most recent first)
+            List<Post> sortedPosts = new ArrayList<>(posts);
+            sortedPosts.sort((p1, p2) -> {
+                try {
+                    LocalDateTime dt1 = LocalDateTime.parse(p1.getTimestamp());
+                    LocalDateTime dt2 = LocalDateTime.parse(p2.getTimestamp());
+                    return dt2.compareTo(dt1); // Reverse order (most recent first)
+                } catch (Exception e) {
+                    return 0; // Keep original order if timestamps can't be parsed
+                }
+            });
+            
+            for (Post post : sortedPosts) {
                 postsPanel.add(createPostListItem(post));
                 postsPanel.add(Box.createVerticalStrut(8));
             }
@@ -521,10 +556,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setOpaque(false);
 
-        // SESSION CHANGE: Author label now shows 'By username'
-        JLabel authorLabel = new JLabel("By " + post.getAuthor());
-        authorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        authorLabel.setForeground(Color.BLACK);
+        // Author label with enhanced styling
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 " + authorText);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        authorLabel.setForeground(new Color(0, 123, 255)); // Blue color for prominence
         
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
         typeLabel.setForeground(post.isLost() ? new Color(220, 53, 69) : new Color(40, 167, 69));
@@ -618,10 +654,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(Box.createVerticalStrut(12));
 
         // Author
-        JLabel authorLabel = new JLabel("Author: " + post.getAuthor());
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        authorLabel.setFont(detailFont);
-        authorLabel.setForeground(Color.BLACK);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        authorLabel.setForeground(new Color(0, 123, 255));
         detailsPanel.add(authorLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
@@ -730,15 +767,18 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         JLabel userLabel = new JLabel(comment.username);
         userLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         userLabel.setForeground(Color.BLACK);
+        userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(userLabel);
         
         JLabel contentLabel = new JLabel(comment.content);
         contentLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         contentLabel.setForeground(Color.BLACK);
+        contentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(contentLabel);
         
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         actions.setOpaque(false);
+        actions.setAlignmentX(Component.LEFT_ALIGNMENT);
         JButton likeButton = new JButton("Like (" + comment.likes + ")");
         likeButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         likeButton.setForeground(new Color(0, 123, 255));
@@ -844,6 +884,17 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             noPostsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             myPostsPanel.add(noPostsLabel);
         } else {
+            // Sort my posts by timestamp in descending order (most recent first)
+            myPosts.sort((p1, p2) -> {
+                try {
+                    LocalDateTime dt1 = LocalDateTime.parse(p1.getTimestamp());
+                    LocalDateTime dt2 = LocalDateTime.parse(p2.getTimestamp());
+                    return dt2.compareTo(dt1); // Reverse order (most recent first)
+                } catch (Exception e) {
+                    return 0; // Keep original order if timestamps can't be parsed
+                }
+            });
+            
             for (Post post : myPosts) {
                 JPanel postItem = createMyPostListItem(post);
                 myPostsPanel.add(postItem);
@@ -882,9 +933,15 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         topRow.add(titleLabel, BorderLayout.WEST);
         topRow.add(typeLabel, BorderLayout.EAST);
 
-        // Bottom row: timestamp and likes
+        // Bottom row: author, timestamp and likes
         JPanel bottomRow = new JPanel(new BorderLayout());
         bottomRow.setOpaque(false);
+        
+        // Author info
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 " + authorText);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        authorLabel.setForeground(new Color(0, 123, 255));
         
         JLabel timestampLabel = new JLabel("Posted: " + formatTimestamp(post.getTimestamp()));
         timestampLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -894,7 +951,14 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         likesLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         likesLabel.setForeground(Color.BLACK);
 
-        bottomRow.add(timestampLabel, BorderLayout.WEST);
+        // Create a left panel with author and timestamp
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        leftPanel.setOpaque(false);
+        leftPanel.add(authorLabel);
+        leftPanel.add(Box.createHorizontalStrut(15));
+        leftPanel.add(timestampLabel);
+
+        bottomRow.add(leftPanel, BorderLayout.WEST);
         bottomRow.add(likesLabel, BorderLayout.EAST);
 
         panel.add(topRow, BorderLayout.NORTH);
@@ -974,10 +1038,11 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(Box.createVerticalStrut(12));
 
         // Author
-        JLabel authorLabel = new JLabel("Author: " + post.getAuthor());
+        String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        authorLabel.setFont(detailFont);
-        authorLabel.setForeground(Color.BLACK);
+        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        authorLabel.setForeground(new Color(0, 123, 255));
         detailsPanel.add(authorLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
@@ -1167,6 +1232,56 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         cancelButton.addActionListener(e -> dialog.dispose());
 
         dialog.setVisible(true);
+    }
+
+    private void performCriteriaSearch(String searchQuery, String criteria, boolean isFuzzySearch) {
+        if (searchQuery.isEmpty()) {
+            // If no query, load all posts
+            dashboardController.loadPosts();
+            return;
+        }
+
+        switch (criteria) {
+            case "General Search":
+                // Use general search (existing functionality)
+                dashboardController.searchPosts(searchQuery, isFuzzySearch);
+                break;
+                
+            case "Title":
+                // Search specifically in titles using advanced search
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), null);
+                break;
+                
+            case "Location":
+                // Search specifically in locations using advanced search
+                dashboardController.executeAdvancedSearch("", searchQuery, new ArrayList<>(), null);
+                break;
+                
+            case "Tags":
+                // Search specifically in tags using advanced search
+                List<String> tagsList = Arrays.asList(searchQuery.split(","));
+                tagsList = tagsList.stream()
+                    .map(String::trim)
+                    .filter(tag -> !tag.isEmpty())
+                    .collect(java.util.stream.Collectors.toList());
+                dashboardController.executeAdvancedSearch("", "", tagsList, null);
+                break;
+                
+            case "Lost Items":
+                // Search for lost items only
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), true);
+                break;
+                
+            case "Found Items":
+                // Search for found items only
+                dashboardController.executeAdvancedSearch(searchQuery, "", new ArrayList<>(), false);
+                break;
+                
+            default:
+                // Default to general search
+                dashboardController.searchPosts(searchQuery, isFuzzySearch);
+                break;
+        }
     }
 
     public String getViewName() {

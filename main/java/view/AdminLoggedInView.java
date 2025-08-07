@@ -71,7 +71,7 @@ public class AdminLoggedInView extends JPanel implements PropertyChangeListener 
 
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {
-                viewManagerModel.pushView("search");
+                viewManagerModel.pushView("advanced_search");
             }
         });
 
