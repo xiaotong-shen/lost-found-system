@@ -275,7 +275,11 @@ public class FirebasePostDataAccessObject implements
 
     @Override
     public List<Post> fuzzySearch(String query) {
-        throw new UnsupportedOperationException("Fuzzy search is not supported in FirebasePostDataAccessObject.");
+        // Get all posts from Firebase first
+        List<Post> allPosts = getAllPosts();
+        
+        // Use fuzzy matching to filter posts
+        return use_case.search.util.FuzzyMatchHelper.fuzzyMatchPosts(allPosts, query);
     }
 
     // Fetch comments for a post from Firebase

@@ -32,6 +32,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private final String viewName = "dashboard";
     private final DashboardViewModel dashboardViewModel;
     private final JTextField searchField = new JTextField(20);
+    private final JCheckBox fuzzySearchCheckbox = new JCheckBox("Fuzzy Search");
     private JButton searchButton;
     private JButton addPostButton;
     private JButton backButton;
@@ -71,7 +72,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     public DashboardView(DashboardViewModel dashboardViewModel) {
         this.dashboardViewModel = dashboardViewModel;
         this.dashboardViewModel.addPropertyChangeListener(this);
-        
+
         // Set up the main layout with modern styling
         this.setLayout(new BorderLayout());
         this.setBackground(new Color(248, 249, 250)); // Light gray background
@@ -132,11 +133,18 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         ));
         searchField.setPreferredSize(new Dimension(250, 35));
         
+        // Style the fuzzy search checkbox
+        fuzzySearchCheckbox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        fuzzySearchCheckbox.setForeground(new Color(108, 117, 125));
+        fuzzySearchCheckbox.setOpaque(false);
+        fuzzySearchCheckbox.setFocusPainted(false);
+        
         searchButton = createStyledButton("Search", new Color(0, 123, 255));
         searchButton.setPreferredSize(new Dimension(80, 35));
 
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
+        searchPanel.add(fuzzySearchCheckbox);
         searchPanel.add(searchButton);
 
         // Right side - buttons
@@ -158,7 +166,9 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         // Add action listeners
         searchButton.addActionListener(evt -> {
             if (evt.getSource().equals(searchButton)) {
-                dashboardController.searchPosts(searchField.getText());
+                String searchQuery = searchField.getText();
+                boolean isFuzzySearch = fuzzySearchCheckbox.isSelected();
+                dashboardController.searchPosts(searchQuery, isFuzzySearch);
             }
         });
 
@@ -730,15 +740,18 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         JLabel userLabel = new JLabel(comment.username);
         userLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         userLabel.setForeground(Color.BLACK);
+        userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(userLabel);
         
         JLabel contentLabel = new JLabel(comment.content);
         contentLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         contentLabel.setForeground(Color.BLACK);
+        contentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(contentLabel);
         
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         actions.setOpaque(false);
+        actions.setAlignmentX(Component.LEFT_ALIGNMENT);
         JButton likeButton = new JButton("Like (" + comment.likes + ")");
         likeButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         likeButton.setForeground(new Color(0, 123, 255));
