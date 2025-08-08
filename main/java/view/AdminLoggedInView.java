@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 import interface_adapter.adminloggedIn.AdminLoggedInState;
 import interface_adapter.adminloggedIn.AdminLoggedInViewModel;
 import interface_adapter.change_password.ChangePasswordController;
+import interface_adapter.dashboard.DashboardController;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 
@@ -36,6 +37,7 @@ public class AdminLoggedInView extends JPanel implements PropertyChangeListener 
     private ChangePasswordController changePasswordController;
     private LogoutController logoutController;
     private final ViewManagerModel viewManagerModel;
+    private DMsView dmsView;
 
     private final JLabel username;
 
@@ -107,7 +109,12 @@ public class AdminLoggedInView extends JPanel implements PropertyChangeListener 
         dashboardButton.addActionListener(evt -> viewManagerModel.pushView("dashboard"));
         searchButton.addActionListener(evt -> viewManagerModel.pushView("advanced_search"));
         accountButton.addActionListener(evt -> viewManagerModel.pushView("account"));
-        dmsButton.addActionListener(evt -> viewManagerModel.pushView("dms"));
+        dmsButton.addActionListener(evt -> {
+                    if (dmsView != null) {
+                        dmsView.setCurrentUsername(username.getText());
+                    }
+                    viewManagerModel.pushView("dms");
+        });
         adminButton.addActionListener(evt -> viewManagerModel.pushView("admin"));
         deleteUsersButton.addActionListener(evt -> viewManagerModel.pushView("delete users"));
 
@@ -167,5 +174,9 @@ public class AdminLoggedInView extends JPanel implements PropertyChangeListener 
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setDMsView(DMsView dmsView) {
+        this.dmsView = dmsView;
     }
 }
