@@ -1431,7 +1431,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
 
         // Username to credit
         gbc.gridx = 0; gbc.gridy = 0;
-        JLabel creditLabel = new JLabel("Credit this user:");
+        JLabel creditLabel = new JLabel("Credit this user (type 0 for none):");
         creditLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         formPanel.add(creditLabel, gbc);
         gbc.gridx = 1;
@@ -1459,7 +1459,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             String creditedUsername = creditField.getText().trim();
             if (creditedUsername.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, 
-                    "Please enter a username to credit!", 
+                    "Please enter a username to credit, or type 0 to skip.", 
                     "Validation Error", 
                     JOptionPane.ERROR_MESSAGE);
                 return;
