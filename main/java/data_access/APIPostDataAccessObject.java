@@ -192,7 +192,6 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         return posts;
     }
 
-    @Override
     public Post getPostById(int postID) {
         List<Post> allPosts = getAllPosts();
         for (Post post : allPosts) {
@@ -213,6 +212,37 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         // For now, we'll return true to simulate success
         System.out.println("DEBUG: APIPostDataAccessObject.updatePost() called for post ID: " + post.getPostID());
         return true;
+    }
+
+    @Override
+    public Post getPostById(String postID) {
+        try {
+            int postId = Integer.parseInt(postID);
+            return getPostById(postId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deletePost(int postId) {
+        // In a real implementation, this would make an API call to delete a post
+        System.out.println("DEBUG: APIPostDataAccessObject.deletePost() called for post ID: " + postId);
+        return true;
+    }
+
+    @Override
+    public entity.User getUserByUsername(String username) {
+        // In a real implementation, this would make an API call to get user data
+        // For now, return null as this is a post-focused DAO
+        return null;
+    }
+
+    @Override
+    public boolean updateUser(entity.User user) {
+        // In a real implementation, this would make an API call to update user data
+        // For now, return false as this is a post-focused DAO
+        return false;
     }
 
 }

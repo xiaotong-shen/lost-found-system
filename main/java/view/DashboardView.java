@@ -556,11 +556,20 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         detailsPanel.setOpaque(false);
 
-        // Author label with enhanced styling
+        // Author label with enhanced styling - make it clickable
         String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
         JLabel authorLabel = new JLabel("👤 " + authorText);
         authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
         authorLabel.setForeground(new Color(0, 123, 255)); // Blue color for prominence
+        authorLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        authorLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (!"Anonymous".equals(authorText)) {
+                    showUserProfile(authorText);
+                }
+            }
+        });
         
         JLabel typeLabel = new JLabel(post.isLost() ? "LOST" : "FOUND");
         typeLabel.setForeground(post.isLost() ? new Color(220, 53, 69) : new Color(40, 167, 69));
@@ -653,9 +662,22 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(postedLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
-        // Author
+        // Author with credibility points
         String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
-        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
+        String credibilityText = "";
+        if (!"Anonymous".equals(authorText)) {
+            try {
+                // Try to get user credibility from Firebase
+                data_access.FirebaseUserDataAccessObject userDAO = new data_access.FirebaseUserDataAccessObject();
+                entity.User authorUser = userDAO.get(authorText);
+                if (authorUser != null) {
+                    credibilityText = " (Credibility: " + authorUser.getCredibilityScore() + " pts)";
+                }
+            } catch (Exception e) {
+                // If we can't get user info, just continue without credibility
+            }
+        }
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText + credibilityText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         authorLabel.setForeground(new Color(0, 123, 255));
@@ -693,6 +715,36 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
                 JOptionPane.showMessageDialog(this, "You've already liked this post!", "Already Liked", JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
+        // Resolve Post button (only show if post is not already resolved AND it's the current user's post)
+        if (!post.isResolved() && currentUser != null && currentUser.equals(post.getAuthor())) {
+            detailsPanel.add(Box.createVerticalStrut(8));
+            JButton resolvePostButton = createStyledButton("✅ Resolve Post", new Color(40, 167, 69));
+            resolvePostButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+            resolvePostButton.setPreferredSize(new Dimension(120, 35));
+            detailsPanel.add(resolvePostButton);
+            
+            // Add resolve functionality
+            resolvePostButton.addActionListener(e -> {
+                showResolvePostDialog(post);
+            });
+        } else if (post.isResolved()) {
+            // Show resolution info if post is already resolved
+            detailsPanel.add(Box.createVerticalStrut(8));
+            JLabel resolvedLabel = new JLabel("✅ Resolved by: " + post.getResolvedBy());
+            resolvedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            resolvedLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            resolvedLabel.setForeground(new Color(40, 167, 69));
+            detailsPanel.add(resolvedLabel);
+            
+            if (post.getCreditedTo() != null) {
+                JLabel creditedLabel = new JLabel("Credited to: " + post.getCreditedTo());
+                creditedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                creditedLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                creditedLabel.setForeground(new Color(108, 117, 125));
+                detailsPanel.add(creditedLabel);
+            }
+        }
 
         // COMMENT SECTION (in-memory, as before)
         JPanel commentSection = new JPanel(new BorderLayout());
@@ -736,9 +788,15 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
                 showPostDetails(post); // Refresh details to show new comment
             }
         });
-        // Layout: details at top, comment section (comments + input bar) at bottom
+        // Wrap the details panel in a scroll pane
+        JScrollPane detailsScrollPane = new JScrollPane(detailsPanel);
+        detailsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        detailsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        detailsScrollPane.setPreferredSize(new Dimension(400, 300)); // Set a reasonable size
+        
+        // Layout: title at top, scrollable details in center, comment section at bottom
         postDetailPanel.add(titleLabel, BorderLayout.NORTH);
-        postDetailPanel.add(detailsPanel, BorderLayout.CENTER);
+        postDetailPanel.add(detailsScrollPane, BorderLayout.CENTER);
         
         // Create a bottom container with spacing and comment section
         JPanel bottomContainer = new JPanel(new BorderLayout());
@@ -1037,9 +1095,22 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(postedLabel);
         detailsPanel.add(Box.createVerticalStrut(12));
 
-        // Author
+        // Author with credibility points
         String authorText = post.getAuthor() != null ? post.getAuthor() : "Anonymous";
-        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText);
+        String credibilityText = "";
+        if (!"Anonymous".equals(authorText)) {
+            try {
+                // Try to get user credibility from Firebase
+                data_access.FirebaseUserDataAccessObject userDAO = new data_access.FirebaseUserDataAccessObject();
+                entity.User authorUser = userDAO.get(authorText);
+                if (authorUser != null) {
+                    credibilityText = " (Credibility: " + authorUser.getCredibilityScore() + " pts)";
+                }
+            } catch (Exception e) {
+                // If we can't get user info, just continue without credibility
+            }
+        }
+        JLabel authorLabel = new JLabel("👤 Posted by: " + authorText + credibilityText);
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         authorLabel.setForeground(new Color(0, 123, 255));
@@ -1061,6 +1132,37 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         detailsPanel.add(editPostButton);
         detailsPanel.add(Box.createVerticalStrut(8));
         
+        // Resolve Post button (only show if post is not already resolved)
+        if (!post.isResolved()) {
+            JButton resolvePostButton = createStyledButton("✅ Resolve Post", new Color(40, 167, 69));
+            resolvePostButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+            resolvePostButton.setPreferredSize(new Dimension(120, 35));
+            detailsPanel.add(resolvePostButton);
+            detailsPanel.add(Box.createVerticalStrut(8));
+            
+            // Add resolve functionality
+            resolvePostButton.addActionListener(e -> {
+                showResolvePostDialog(post);
+            });
+        } else {
+            // Show resolution info if post is already resolved
+            JLabel resolvedLabel = new JLabel("✅ Resolved by: " + post.getResolvedBy());
+            resolvedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            resolvedLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            resolvedLabel.setForeground(new Color(40, 167, 69));
+            detailsPanel.add(resolvedLabel);
+            detailsPanel.add(Box.createVerticalStrut(8));
+            
+            if (post.getCreditedTo() != null) {
+                JLabel creditedLabel = new JLabel("Credited to: " + post.getCreditedTo());
+                creditedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                creditedLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                creditedLabel.setForeground(new Color(108, 117, 125));
+                detailsPanel.add(creditedLabel);
+                detailsPanel.add(Box.createVerticalStrut(8));
+            }
+        }
+
         // Delete button for the post
         JButton deletePostButton = createStyledButton("🗑️ Delete Post", new Color(220, 53, 69));
         deletePostButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -1086,9 +1188,15 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // Layout: details at top
+        // Wrap the details panel in a scroll pane
+        JScrollPane detailsScrollPane = new JScrollPane(detailsPanel);
+        detailsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        detailsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        detailsScrollPane.setPreferredSize(new Dimension(400, 300)); // Set a reasonable size
+        
+        // Layout: title at top, scrollable details in center
         myPostDetailPanel.add(titleLabel, BorderLayout.NORTH);
-        myPostDetailPanel.add(detailsPanel, BorderLayout.CENTER);
+        myPostDetailPanel.add(detailsScrollPane, BorderLayout.CENTER);
         myPostDetailPanel.revalidate();
         myPostDetailPanel.repaint();
     }
@@ -1295,5 +1403,84 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     public void setCurrentUser(String username) {
         this.currentUser = username;
         System.out.println("DEBUG: DashboardView.setCurrentUser() called with: '" + username + "'");
+    }
+
+    private void showUserProfile(String username) {
+        // This will be handled by the ViewManager to navigate to user profile
+        System.out.println("DEBUG: Requesting to show profile for user: " + username);
+        // For now, just show a message - in a full implementation, this would navigate to the user profile view
+        JOptionPane.showMessageDialog(this, 
+            "User Profile: " + username + "\n\nThis feature is coming soon!", 
+            "User Profile", 
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showResolvePostDialog(Post post) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Resolve Post", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(500, 250); // Increased dialog size
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(new Color(248, 249, 250));
+
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(new Color(255, 255, 255));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Username to credit
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel creditLabel = new JLabel("Credit this user:");
+        creditLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formPanel.add(creditLabel, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0; // Make the text field expand
+        JTextField creditField = new JTextField(30); // Increased columns
+        creditField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        creditField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(206, 212, 218), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        formPanel.add(creditField, gbc);
+        gbc.weightx = 0.0; // Reset weight
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        
+        JButton resolveButton = createStyledButton("Resolve Post", new Color(40, 167, 69));
+        JButton cancelButton = createStyledButton("Cancel", new Color(108, 117, 125));
+        resolveButton.setPreferredSize(new Dimension(150, 40)); // Increased button size
+        cancelButton.setPreferredSize(new Dimension(120, 40)); // Increased button size
+
+        resolveButton.addActionListener(e -> {
+            String creditedUsername = creditField.getText().trim();
+            if (creditedUsername.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Please enter a username to credit!", 
+                    "Validation Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Call the controller to resolve the post
+            if (dashboardController != null) {
+                dashboardController.resolvePost(String.valueOf(post.getPostID()), creditedUsername, currentUser);
+            }
+            
+            dialog.dispose();
+        });
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(resolveButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
     }
 }

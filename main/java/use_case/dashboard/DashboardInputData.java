@@ -17,6 +17,8 @@ public class DashboardInputData {
     private final String author; // Add author field
     private final entity.Post post; // For update operations
     private final int postId; // For delete operations
+    private final String creditedUsername; // For resolve post operations
+    private final String resolvedByUsername; // For resolve post operations
 
     public DashboardInputData(String action) {
         this.action = action;
@@ -30,6 +32,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
 
     public DashboardInputData(String action, String searchQuery) {
@@ -44,6 +48,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
 
     public DashboardInputData(String action, String searchQuery, boolean isFuzzySearch) {
@@ -58,6 +64,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
 
     public DashboardInputData(String action, String title, String location, List<String> tags, Boolean isLost) {
@@ -72,6 +80,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
 
     public DashboardInputData(String action, String postTitle, String postContent, 
@@ -87,6 +97,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
     
     public DashboardInputData(String action, String postTitle, String postContent, 
@@ -102,6 +114,8 @@ public class DashboardInputData {
         this.author = author;
         this.post = null;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
     
     public DashboardInputData(String action, entity.Post post) {
@@ -116,6 +130,8 @@ public class DashboardInputData {
         this.author = null;
         this.post = post;
         this.postId = 0;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
     }
     
     public DashboardInputData(String action, int postId) {
@@ -130,6 +146,24 @@ public class DashboardInputData {
         this.author = null;
         this.post = null;
         this.postId = postId;
+        this.creditedUsername = null;
+        this.resolvedByUsername = null;
+    }
+
+    public DashboardInputData(String action, String postId, String creditedUsername, String resolvedByUsername) {
+        this.action = action;
+        this.searchQuery = null;
+        this.isFuzzySearch = false;
+        this.postTitle = null;
+        this.postContent = null;
+        this.postTags = null;
+        this.postLocation = null;
+        this.isLost = false;
+        this.author = null;
+        this.post = null;
+        this.postId = Integer.parseInt(postId);
+        this.creditedUsername = creditedUsername;
+        this.resolvedByUsername = resolvedByUsername;
     }
 
     // Getters
@@ -144,4 +178,6 @@ public class DashboardInputData {
     public String getAuthor() { return author; }
     public entity.Post getPost() { return post; }
     public int getPostId() { return postId; }
+    public String getCreditedUsername() { return creditedUsername; }
+    public String getResolvedByUsername() { return resolvedByUsername; }
 }

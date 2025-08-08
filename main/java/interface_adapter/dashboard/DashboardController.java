@@ -119,4 +119,15 @@ public class DashboardController {
         DashboardInputData dashboardInputData = new DashboardInputData("delete_post", postId);
         dashboardInteractor.execute(dashboardInputData);
     }
+
+    /**
+     * Resolves a post and credits a user.
+     * @param postId the ID of the post to resolve
+     * @param creditedUsername the username to credit
+     * @param resolvedByUsername the username of the person resolving the post
+     */
+    public void resolvePost(String postId, String creditedUsername, String resolvedByUsername) {
+        DashboardInputData dashboardInputData = new DashboardInputData("resolve_post", postId, creditedUsername, resolvedByUsername);
+        dashboardInteractor.execute(dashboardInputData);
+    }
 }
