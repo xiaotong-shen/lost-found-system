@@ -97,58 +97,71 @@ public class DashboardInteractor implements DashboardInputBoundary {
                     break;
 
                 case "resolve_post":
-                    // Handle resolve post action
-                    if (dashboardInputData.getCreditedUsername() != null && 
-                        dashboardInputData.getResolvedByUsername() != null) {
-                        
-                        // Get the post to be resolved
-                        entity.Post post = dashboardDataAccessObject.getPostById(String.valueOf(dashboardInputData.getPostId()));
-                        if (post == null) {
-                            dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post not found."));
+                    // Handle resolve post action, allowing "0" to mean no credit
+                    if (dashboardInputData.getResolvedByUsername() == null) {
+                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Resolving username is required."));
+                        break;
+                    }
+
+                    // Get the post to be resolved
+                    entity.Post post = dashboardDataAccessObject.getPostById(String.valueOf(dashboardInputData.getPostId()));
+                    if (post == null) {
+                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post not found."));
+                        break;
+                    }
+
+                    // Check if post is already resolved
+                    if (post.isResolved()) {
+                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post is already resolved."));
+                        break;
+                    }
+
+                    String credited = dashboardInputData.getCreditedUsername();
+                    boolean skipCredit = credited != null && credited.trim().equals("0");
+
+                    // Mark post as resolved
+                    post.setResolved(true);
+                    post.setResolvedBy(dashboardInputData.getResolvedByUsername());
+                    post.setCreditedTo(skipCredit ? null : credited);
+
+                    if (skipCredit) {
+                        // Only update the post; no user credit
+                        boolean postUpdated = dashboardDataAccessObject.updatePost(post);
+                        if (postUpdated) {
+                            DashboardOutputData resolvePostOutputData = new DashboardOutputData("Post resolved successfully.", true);
+                            dashboardOutputBoundary.prepareSuccessView(resolvePostOutputData);
+                        } else {
+                            dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Failed to update post in database."));
+                        }
+                    } else {
+                        // Credit the specified user
+                        if (credited == null || credited.trim().isEmpty()) {
+                            dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Credited username is required or type 0 to skip."));
                             break;
                         }
 
-                        // Check if post is already resolved
-                        if (post.isResolved()) {
-                            dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Post is already resolved."));
-                            break;
-                        }
-
-                        // Get the user to be credited
-                        entity.User creditedUser = dashboardDataAccessObject.getUserByUsername(dashboardInputData.getCreditedUsername());
+                        entity.User creditedUser = dashboardDataAccessObject.getUserByUsername(credited.trim());
                         if (creditedUser == null) {
                             dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Credited user not found."));
                             break;
                         }
 
-                        // Mark post as resolved
-                        post.setResolved(true);
-                        post.setResolvedBy(dashboardInputData.getResolvedByUsername());
-                        post.setCreditedTo(dashboardInputData.getCreditedUsername());
-
-                        // Credit the user
                         creditedUser.addResolvedPost(String.valueOf(dashboardInputData.getPostId()));
                         creditedUser.addCredibilityPoints(1); // Award 1 point for resolving a post
 
-                        // Update both post and user in database
                         boolean postUpdated = dashboardDataAccessObject.updatePost(post);
                         boolean userUpdated = dashboardDataAccessObject.updateUser(creditedUser);
 
                         if (postUpdated && userUpdated) {
                             String successMessage = String.format(
-                                "Post resolved successfully! %s has been credited with 1 credibility point. " +
-                                "New credibility score: %d", 
-                                creditedUser.getName(), 
+                                "Post resolved successfully! %s has been credited with 1 credibility point. New credibility score: %d",
+                                creditedUser.getName(),
                                 creditedUser.getCredibilityScore()
                             );
-                            
-                            DashboardOutputData resolvePostOutputData = new DashboardOutputData(successMessage, true);
-                            dashboardOutputBoundary.prepareSuccessView(resolvePostOutputData);
+                            dashboardOutputBoundary.prepareSuccessView(new DashboardOutputData(successMessage, true));
                         } else {
                             dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Failed to update post or user in database."));
                         }
-                    } else {
-                        dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Credited username and resolving username are required."));
                     }
                     break;
 
