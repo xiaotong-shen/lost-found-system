@@ -42,7 +42,7 @@ public interface DashboardUserDataAccessInterface {
      * @param postID the ID of the post
      * @return the post, or null if not found
      */
-    Post getPostById(int postID);
+    Post getPostById(String postID);
 
     /**
      * Adds a new post.
@@ -68,4 +68,19 @@ public interface DashboardUserDataAccessInterface {
      * @param postId the ID of the post to delete
      * @return true if deletion was successful, false otherwise
      */
+    boolean deletePost(int postId);
+    
+    /**
+     * Gets a user by username.
+     * @param username the username to search for
+     * @return the user if found, null otherwise
+     */
+    entity.User getUserByUsername(String username);
+    
+    /**
+     * Updates a user's information.
+     * @param user the user to update
+     * @return true if update was successful, false otherwise
+     */
+    boolean updateUser(entity.User user);
 }

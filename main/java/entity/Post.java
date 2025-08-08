@@ -23,6 +23,9 @@ public class Post {
     private int numberOfLikes;
     private Map<Integer, String> reactions;
     private List<Comment> comments;
+    private boolean resolved;
+    private String resolvedBy;
+    private String creditedTo;
     
     // Default constructor required for Firebase
     public Post() {}
@@ -79,4 +82,13 @@ public class Post {
 
     public List<Comment> getComments() { return comments; }
     public void setComments(List<Comment> comments) { this.comments = comments; }
+
+    public boolean isResolved() { return resolved; }
+    public void setResolved(boolean resolved) { this.resolved = resolved; }
+
+    public String getResolvedBy() { return resolvedBy; }
+    public void setResolvedBy(String resolvedBy) { this.resolvedBy = resolvedBy; }
+
+    public String getCreditedTo() { return creditedTo; }
+    public void setCreditedTo(String creditedTo) { this.creditedTo = creditedTo; }
 } 

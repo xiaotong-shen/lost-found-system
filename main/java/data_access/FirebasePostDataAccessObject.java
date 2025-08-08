@@ -116,26 +116,64 @@ public class FirebasePostDataAccessObject implements
     }
 
     @Override
-    public Post getPostById(int postID) {
+    public Post getPostById(String postID) {
+        // Try to find post by hash code (which is what we're passing from the UI)
+        try {
+            int hashCode = Integer.parseInt(postID);
+            return findPostByHashCode(hashCode);
+        } catch (NumberFormatException e) {
+            // If it's not a number, try to find it as a Firebase key
+            CompletableFuture<Post> future = new CompletableFuture<>();
+
+            postsRef.child(postID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    future.complete(post);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
+                }
+            });
+
+            try {
+                return future.get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+                System.err.println("Error fetching post: " + ex.getMessage());
+                return null;
+            }
+        }
+    }
+
+    private Post findPostByHashCode(int hashCode) {
         CompletableFuture<Post> future = new CompletableFuture<>();
 
-        postsRef.child(String.valueOf(postID)).addListenerForSingleValueEvent(new ValueEventListener() {
+        postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Post post = dataSnapshot.getValue(Post.class);
-                future.complete(post);
+                Post foundPost = null;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Post post = snapshot.getValue(Post.class);
+                    if (post != null && post.getPostID() == hashCode) {
+                        foundPost = post;
+                        break;
+                    }
+                }
+                future.complete(foundPost);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                future.completeExceptionally(new RuntimeException("Failed to load post: " + databaseError.getMessage()));
+                future.completeExceptionally(new RuntimeException("Failed to search posts: " + databaseError.getMessage()));
             }
         });
 
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.err.println("Error fetching post: " + e.getMessage());
+            System.err.println("Error searching for post by hash code: " + e.getMessage());
             return null;
         }
     }
@@ -401,17 +439,45 @@ public class FirebasePostDataAccessObject implements
     public boolean updatePost(Post post) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
-        DatabaseReference postRef = postsRef.child(String.valueOf(post.getPostID()));
-        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+        // Find the Firebase key for this post by searching through all posts
+        postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError != null) {
-                    System.err.println("Error updating post: " + databaseError.getMessage());
-                    future.complete(false);
-                } else {
-                    System.out.println("Post updated successfully");
-                    future.complete(true);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String firebaseKey = null;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Post existingPost = snapshot.getValue(Post.class);
+                    if (existingPost != null && existingPost.getPostID() == post.getPostID()) {
+                        firebaseKey = snapshot.getKey();
+                        break;
+                    }
                 }
+
+                if (firebaseKey != null) {
+                    // Update the post at the correct Firebase key
+                    final String finalFirebaseKey = firebaseKey;
+                    DatabaseReference postRef = postsRef.child(finalFirebaseKey);
+                    postRef.setValue(post, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError != null) {
+                                System.err.println("Error updating post: " + databaseError.getMessage());
+                                future.complete(false);
+                            } else {
+                                System.out.println("Post updated successfully at key: " + finalFirebaseKey);
+                                future.complete(true);
+                            }
+                        }
+                    });
+                } else {
+                    System.err.println("Could not find Firebase key for post with ID: " + post.getPostID());
+                    future.complete(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("Error searching for post to update: " + databaseError.getMessage());
+                future.complete(false);
             }
         });
 
@@ -619,5 +685,37 @@ public class FirebasePostDataAccessObject implements
         boolean result = exists.get();
         System.out.println("Final result: post exists = " + result);
         return result;
+    }
+
+    @Override
+    public boolean deletePost(int postId) {
+        // Convert int to String and call the existing deletePost method
+        deletePost(String.valueOf(postId));
+        return true; // Assuming success if no exception is thrown
+    }
+
+    @Override
+    public entity.User getUserByUsername(String username) {
+        // Use FirebaseUserDataAccessObject to get user data
+        FirebaseUserDataAccessObject userDAO = new FirebaseUserDataAccessObject();
+        return userDAO.get(username);
+    }
+
+    @Override
+    public boolean updateUser(entity.User user) {
+        // Use FirebaseUserDataAccessObject to update user data
+        FirebaseUserDataAccessObject userDAO = new FirebaseUserDataAccessObject();
+        try {
+            userDAO.save(user);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating user: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Method for AdminUserDataAccessInterface compatibility
+    public Post getPostById(int postID) {
+        return getPostById(String.valueOf(postID));
     }
 }

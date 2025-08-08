@@ -36,6 +36,7 @@ interface_adapter/login/LoginState.class
 view/SignupView$1.class
 entity/CommonUser.class
 use_case/signup/SignupOutputData.class
+use_case/search/util/FuzzyMatchHelper$PostWithScore.class
 interface_adapter/change_password/LoggedInViewModel.class
 view/LoggedInView$1.class
 use_case/change_password/ChangePasswordOutputData.class
