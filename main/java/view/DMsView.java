@@ -32,6 +32,8 @@ public class DMsView extends JPanel implements PropertyChangeListener {
     private final JTextArea chatArea = new JTextArea();
     private final JTextField chatInputField = new JTextField(30);
     private final JButton sendButton = new JButton("Send");
+    private JLabel chatWithLabel;
+    private JButton blockButton;
 
     private DMsController dmsController;
     private DMsViewModel dmsViewModel;
@@ -89,6 +91,21 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         chatPanel.setLayout(new BorderLayout());
         chatPanel.setBorder(BorderFactory.createTitledBorder("DM Chat"));
         chatPanel.setPreferredSize(new Dimension(500, 600));
+
+        // ——— Header bar for DM chat ———
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        chatWithLabel = new JLabel("");
+        blockButton = new JButton("Block");
+        headerPanel.add(chatWithLabel, BorderLayout.WEST);
+        headerPanel.add(blockButton, BorderLayout.EAST);
+        chatPanel.add(headerPanel, BorderLayout.NORTH);
+
+        blockButton.addActionListener(e -> {
+            String userToBlock = chatWithLabel.getText();
+            if (userToBlock != null && !userToBlock.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Blocked user: " + userToBlock);
+            }
+        });
 
         // Chat area (scrollable, non-editable)
         chatArea.setEditable(false);
@@ -207,6 +224,7 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         if (state.getCurrentChat() != null) {
             System.out.println("DEBUG: Setting current chat: " + state.getCurrentChat().getChatId());
             selectedChatId = state.getCurrentChat().getChatId();
+            updateChatHeader(state.getCurrentChat());
         }
     }
 
@@ -326,5 +344,17 @@ public class DMsView extends JPanel implements PropertyChangeListener {
             // Scroll to bottom
             chatArea.setCaretPosition(chatArea.getDocument().getLength());
         }
+    }
+
+    /** Updates the header label to show the other participant’s username. */
+    private void updateChatHeader(Chat chat) {
+        String other = "";
+        for (String p : chat.getParticipants()) {
+            if (!p.equals(currentUsername)) {
+                other = p;
+                break;
+            }
+        }
+        chatWithLabel.setText(other);
     }
 }
