@@ -409,6 +409,7 @@ public class AppBuilder {
         final DMsController dMsController = new DMsController(dMsInteractor);
         dmsView.setDMsController(dMsController);
         loggedInView.setDMsView(dmsView);
+        adminloggedInView.setDMsView(dmsView);
         return this;
     }
 
