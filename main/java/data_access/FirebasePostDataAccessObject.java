@@ -142,10 +142,26 @@ public class FirebasePostDataAccessObject implements
 
     @Override
     public Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author) {
-        String postId = postsRef.push().getKey();
+        // Get a new Firebase key for the post
+        String firebaseKey = postsRef.push().getKey();
+        if (firebaseKey == null) {
+            System.err.println("Error: Failed to generate Firebase key");
+            return null;
+        }
 
+        // Get all posts to find the highest ID
+        List<Post> allPosts = getAllPosts();
+        int maxId = 0;
+        for (Post post : allPosts) {
+            if (post.getPostID() > maxId) {
+                maxId = post.getPostID();
+            }
+        }
+        int newPostId = maxId + 1;
+
+        // Create the new post with sequential ID
         Post newPost = new Post(
-                postId.hashCode(),
+                newPostId,
                 title,
                 content,
                 tags != null ? tags : new ArrayList<>(),
@@ -157,17 +173,30 @@ public class FirebasePostDataAccessObject implements
                 0,
                 new HashMap<>()
         );
-        postsRef.child(postId).setValue(newPost, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError != null) {
-                    System.err.println("Error saving post: " + databaseError.getMessage());
-                } else {
-                    System.out.println("Post saved successfully!");
-                }
+
+        // Save the post and wait for completion
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        postsRef.child(firebaseKey).setValue(newPost, (databaseError, databaseReference) -> {
+            if (databaseError != null) {
+                System.err.println("Error saving post: " + databaseError.getMessage());
+                future.complete(false);
+            } else {
+                System.out.println("Post saved successfully with ID: " + newPostId);
+                future.complete(true);
             }
         });
-        return newPost;
+
+        try {
+            boolean success = future.get(5, TimeUnit.SECONDS);
+            if (success) {
+                return newPost;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Error waiting for post save: " + e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -429,6 +458,89 @@ public class FirebasePostDataAccessObject implements
      * @param postId the ID of the post to delete
      * @return true if deletion was successful, false otherwise
      */
+    @Override
+    public boolean deletePost(int postId) {
+        System.out.println("\n=== Firebase Delete Operation ===");
+        System.out.println("FirebaseDAO: Starting delete operation for post ID: " + postId);
+
+        // First verify the post exists
+        List<Post> allPosts = getAllPosts();
+        boolean postExists = false;
+        for (Post post : allPosts) {
+            if (post.getPostID() == postId) {
+                postExists = true;
+                break;
+            }
+        }
+
+        if (!postExists) {
+            System.err.println("FirebaseDAO: Post with ID " + postId + " does not exist");
+            return false;
+        }
+
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        CountDownLatch deleteLatch = new CountDownLatch(1);
+
+        // Query for posts with matching postID
+        System.out.println("FirebaseDAO: Querying for post with ID: " + postId);
+        postsRef.orderByChild("postID").equalTo(postId)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    System.out.println("FirebaseDAO: Query returned " + dataSnapshot.getChildrenCount() + " matches");
+
+                    if (!dataSnapshot.exists() || dataSnapshot.getChildrenCount() == 0) {
+                        System.err.println("FirebaseDAO: No matching post found in Firebase");
+                        future.complete(false);
+                        deleteLatch.countDown();
+                        return;
+                    }
+
+                    // Should only be one post with this ID
+                    DataSnapshot postSnapshot = dataSnapshot.getChildren().iterator().next();
+                    String firebaseKey = postSnapshot.getKey();
+                    Post post = postSnapshot.getValue(Post.class);
+                    System.out.println("FirebaseDAO: Found post with Firebase key: " + firebaseKey);
+                    System.out.println("FirebaseDAO: Post details - Title: " + (post != null ? post.getTitle() : "null") + 
+                                     ", ID: " + (post != null ? post.getPostID() : "null"));
+
+                    postsRef.child(firebaseKey).removeValue((error, ref) -> {
+                        if (error != null) {
+                            System.err.println("FirebaseDAO: Error deleting post: " + error.getMessage());
+                            future.complete(false);
+                        } else {
+                            System.out.println("FirebaseDAO: Post successfully deleted");
+                            future.complete(true);
+                        }
+                        deleteLatch.countDown();
+                    });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.err.println("FirebaseDAO: Delete operation cancelled: " + databaseError.getMessage());
+                    System.err.println("FirebaseDAO: Error Code: " + databaseError.getCode());
+                    System.err.println("FirebaseDAO: Error Details: " + databaseError.getDetails());
+                    future.complete(false);
+                    deleteLatch.countDown();
+                }
+            });
+
+        try {
+            // Wait for the operation to complete
+            boolean completed = deleteLatch.await(5, TimeUnit.SECONDS);
+            if (!completed) {
+                System.err.println("FirebaseDAO: Delete operation timed out");
+                return false;
+            }
+            boolean result = future.get(5, TimeUnit.SECONDS);
+            System.out.println("FirebaseDAO: Delete operation completed with result: " + result);
+            return result;
+        } catch (Exception e) {
+            System.err.println("FirebaseDAO: Error during delete operation: " + e.getMessage());
+            return false;
+        }
+    }
 
     // Admin methods
     @Override

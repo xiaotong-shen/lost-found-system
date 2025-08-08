@@ -18,9 +18,11 @@ public interface User {
     String getPassword();
 
     /**
-     * Returns if it's an admin
-     * @return true if they are admin
+     * Returns whether the user is an admin. For backward compatibility, the default
+     * implementation returns false so older test doubles that do not implement this
+     * method will still compile and behave as non-admin users.
+     * @return true if the user is an admin, false otherwise
      */
-    boolean isAdmin();
+    default boolean isAdmin() { return false; }
 
 }

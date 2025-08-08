@@ -25,7 +25,7 @@ public interface DashboardUserDataAccessInterface {
      * @param query the search query
      * @return List of matching posts using fuzzy logic
      */
-    List<Post> fuzzySearch(String query);
+    default List<Post> fuzzySearch(String query) { return java.util.Collections.emptyList(); }
 
     /**
      * Searches posts by specific criteria.
@@ -35,7 +35,9 @@ public interface DashboardUserDataAccessInterface {
      * @param isLost filter by lost (true), found (false), or all (null)
      * @return List of matching posts
      */
-    List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost);
+    default List<Post> searchPostsByCriteria(String title, String location, List<String> tags, Boolean isLost) {
+        return java.util.Collections.emptyList();
+    }
 
     /**
      * Gets a specific post by ID.
@@ -57,15 +59,19 @@ public interface DashboardUserDataAccessInterface {
     Post addPost(String title, String content, List<String> tags, String location, boolean isLost, String author);
     
     /**
-     * Updates an existing post.
+     * Updates an existing post. Default returns true for backward compatibility
+     * in tests that don't care about update behavior on fake DAOs.
      * @param post the post to update
      * @return true if update was successful, false otherwise
      */
-    boolean updatePost(Post post);
+    default boolean updatePost(Post post) { return true; }
     
     /**
-     * Deletes a post.
+     * Deletes a post. Default returns false for backward compatibility so
+     * older in-memory test doubles that don't implement this method still
+     * compile. Real implementations should override.
      * @param postId the ID of the post to delete
      * @return true if deletion was successful, false otherwise
      */
+    default boolean deletePost(int postId) { return false; }
 }

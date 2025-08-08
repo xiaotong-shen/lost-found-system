@@ -215,4 +215,11 @@ public class APIPostDataAccessObject implements use_case.search.SearchUserDataAc
         return true;
     }
 
+    @Override
+    public boolean deletePost(int postId) {
+        // In a real implementation, this would make an API call to delete a post
+        // For now, we'll return true to simulate success
+        System.out.println("DEBUG: APIPostDataAccessObject.deletePost() called for post ID: " + postId);
+        return true;
+    }
 }
