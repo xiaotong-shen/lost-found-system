@@ -137,7 +137,9 @@ public class DMsView extends JPanel implements PropertyChangeListener {
                 if (selectedChatId != null && dmsController != null) {
                     dmsController.updateChatIsBlocked(selectedChatId, true);
                     JOptionPane.showMessageDialog(this, "Blocked this user in chat: " + selectedChatId);
-                    dmsController.sendMessage(selectedChatId, currentUsername, "User: " + currentUsername + " has blocked this chat.");
+                    if (!dmsController.isChatBlocked(selectedChatId)) {
+                        dmsController.sendMessage(selectedChatId, currentUsername, "User: " + currentUsername + " has blocked this chat.");
+                    }
                 } else {
                     JOptionPane.showMessageDialog(this, "No chat selected or controller missing.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
