@@ -100,13 +100,6 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         headerPanel.add(blockButton, BorderLayout.EAST);
         chatPanel.add(headerPanel, BorderLayout.NORTH);
 
-        blockButton.addActionListener(e -> {
-            String userToBlock = chatWithLabel.getText();
-            if (userToBlock != null && !userToBlock.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Blocked user: " + userToBlock);
-            }
-        });
-
         // Chat area (scrollable, non-editable)
         chatArea.setEditable(false);
         chatArea.setLineWrap(true);
@@ -137,6 +130,18 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         this.add(mainPanel, BorderLayout.CENTER);
 
         backButton.addActionListener(e -> {viewManagerModel.popViewOrClose();});
+
+        blockButton.addActionListener(e -> {
+            String userToBlock = chatWithLabel.getText();
+            if (userToBlock != null && !userToBlock.isEmpty()) {
+                if (selectedChatId != null && dmsController != null) {
+                    dmsController.updateChatIsBlocked(selectedChatId, true);
+                    JOptionPane.showMessageDialog(this, "Blocked this user in chat: " + selectedChatId);
+                    dmsController.sendMessage(selectedChatId, currentUsername, "User: " + currentUsername + " has blocked this chat.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "No chat selected or controller missing.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+        }});
 
         newDMButton.addActionListener(e -> {
             if (!newDMField.getText().trim().isEmpty() && dmsController != null && currentUsername != null) {
@@ -180,12 +185,18 @@ public class DMsView extends JPanel implements PropertyChangeListener {
         });
 
         sendButton.addActionListener(e -> {
-            if (!chatInputField.getText().trim().isEmpty() && selectedChatId != null && currentUsername != null && dmsController != null) {
-                String messageContent = chatInputField.getText().trim();
-                dmsController.sendMessage(selectedChatId, currentUsername, messageContent);
-                chatInputField.setText(""); // Clear the field
-            }
-        });
+            if (selectedChatId != null && dmsController != null) {
+                if (dmsController.isChatBlocked(selectedChatId)) {
+                    JOptionPane.showMessageDialog(this, "This chat is blocked. You cannot send messages.", "Blocked", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (!chatInputField.getText().trim().isEmpty() && currentUsername != null) {
+                    String messageContent = chatInputField.getText().trim();
+                    dmsController.sendMessage(selectedChatId, currentUsername, messageContent);
+                    chatInputField.setText(""); // Clear the field
+                }
+        }});
     }
 
     public String getViewName() {
