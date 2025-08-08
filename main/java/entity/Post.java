@@ -37,7 +37,9 @@ public class Post {
         this.title = title;
         this.description = description;
         this.tags = tags;
-        this.timestamp = timestamp.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        this.timestamp = (timestamp != null)
+                ? timestamp.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                : null;
         this.author = author;
         this.location = location;
         this.imageURL = imageURL;
