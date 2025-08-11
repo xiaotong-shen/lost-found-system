@@ -1172,6 +1172,15 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         
         // Add delete functionality
         deletePostButton.addActionListener(e -> {
+            // Check if the current user is the author of the post
+            if (currentUser == null || !currentUser.equals(post.getAuthor())) {
+                JOptionPane.showMessageDialog(this,
+                    "You can only delete your own posts!",
+                    "Permission Denied",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             int result = JOptionPane.showConfirmDialog(this, 
                 "Are you sure you want to delete this post?", 
                 "Confirm Delete", 
@@ -1180,6 +1189,8 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
                 // Call the controller to delete the post
                 if (dashboardController != null) {
                     dashboardController.deletePost(post.getPostID());
+                    // After successful deletion, refresh the posts list
+                    dashboardController.loadPosts();
                 }
             }
         });
