@@ -39,8 +39,6 @@ public class AdminOutputData {
     public Post getSelectedPost() { return selectedPost; }
     public String getError() { return error; }
     public String getSuccessMessage() { return successMessage; }
-    public boolean hasError() { return error != null; }
-    public boolean hasSuccess() { return successMessage != null; }
 
     public void setPosts(List<Post> posts) {
         this.posts = posts;
