@@ -239,7 +239,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         
         // Style the search criteria dropdown
         searchCriteriaDropdown.setFont(new Font("Segoe UI", Font.PLAIN, FONT_SIZE_12));
-        searchCriteriaDropdown.setPreferredSize(new Dimension(WINDOW_WIDTH_120, BUTTON_HEIGHT_35));
+        searchCriteriaDropdown.setPreferredSize(new Dimension(BUTTON_WIDTH_120, BUTTON_HEIGHT_35));
         searchCriteriaDropdown.setBorder(BorderFactory.createLineBorder(LIGHT_BLUE, 1));
         
         searchButton = createStyledButton("Search", PRIMARY_BLUE);
