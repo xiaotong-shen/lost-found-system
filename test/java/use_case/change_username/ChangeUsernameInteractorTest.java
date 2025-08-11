@@ -1,4 +1,4 @@
-package app.use_case.change_username;
+package use_case.change_username;
 
 import org.junit.jupiter.api.Test;
 import use_case.change_username.*;
