@@ -793,12 +793,7 @@ public class FirebasePostDataAccessObject implements
         return result;
     }
 
-    @Override
-    public boolean deletePost(int postId) {
-        // Convert int to String and call the existing deletePost method
-        deletePost(String.valueOf(postId));
-        return true; // Assuming success if no exception is thrown
-    }
+
 
     @Override
     public entity.User getUserByUsername(String username) {
