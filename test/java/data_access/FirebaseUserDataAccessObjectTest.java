@@ -1,5 +1,8 @@
 package data_access;
 
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import entity.CommonUser;
 import entity.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,12 +12,19 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.google.firebase.database.DataSnapshot;
+import java.util.Arrays;
+import java.util.ArrayList;
 
-class FirebaseUserDataAccessObjectCoverageTest {
+class FirebaseUserDataAccessObjectTest {
 
     private FirebaseUserDataAccessObject dao;
 
@@ -494,5 +504,458 @@ void changeUsername_DoesNotUpdateCurrentUsernameForDifferentUser() throws Except
     assertTrue(result, "Username change should succeed");
     assertEquals(currentUser, dao.getCurrentUsername(), 
                 "Current username should not change when different user is renamed");
+    }
+    @Test
+    @DisplayName("Change password updates user password successfully")
+    void changePassword_UpdatesUserPassword() {
+        // Create initial user
+        User user = new CommonUser("testuser", "oldpassword", false);
+        dao.save(user);
+
+        // Change password
+        User updatedUser = new CommonUser("testuser", "newpassword", false);
+        dao.changePassword(updatedUser);
+
+        // Verify password was updated
+        User retrievedUser = dao.get("testuser");
+        assertNotNull(retrievedUser, "User should exist");
+        assertEquals("newpassword", retrievedUser.getPassword(), "Password should be updated");
+    }
+
+//    @Test
+//    @DisplayName("Change password for non-existent user throws RuntimeException")
+//    void changePassword_NonExistentUser_ThrowsException() {
+//        User nonExistentUser = new CommonUser("nonexistent", "newpassword", false);
+//        assertThrows(RuntimeException.class, () -> dao.changePassword(nonExistentUser));
+//    }
+
+    @Test
+    @DisplayName("Get all users throws RuntimeException when database error occurs")
+    void getAllUsers_DatabaseError_ThrowsException() throws Exception {
+        // Force Firebase mode (not mock mode)
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Set usersRef to null to simulate database error
+        setPrivateField(dao, "usersRef", null);
+
+        assertThrows(RuntimeException.class, () -> dao.getAllUsers());
+    }
+
+    @Test
+    @DisplayName("Delete user fails when database error occurs")
+    void deleteUser_DatabaseError_ThrowsException() throws Exception {
+        // Force Firebase mode (not mock mode)
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Set usersRef to null to simulate database error
+        setPrivateField(dao, "usersRef", null);
+
+        assertThrows(RuntimeException.class, () -> dao.deleteUser("testuser"));
+    }
+
+    @Test
+    @DisplayName("Delete user throws RuntimeException when operation is cancelled")
+    void deleteUser_OperationCancelled_ThrowsException() throws Exception {
+        // Create a mock DatabaseReference that simulates a cancelled operation
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockRef);
+
+        doAnswer(invocation -> {
+            ValueEventListener listener = invocation.getArgument(0);
+            listener.onCancelled(DatabaseError.fromException(new Exception("Operation cancelled")));
+            return null;
+        }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+
+        // Set the mock reference
+        setPrivateBoolean(dao, "useMockData", false);
+        setPrivateField(dao, "usersRef", mockRef);
+
+        assertThrows(RuntimeException.class, () -> dao.deleteUser("testuser"));
+    }
+
+    @Test
+    @DisplayName("Get all users returns empty list when no users exist")
+    void getAllUsers_NoUsers_ReturnsEmptyList() throws Exception {
+        // Clear all mock users
+        @SuppressWarnings("unchecked")
+        Map<String, User> mockUsers = (Map<String, User>) getPrivateField(dao, "mockUsers");
+        mockUsers.clear();
+
+        List<String> users = dao.getAllUsers();
+        assertNotNull(users, "Should return non-null list");
+        assertTrue(users.isEmpty(), "List should be empty when no users exist");
+    }
+
+    @Test
+    @DisplayName("Change username with timeout throws exception")
+    void changeUsername_Timeout_ReturnsFalse() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+        
+        // Create a mock DatabaseReference that never completes
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockRef);
+        
+        doAnswer(invocation -> {
+            // Do nothing - this simulates a hanging operation that will timeout
+            return null;
+        }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+        
+        setPrivateField(dao, "usersRef", mockRef);
+        
+        boolean result = dao.changeUsername("olduser", "newuser");
+        assertFalse(result, "Should return false when operation times out");
+    }
+
+    @Test
+    @DisplayName("Change username with interrupted operation returns false")
+    void changeUsername_Interrupted_ReturnsFalse() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+        
+        // Create a mock DatabaseReference
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockRef);
+        
+        doAnswer(invocation -> {
+            // Interrupt the current thread to force an InterruptedException
+            Thread.currentThread().interrupt();
+            return null;
+        }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+        
+        setPrivateField(dao, "usersRef", mockRef);
+        
+        boolean result = dao.changeUsername("olduser", "newuser");
+        assertFalse(result, "Should return false when operation is interrupted");
+    }
+
+    @Test
+    @DisplayName("Change username with execution exception returns false")
+    void changeUsername_ExecutionException_ReturnsFalse() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+        
+        // Create a mock DatabaseReference that throws an error
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockRef);
+        
+        doAnswer(invocation -> {
+            ValueEventListener listener = invocation.getArgument(0);
+            listener.onCancelled(DatabaseError.fromException(new RuntimeException("Database error")));
+            return null;
+        }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+        
+        setPrivateField(dao, "usersRef", mockRef);
+        
+        boolean result = dao.changeUsername("olduser", "newuser");
+        assertFalse(result, "Should return false when execution fails");
+    }
+
+@Test
+@DisplayName("Get all users - test onDataChange with empty snapshot")
+void getAllUsers_EmptySnapshot() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockRef);
+    
+    // Simulate empty snapshot
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+        when(mockSnapshot.exists()).thenReturn(true);
+        when(mockSnapshot.getChildrenCount()).thenReturn(0L);
+        when(mockSnapshot.getChildren()).thenReturn(new ArrayList<>());
+        
+        listener.onDataChange(mockSnapshot);
+        return null;
+    }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    List<String> users = dao.getAllUsers();
+    assertNotNull(users);
+    assertTrue(users.isEmpty());
 }
+
+@Test
+@DisplayName("Get all users - test onDataChange with populated snapshot")
+void getAllUsers_PopulatedSnapshot() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockRef);
+    
+    // Create mock snapshots
+    DataSnapshot userSnapshot1 = mock(DataSnapshot.class);
+    when(userSnapshot1.child("name")).thenReturn(userSnapshot1);
+    when(userSnapshot1.getValue(String.class)).thenReturn("user1");
+    
+    DataSnapshot userSnapshot2 = mock(DataSnapshot.class);
+    when(userSnapshot2.child("name")).thenReturn(userSnapshot2);
+    when(userSnapshot2.getValue(String.class)).thenReturn("user2");
+    
+    List<DataSnapshot> snapshotList = Arrays.asList(userSnapshot1, userSnapshot2);
+    
+    // Simulate populated snapshot
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+        when(mockSnapshot.exists()).thenReturn(true);
+        when(mockSnapshot.getChildrenCount()).thenReturn(2L);
+        when(mockSnapshot.getChildren()).thenReturn(snapshotList);
+        
+        listener.onDataChange(mockSnapshot);
+        return null;
+    }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    List<String> users = dao.getAllUsers();
+    assertNotNull(users);
+    assertEquals(2, users.size());
+    assertTrue(users.contains("user1"));
+    assertTrue(users.contains("user2"));
+}
+
+@Test
+@DisplayName("Get all users - test onCancelled")
+void getAllUsers_OnCancelled() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockRef);
+    
+    // Simulate operation cancelled
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DatabaseError error = DatabaseError.fromException(new RuntimeException("Operation cancelled"));
+        listener.onCancelled(error);
+        return null;
+    }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    assertThrows(RuntimeException.class, () -> dao.getAllUsers(),
+                "Should throw RuntimeException when operation is cancelled");
+}
+
+@Test
+@DisplayName("Get all users - test timeout exception")
+void getAllUsers_Timeout() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockRef);
+    
+    // Simulate timeout by not calling the listener
+    doAnswer(invocation -> {
+        Thread.sleep(6000); // Sleep longer than the 5-second timeout
+        return null;
+    }).when(mockRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    assertThrows(RuntimeException.class, () -> dao.getAllUsers(),
+                "Should throw RuntimeException on timeout");
+}
+
+@Test
+@DisplayName("Delete user - successful deletion")
+void deleteUser_SuccessfulDeletion() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    DatabaseReference mockChildRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockChildRef);
+    
+    // Simulate successful deletion flow
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+        when(mockSnapshot.exists()).thenReturn(true);
+        
+        // Simulate successful deletion
+        doAnswer(innerInvocation -> {
+            DatabaseReference.CompletionListener completionListener = innerInvocation.getArgument(0);
+            completionListener.onComplete(null, mockChildRef);
+            return null;
+        }).when(mockChildRef).removeValue(any(DatabaseReference.CompletionListener.class));
+        
+        listener.onDataChange(mockSnapshot);
+        return null;
+    }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    // Should complete without throwing exception
+    assertDoesNotThrow(() -> dao.deleteUser("testuser"));
+}
+
+@Test
+@DisplayName("Delete user - error during deletion")
+void deleteUser_ErrorDuringDeletion() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+    
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    DatabaseReference mockChildRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockChildRef);
+    
+    // Simulate deletion with error
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+        when(mockSnapshot.exists()).thenReturn(true);
+        
+        // Simulate error during deletion
+        doAnswer(innerInvocation -> {
+            DatabaseReference.CompletionListener completionListener = innerInvocation.getArgument(0);
+            DatabaseError mockError = DatabaseError.fromException(new RuntimeException("Deletion failed"));
+            completionListener.onComplete(mockError, mockChildRef);
+            return null;
+        }).when(mockChildRef).removeValue(any(DatabaseReference.CompletionListener.class));
+        
+        listener.onDataChange(mockSnapshot);
+        return null;
+    }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+    
+    setPrivateField(dao, "usersRef", mockRef);
+    
+    assertThrows(RuntimeException.class, () -> dao.deleteUser("testuser"),
+                "Should throw RuntimeException when deletion fails");
+}
+
+@Test
+@DisplayName("Delete user - user not found")
+void deleteUser_UserNotFound() throws Exception {
+    // Force Firebase mode
+    setPrivateBoolean(dao, "useMockData", false);
+
+    // Create mock references
+    DatabaseReference mockRef = mock(DatabaseReference.class);
+    DatabaseReference mockChildRef = mock(DatabaseReference.class);
+    when(mockRef.child(anyString())).thenReturn(mockChildRef);
+
+    // Simulate user not found
+    doAnswer(invocation -> {
+        ValueEventListener listener = invocation.getArgument(0);
+        DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+        when(mockSnapshot.exists()).thenReturn(false);
+
+        listener.onDataChange(mockSnapshot);
+        return null;
+    }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+}
+
+    @Test
+    @DisplayName("ExistsByName - user exists")
+    void existsByName_UserExists() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Create mock references
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        DatabaseReference mockChildRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockChildRef);
+
+        // Mock successful existence check
+        doAnswer(invocation -> {
+            ValueEventListener listener = invocation.getArgument(0);
+            DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+            when(mockSnapshot.exists()).thenReturn(true);
+            listener.onDataChange(mockSnapshot);
+            return null;
+        }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+
+        setPrivateField(dao, "usersRef", mockRef);
+
+        boolean result = dao.existsByName("testuser");
+        assertTrue(result, "Should return true when user exists");
+    }
+
+    @Test
+    @DisplayName("ExistsByName - user does not exist")
+    void existsByName_UserDoesNotExist() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Create mock references
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        DatabaseReference mockChildRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockChildRef);
+
+        // Mock non-existence check
+        doAnswer(invocation -> {
+            ValueEventListener listener = invocation.getArgument(0);
+            DataSnapshot mockSnapshot = mock(DataSnapshot.class);
+            when(mockSnapshot.exists()).thenReturn(false);
+            listener.onDataChange(mockSnapshot);
+            return null;
+        }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+
+        setPrivateField(dao, "usersRef", mockRef);
+
+        boolean result = dao.existsByName("nonexistent");
+        assertFalse(result, "Should return false when user does not exist");
+    }
+
+    @Test
+    @DisplayName("ExistsByName - operation cancelled")
+    void existsByName_OperationCancelled() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Create mock references
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        DatabaseReference mockChildRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockChildRef);
+
+        // Mock operation cancelled
+        doAnswer(invocation -> {
+            ValueEventListener listener = invocation.getArgument(0);
+            DatabaseError mockError = DatabaseError.fromException(new RuntimeException("Operation cancelled"));
+            listener.onCancelled(mockError);
+            return null;
+        }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+
+        setPrivateField(dao, "usersRef", mockRef);
+
+        boolean result = dao.existsByName("testuser");
+        assertFalse(result, "Should return false when operation is cancelled");
+    }
+
+    @Test
+    @DisplayName("ExistsByName - timeout")
+    void existsByName_Timeout() throws Exception {
+        // Force Firebase mode
+        setPrivateBoolean(dao, "useMockData", false);
+
+        // Create mock references
+        DatabaseReference mockRef = mock(DatabaseReference.class);
+        DatabaseReference mockChildRef = mock(DatabaseReference.class);
+        when(mockRef.child(anyString())).thenReturn(mockChildRef);
+
+        // Mock timeout by not calling listener
+        doAnswer(invocation -> {
+            Thread.sleep(6000); // Sleep longer than the 5-second timeout
+            return null;
+        }).when(mockChildRef).addListenerForSingleValueEvent(any(ValueEventListener.class));
+
+        setPrivateField(dao, "usersRef", mockRef);
+
+        boolean result = dao.existsByName("testuser");
+        assertFalse(result, "Should return false when operation times out");
+    }
 }
