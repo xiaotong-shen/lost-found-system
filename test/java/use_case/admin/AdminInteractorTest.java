@@ -1,4 +1,4 @@
-package app.use_case.admin;
+package use_case.admin;
 
 import data_access.FirebasePostDataAccessObject;
 import entity.Post;
