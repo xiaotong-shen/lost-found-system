@@ -14,7 +14,7 @@ public class DashboardInteractor implements DashboardInputBoundary {
     private final DashboardOutputBoundary dashboardOutputBoundary;
 
     public DashboardInteractor(DashboardUserDataAccessInterface dashboardDataAccessObject,
-                              DashboardOutputBoundary dashboardOutputBoundary) {
+                               DashboardOutputBoundary dashboardOutputBoundary) {
         this.dashboardDataAccessObject = dashboardDataAccessObject;
         this.dashboardOutputBoundary = dashboardOutputBoundary;
     }
@@ -22,7 +22,13 @@ public class DashboardInteractor implements DashboardInputBoundary {
     @Override
     public void execute(DashboardInputData dashboardInputData) {
         try {
-            switch (dashboardInputData.getAction()) {
+            String action = dashboardInputData.getAction();
+            if (action == null) {
+                dashboardOutputBoundary.prepareFailView(new DashboardOutputData("Invalid action."));
+                return;
+            }
+
+            switch (action) {
                 case "load_posts":
                     List<Post> posts = dashboardDataAccessObject.getAllPosts();
                     DashboardOutputData outputData = new DashboardOutputData(posts);
@@ -159,8 +165,9 @@ public class DashboardInteractor implements DashboardInputBoundary {
                     break;
 
                 case "delete_post":
-                    // Attempt deletion for any provided ID. The DAO will determine validity.
-                    boolean deleteSuccess = dashboardDataAccessObject.deletePost(dashboardInputData.getPostId());
+                    // Make sure this correctly gets the post ID from the input data
+                    int postIdToDelete = dashboardInputData.getPostId();
+                    boolean deleteSuccess = dashboardDataAccessObject.deletePost(postIdToDelete);
                     if (deleteSuccess) {
                         DashboardOutputData deletePostOutputData = new DashboardOutputData("Post deleted successfully!", true);
                         dashboardOutputBoundary.prepareSuccessView(deletePostOutputData);
@@ -177,4 +184,4 @@ public class DashboardInteractor implements DashboardInputBoundary {
             dashboardOutputBoundary.prepareFailView(new DashboardOutputData("An error occurred: " + e.getMessage()));
         }
     }
-} 
+}

@@ -188,7 +188,7 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
     }
 
     private void addFormRow(JPanel panel, String label, Component component,
-                          GridBagConstraints gbc, int row) {
+                            GridBagConstraints gbc, int row) {
         gbc.gridy = row;
         gbc.gridx = 0;
         panel.add(new JLabel(label), gbc);
@@ -222,12 +222,12 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         List<String> tags = Arrays.asList(tagsField.getText().split("\\s*,\\s*"));
 
         adminController.editPost(
-            selectedPostId,
-            titleField.getText(),
-            descriptionArea.getText(),
-            locationField.getText(),
-            tags,
-            isLostCheckBox.isSelected()
+                selectedPostId,
+                titleField.getText(),
+                descriptionArea.getText(),
+                locationField.getText(),
+                tags,
+                isLostCheckBox.isSelected()
         );
 
         editDialog.setVisible(false);
@@ -300,14 +300,14 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
             String location = locationField.getText().trim();
             boolean isLost = lostButton.isSelected();
 
-            if (titleField.getText().trim().isEmpty() || descriptionArea.getText().trim().isEmpty()) {
+            // FIX: Use contentArea instead of descriptionArea
+            if (title.isEmpty() || content.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                        "Title and description are required.",
+                        "Title and content are required.",
                         "Validation Error",
                         JOptionPane.ERROR_MESSAGE);
                 return; // Don't proceed with the submission
             }
-
 
             List<String> tags = new ArrayList<>();
             if (!tagsText.isEmpty()) {
@@ -333,14 +333,14 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("editSuccess")) {
             JOptionPane.showMessageDialog(this,
-                "Post updated successfully",
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Post updated successfully",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
         } else if (evt.getPropertyName().equals("editError")) {
             JOptionPane.showMessageDialog(this,
-                "Error updating post: " + evt.getNewValue(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error updating post: " + evt.getNewValue(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
         if (evt.getPropertyName().equals("state")) {
             final AdminState state = (AdminState) evt.getNewValue();
@@ -549,15 +549,15 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
         deleteButton.addActionListener(e -> {
             System.out.println("\n=== Delete Operation Started ===");
             System.out.println("AdminView: Delete button clicked for post ID: " + postId);
-        
+
             int result = JOptionPane.showConfirmDialog(this,
                     "Are you sure you want to delete this post?",
                     "Confirm Delete",
                     JOptionPane.YES_NO_OPTION);
-                
-            System.out.println("AdminView: User confirmation result: " + 
-                          (result == JOptionPane.YES_OPTION ? "YES" : "NO"));
-                          
+
+            System.out.println("AdminView: User confirmation result: " +
+                    (result == JOptionPane.YES_OPTION ? "YES" : "NO"));
+
             if (result == JOptionPane.YES_OPTION) {
                 try {
                     System.out.println("AdminView: Initiating delete operation through controller");
@@ -566,9 +566,9 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
                     System.err.println("AdminView: Error during delete operation: " + ex.getMessage());
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(this,
-                    "Failed to delete post: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                            "Failed to delete post: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

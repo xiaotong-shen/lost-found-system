@@ -413,83 +413,83 @@ public class FirebasePostDataAccessObject implements
         return new ArrayList<>();
     }
 
-    // Add a top-level comment to a post in Firebase
-    public void addCommentToPost(int postId, Comment comment) {
-        try {
-            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Post post = dataSnapshot.getValue(Post.class);
-                    if (post != null) {
-                        List<Comment> comments = post.getComments();
-                        if (comments == null) comments = new ArrayList<>();
-                        comments.add(comment);
-                        post.setComments(comments);
-                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                if (databaseError != null) {
-                                    System.err.println("Error saving comment: " + databaseError.getMessage());
-                                } else {
-                                    System.out.println("Comment saved successfully!");
-                                }
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    future.completeExceptionally(new RuntimeException("Failed to load post for comment: " + databaseError.getMessage()));
-                }
-            });
-            future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Like a comment (top-level only for now)
-    public void likeComment(int postId, String commentId) {
-        try {
-            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Post post = dataSnapshot.getValue(Post.class);
-                    if (post != null && post.getComments() != null) {
-                        for (Comment c : post.getComments()) {
-                            if (c.getId().equals(commentId)) {
-                                c.like();
-                                break;
-                            }
-                        }
-                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                if (databaseError != null) {
-                                    System.err.println("Error saving liked comment: " + databaseError.getMessage());
-                                } else {
-                                    System.out.println("Comment liked successfully!");
-                                }
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    future.completeExceptionally(new RuntimeException("Failed to load post for like: " + databaseError.getMessage()));
-                }
-            });
-            future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-        }
-    }
+//    // Add a top-level comment to a post in Firebase
+//    public void addCommentToPost(int postId, Comment comment) {
+//        try {
+//            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
+//            CompletableFuture<Void> future = new CompletableFuture<>();
+//            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    Post post = dataSnapshot.getValue(Post.class);
+//                    if (post != null) {
+//                        List<Comment> comments = post.getComments();
+//                        if (comments == null) comments = new ArrayList<>();
+//                        comments.add(comment);
+//                        post.setComments(comments);
+//                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+//                            @Override
+//                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                if (databaseError != null) {
+//                                    System.err.println("Error saving comment: " + databaseError.getMessage());
+//                                } else {
+//                                    System.out.println("Comment saved successfully!");
+//                                }
+//                            }
+//                        });
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//                    future.completeExceptionally(new RuntimeException("Failed to load post for comment: " + databaseError.getMessage()));
+//                }
+//            });
+//            future.get(5, TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    // Like a comment (top-level only for now)
+//    public void likeComment(int postId, String commentId) {
+//        try {
+//            DatabaseReference postRef = FirebaseConfig.getDatabase().getReference("posts").child(String.valueOf(postId));
+//            CompletableFuture<Void> future = new CompletableFuture<>();
+//            postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    Post post = dataSnapshot.getValue(Post.class);
+//                    if (post != null && post.getComments() != null) {
+//                        for (Comment c : post.getComments()) {
+//                            if (c.getId().equals(commentId)) {
+//                                c.like();
+//                                break;
+//                            }
+//                        }
+//                        postRef.setValue(post, new DatabaseReference.CompletionListener() {
+//                            @Override
+//                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                if (databaseError != null) {
+//                                    System.err.println("Error saving liked comment: " + databaseError.getMessage());
+//                                } else {
+//                                    System.out.println("Comment liked successfully!");
+//                                }
+//                            }
+//                        });
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//                    future.completeExceptionally(new RuntimeException("Failed to load post for like: " + databaseError.getMessage()));
+//                }
+//            });
+//            future.get(5, TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * Updates an existing post in Firebase.
@@ -644,64 +644,83 @@ public class FirebasePostDataAccessObject implements
     @Override
     public boolean editPost(String postId, String newTitle, String description,
                             String location, List<String> tags, boolean isLost) {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-        int intPostId = Integer.parseInt(postId);
-        // Query for the post with matching title
-        postsRef.orderByChild("postID").equalTo(intPostId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Should only be one post with this title
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            Post existingPost = postSnapshot.getValue(Post.class);
-                            if (existingPost != null) {
-                                // Create updated post
-                                Post updatedPost = new Post(
-                                        existingPost.getPostID(),
-                                        newTitle,
-                                        description,
-                                        tags != null ? tags : existingPost.getTags(),
-                                        LocalDateTime.parse(existingPost.getTimestamp(), dateFormatter),
-                                        existingPost.getAuthor(),
-                                        location,
-                                        existingPost.getImageURL(),
-                                        isLost,
-                                        existingPost.getNumberOfLikes(),
-                                        existingPost.getReactions()
-                                );
+        System.out.println("FirebasePostDataAccessObject: Editing post: " + postId);
 
-                                // Update in Firebase using the snapshot's key
-                                postsRef.child(postSnapshot.getKey())
-                                        .setValue(updatedPost, (databaseError, databaseReference) -> {
-                                            if (databaseError != null) {
-                                                System.err.println("Error updating post: " +
-                                                        databaseError.getMessage());
-                                                future.complete(false);
-                                            } else {
-                                                System.out.println("Post updated successfully!");
-                                                future.complete(true);
-                                            }
-                                        });
-                                return;  // Exit after finding and updating the post
-                            }
+        // Convert string ID to int for lookup
+        int numericId;
+        try {
+            numericId = Integer.parseInt(postId);
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid post ID format: " + postId);
+            return false;
+        }
+
+        // Find the post
+        CompletableFuture<Post> future = new CompletableFuture<>();
+        Query query = postsRef.orderByChild("postID").equalTo((double) numericId);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists() || dataSnapshot.getChildrenCount() == 0) {
+                    System.err.println("Post not found: " + postId);
+                    future.complete(null);
+                    return;
+                }
+
+                // Get the first matching post
+                DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
+                Post existingPost = firstChild.getValue(Post.class);
+
+                if (existingPost == null) {
+                    System.err.println("Failed to deserialize post: " + postId);
+                    future.complete(null);
+                    return;
+                }
+
+                // Update fields only if new values are provided (not null)
+                if (newTitle != null) {
+                    existingPost.setTitle(newTitle);
+                }
+                if (description != null) {
+                    existingPost.setDescription(description);
+                }
+                if (location != null) {
+                    existingPost.setLocation(location);
+                }
+                if (tags != null) {
+                    existingPost.setTags(tags);
+                }
+                existingPost.setLost(isLost);  // Boolean is always set
+
+                // Update the post in the database
+                String key = firstChild.getKey();
+                postsRef.child(key).setValue(existingPost, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError != null) {
+                            System.err.println("Error updating post: " + databaseError.getMessage());
+                            future.complete(null);
+                        } else {
+                            System.out.println("Post updated successfully!");
+                            future.complete(existingPost);
                         }
-                        // If we get here, no post was found
-                        System.err.println("Post not found with postid: " + postId);
-                        future.complete(false);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("Error fetching post for update: " +
-                                databaseError.getMessage());
-                        future.complete(false);
                     }
                 });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("Database error: " + databaseError.getMessage());
+                future.complete(null);
+            }
+        });
 
         try {
-            return future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.err.println("Error during post update: " + e.getMessage());
+            Post result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            return result != null;
+        } catch (Exception e) {
+            System.err.println("Error waiting for post update: " + e.getMessage());
             return false;
         }
     }
@@ -709,81 +728,69 @@ public class FirebasePostDataAccessObject implements
     // Delete post methods
     @Override
     public void deletePost(String postId) {
-        System.out.println("\n=== Firebase Delete Operation ===");
-        System.out.println("FirebaseDAO: Starting delete operation for post ID: " + postId);
+    System.out.println("\n=== Firebase Delete Operation ===");
+    System.out.println("FirebaseDAO: Starting delete operation for post ID: " + postId);
 
-        DatabaseReference postsRef = database.getReference("posts");
-        CountDownLatch deleteLatch = new CountDownLatch(1);
+    CountDownLatch deleteLatch = new CountDownLatch(1);
+    final DatabaseError[] errorHolder = new DatabaseError[1];
 
-        try {
-            System.out.println("FirebaseDAO: Converting post ID to integer: " + postId);
-            int intPostId = Integer.parseInt(postId);
+    try {
+        System.out.println("FirebaseDAO: Converting post ID to integer: " + postId);
+        int intPostId = Integer.parseInt(postId);
 
-            System.out.println("FirebaseDAO: Querying for post with ID: " + intPostId);
-            postsRef.orderByChild("postID").equalTo(intPostId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        System.out.println("FirebaseDAO: Query returned " +
-                                         dataSnapshot.getChildrenCount() + " matches");
+        System.out.println("FirebaseDAO: Querying for post with ID: " + intPostId);
+        Query query = postsRef.orderByChild("postID").equalTo(intPostId);
+        
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println("FirebaseDAO: Query returned " +
+                        dataSnapshot.getChildrenCount() + " matches");
 
-                        if (!dataSnapshot.exists()) {
-                            System.err.println("FirebaseDAO: No matching post found");
-                            deleteLatch.countDown();
-                            return;
-                        }
+                if (!dataSnapshot.exists() || dataSnapshot.getChildrenCount() == 0) {
+                    System.err.println("FirebaseDAO: No matching post found");
+                    errorHolder[0] = DatabaseError.fromException(
+                        new DatabaseException("No matching post found")
+                    );
+                    deleteLatch.countDown();
+                    return;
+                }
 
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            String firebaseKey = postSnapshot.getKey();
-                            System.out.println("FirebaseDAO: Found post with Firebase key: " + firebaseKey);
+                DataSnapshot postSnapshot = dataSnapshot.getChildren().iterator().next();
+                String firebaseKey = postSnapshot.getKey();
+                System.out.println("FirebaseDAO: Found post with Firebase key: " + firebaseKey);
 
-                            postsRef.child(firebaseKey).removeValue((error, ref) -> {
-                                if (error != null) {
-                                    System.err.println("FirebaseDAO: Error deleting post: " +
-                                                     error.getMessage());
-                                } else {
-                                    System.out.println("FirebaseDAO: Post successfully deleted");
-                                }
-                                deleteLatch.countDown();
-                            });
-                            return;
-                        }
-
-                        System.out.println("FirebaseDAO: No posts to delete");
-                        deleteLatch.countDown();
+                postsRef.child(firebaseKey).removeValue((error, ref) -> {
+                    if (error != null) {
+                        System.err.println("FirebaseDAO: Error deleting post: " + error.getMessage());
+                        errorHolder[0] = error;
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("FirebaseDAO: Delete operation cancelled: " +
-                                         databaseError.getMessage());
-                        System.err.println("FirebaseDAO: Error Code: " + databaseError.getCode());
-                        System.err.println("FirebaseDAO: Error Details: " + databaseError.getDetails());
-                        deleteLatch.countDown();
-                    }
+                    deleteLatch.countDown();
                 });
+            }
 
-        System.out.println("FirebaseDAO: Waiting for delete operation to complete...");
-        boolean completed = deleteLatch.await(5, TimeUnit.SECONDS);
-        System.out.println("FirebaseDAO: Operation completed: " + completed);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("FirebaseDAO: Delete operation cancelled: " + databaseError.getMessage());
+                errorHolder[0] = databaseError;
+                deleteLatch.countDown();
+            }
+        });
 
-        if (!completed) {
-            System.err.println("FirebaseDAO: Delete operation timed out");
+        if (!deleteLatch.await(5, TimeUnit.SECONDS)) {
             throw new RuntimeException("Delete operation timed out");
         }
+        
+        if (errorHolder[0] != null) {
+            throw new RuntimeException("Failed to delete post: " + errorHolder[0].getMessage());
+        }
+
     } catch (NumberFormatException e) {
-        System.err.println("FirebaseDAO: Invalid post ID format: " + e.getMessage());
         throw new RuntimeException("Invalid post ID format: " + postId);
     } catch (InterruptedException e) {
-        System.err.println("FirebaseDAO: Operation interrupted: " + e.getMessage());
         Thread.currentThread().interrupt();
         throw new RuntimeException("Operation interrupted while deleting post");
-    } catch (Exception e) {
-        System.err.println("FirebaseDAO: Unexpected error: " + e.getMessage());
-        e.printStackTrace();
-        throw new RuntimeException("Unexpected error during delete: " + e.getMessage());
     }
-    System.out.println("=== Firebase Delete Operation Completed ===\n");
 }
 
     @Override

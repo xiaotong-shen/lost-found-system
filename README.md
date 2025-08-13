@@ -1,4 +1,4 @@
-# **miao miao / nyan nyanz – Lost & Found System**
+# ** CSC207 Group 8 - MIAO MIAO – Lost & Found System**
 
 ## **Authors & Contributors**
 - Yipeng Zhao
@@ -25,11 +25,13 @@ To create a more efficient and community-driven way for people to report, find, 
 
 ## **Table of Contents**
 1. [Features](#features)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [License](#license)
-5. [Feedback](#feedback)
-6. [Contributing](#contributing)
+2. [Technology Stack](#technology-stack)
+3. [Project Structure](#project-structure)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [License](#license)
+7. [Feedback](#feedback)
+8. [Contributing](#contributing)
 
 ---
 
@@ -49,23 +51,84 @@ To create a more efficient and community-driven way for people to report, find, 
 - **Data Persistence:**  
   Uses Firebase APIs to store posts, comments, and chat history.
 
+## **Technology Stack**
+- **Backend:** Java 17 with Clean Architecture pattern
+- **Build Tool:** Maven
+- **Database:** Firebase (Firestore & Authentication)
+- **Testing:** JUnit 5 with Mockito
+- **Code Coverage:** JaCoCo
+- **Architecture:** MVC pattern with Interface Adapters
+
+## **Project Structure**
+```
+CSC207-Miao-Miao/
+├── main/java/
+│   ├── app/                 # Main application entry point
+│   ├── data_access/         # Firebase data access layer
+│   ├── entity/              # Domain entities (User, Post, Chat, etc.)
+│   ├── interface_adapter/   # Controllers, Presenters, ViewModels
+│   ├── use_case/            # Business logic and use cases
+│   └── view/                # UI components and views
+├── test/java/               # Test files mirroring main structure
+├── resources/               # Configuration files and Firebase credentials
+├── pom.xml                  # Maven configuration and dependencies
+└── README.md               # This file
+```
+
+**Key Components:**
+- **Use Cases:** Core business logic (login, signup, search, etc.)
+- **Interface Adapters:** Controllers and presenters for UI interaction
+- **Data Access:** Firebase integration for persistence
+- **Views:** Swing-based user interface components
+
 ---
 
 ## **Installation**
 ### Requirements
-- Java Version: [NEED INFO]
-- Dependencies:
+- **Java Version:** Java 17 (OpenJDK 17.0.16 or later)
+- **Maven:** Version 3.6.0 or later (for dependency management and building)
+- **Dependencies:**
     - Firebase Auth REST API (Docs: https://firebase.google.com/docs/reference/rest/auth)
     - Cloud Firestore REST API (Docs: https://firebase.google.com/docs/firestore/use-rest-api)
 
 ### Steps
-1. Clone this repository:
+1. **Clone this repository:**
+   ```bash
    git clone https://github.com/Ethan-Hapurne/CSC207-Miao-Miao.git
+   cd CSC207-Miao-Miao
+   ```
 
-2. Run the main application:
-    - Locate Main.java in:
-      main/java/app/Main.java
-    - Compile and run it with your preferred IDE (e.g., IntelliJ, Eclipse) or from the command line.
+2. **Verify Java 17 is installed:**
+   ```bash
+   java -version
+   # Should show Java 17.x.x
+   ```
+   
+   **Note:** This project requires Java 17 specifically. If you have multiple Java versions installed, ensure JAVA_HOME points to Java 17:
+   ```bash
+   export JAVA_HOME=/path/to/java17
+   export PATH=$JAVA_HOME/bin:$PATH
+   ```
+
+3. **Build the project:**
+   ```bash
+   mvn clean compile
+   ```
+
+4. **Run tests (optional but recommended):**
+   ```bash
+   mvn test
+   ```
+
+5. **Run the main application:**
+   - **Option A - From command line:**
+     ```bash
+     mvn exec:java -Dexec.mainClass="app.Main"
+     ```
+   - **Option B - From IDE:**
+     - Open the project in your preferred IDE (IntelliJ IDEA, Eclipse, VS Code)
+     - Locate `main/java/app/Main.java`
+     - Run the `Main` class
 
 ---
 

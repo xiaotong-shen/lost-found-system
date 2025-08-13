@@ -188,13 +188,10 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         tabbedPane.setBackground(WHITE_COLOR);
         tabbedPane.setForeground(DARK_TEXT_COLOR);
 
-        // Posts tab
+        // Posts tabs
         JPanel postsTab = createPostsTab();
         tabbedPane.addTab("General Postings", postsTab);
-
-        // Add more tabs as needed
         tabbedPane.addTab("My Posts", createMyPostsTab());
-        tabbedPane.addTab("Settings", new JPanel());
 
         // Add components to main panel
         this.add(toolbarPanel, BorderLayout.NORTH);
