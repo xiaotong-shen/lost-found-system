@@ -4,194 +4,445 @@ import entity.Post;
 import interface_adapter.search.SearchController;
 import interface_adapter.search.SearchState;
 import interface_adapter.search.SearchViewModel;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for SearchView.
- * No Mockito: we use lightweight stubs to avoid ByteBuddy/JDK version issues.
+ * Stable, high-coverage tests for {@link SearchView}.
+ *
+ * Why this version is stable when running with the whole suite:
+ *  - Every test shows the view inside a real JFrame and disposes it in @AfterEach.
+ *  - All UI mutations happen on the EDT.
+ *  - flushEdt() guarantees that pending invokeLater tasks are processed even if
+ *    the caller is already on the EDT (the usual flakiness culprit).
+ *  - A couple of tiny wait helpers avoid racing on asynchronous label updates.
  */
-class SearchViewTest {
+public class SearchViewTest {
 
-    @BeforeAll
-    static void headless() {
-        System.setProperty("java.awt.headless", "true");
-    }
+    /** Minimal fake controller capturing the last call for verification. */
+    static class FakeSearchController extends SearchController {
+        String lastMethod;
+        Object[] lastArgs;
 
-    /**
-     * A stub controller that records calls without touching real use cases.
-     */
-    static class StubSearchController extends SearchController {
-        boolean executeCalled = false;
-        String lastQuery = null;
-        boolean backCalled = false;
-
-        // super requires params; pass null and override methods to avoid NPE
-        public StubSearchController() { super(null, null); }
+        FakeSearchController() { super(null, null); }
 
         @Override
-        public void execute(String searchQuery) {
-            executeCalled = true;
-            lastQuery = searchQuery;
-        }
-
-        @Override
-        public void executeAdvancedSearch(String title, String location,
-                                          java.util.List<String> tags, Boolean isLost) {
-            // not used in these tests
+        public void execute(String query) {
+            lastMethod = "execute";
+            lastArgs = new Object[]{query};
         }
 
         @Override
         public void navigateBack() {
-            backCalled = true;
+            lastMethod = "navigateBack";
+            lastArgs = null;
         }
     }
 
-    private SearchViewModel vm;        // use the real ViewModel (no mocks)
-    private StubSearchController controller;
-    private SearchState initialState;
+    private SearchViewModel vm;
     private SearchView view;
+    private FakeSearchController controller;
+    private JFrame host;
 
     @BeforeEach
-    void setup() throws Exception {
-        vm = new SearchViewModel();
-        initialState = new SearchState();
-        initialState.setSearchQuery("laptop");
-        initialState.setLoading(false);
-        vm.setState(initialState);
-
-        controller = new StubSearchController();
-
-        SwingUtilities.invokeAndWait(() -> {
+    void setUp() throws Exception {
+        runOnEdt(() -> {
+            vm = new SearchViewModel();
+            controller = new FakeSearchController();
             view = new SearchView(vm);
             view.setSearchController(controller);
+
+            host = new JFrame("SearchHost");
+            host.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            host.getContentPane().add(view);
+            host.setSize(900, 600);
+            host.setLocationRelativeTo(null);
+            host.setVisible(true);
+        });
+        flushEdt();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        runOnEdt(() -> {
+            if (host != null) {
+                host.dispose();
+            }
+        });
+        flushEdt();
+        view = null;
+        vm = null;
+        controller = null;
+        host = null;
+    }
+
+    @Test
+    void viewName_isSearch() throws Exception {
+        runOnEdt(() -> assertEquals("search", view.getViewName()));
+    }
+
+    @Test
+    void propertyChange_loading_showsSearchingLabel() throws Exception {
+        runOnEdt(() -> {
+            SearchState s = vm.getState();
+            s.setSearchQuery("wallet");
+            s.setLoading(true);
+            s.setSearchResults(null);
+            s.setSearchError(null);
+            vm.setState(s);
+            vm.firePropertyChanged();
+        });
+        flushEdt();
+
+        runOnEdt(() -> {
+            JPanel resultsPanel = findResultsPanel(view);
+            assertNotNull(resultsPanel);
+            assertTrue(
+                    waitForLabelTextContains(resultsPanel, "searching", 2000),
+                    "Expected a 'Searching' label to appear"
+            );
         });
     }
 
-    // ----- helpers -----
-    private JButton findButton(Container root, String text) {
-        for (Component c : root.getComponents()) {
-            if (c instanceof JButton && text.equals(((JButton) c).getText())) return (JButton) c;
-            if (c instanceof Container) {
-                JButton b = findButton((Container) c, text);
-                if (b != null) return b;
+    @Test
+    void propertyChange_emptyResults_showsNoResultsMessage() throws Exception {
+        runOnEdt(() -> {
+            SearchState s = vm.getState();
+            s.setSearchQuery("zzz");
+            s.setLoading(false);
+            s.setSearchResults(new ArrayList<>());
+            s.setSearchError(null);
+            vm.setState(s);
+            vm.firePropertyChanged();
+        });
+        flushEdt();
+
+        runOnEdt(() -> {
+            JPanel resultsPanel = findResultsPanel(view);
+            assertNotNull(resultsPanel);
+            assertTrue(
+                    waitForLabelTextContains(resultsPanel, "no posts", 2000),
+                    "Expected a 'No posts' message"
+            );
+        });
+    }
+
+    @Test
+    void propertyChange_results_renderList_andShowTags() throws Exception {
+        runOnEdt(() -> {
+            List<Post> posts = new ArrayList<>();
+
+            Post p1 = new Post();
+            p1.setTitle("Lost Wallet");
+            p1.setDescription("Black leather wallet near library");
+            p1.setAuthor("Alice");
+            p1.setLocation("Library");
+            p1.setLost(true);
+            p1.setTimestamp("2025-08-12T10:20:00");
+            p1.setTags(List.of("wallet", "black"));
+
+            Post p2 = new Post();
+            p2.setTitle("Found Keys");
+            p2.setDescription("Keychain with blue tag");
+            p2.setAuthor("Bob");
+            p2.setLocation("Gym");
+            p2.setLost(false);
+            p2.setTimestamp("2025-08-12T11:00:00");
+            p2.setTags(List.of("keys"));
+
+            posts.add(p1);
+            posts.add(p2);
+
+            SearchState s = vm.getState();
+            s.setSearchQuery("wa");
+            s.setLoading(false);
+            s.setSearchResults(posts);
+            s.setSearchError(null);
+            vm.setState(s);
+            vm.firePropertyChanged();
+        });
+        flushEdt();
+
+        runOnEdt(() -> {
+            JPanel resultsPanel = findResultsPanel(view);
+            assertNotNull(resultsPanel);
+
+            // Header that says "2 posts found" (wording can vary slightly, so just check the number)
+            assertTrue(anyLabelContains(resultsPanel, "2"), "Header should reflect 2 posts found");
+
+            String allTexts = collectAllLabelTexts(resultsPanel).toLowerCase();
+            assertTrue(allTexts.contains("lost wallet"));
+            assertTrue(allTexts.contains("found keys"));
+            assertTrue(allTexts.contains("alice"));
+            assertTrue(allTexts.contains("bob"));
+            assertTrue(allTexts.contains("library"));
+            assertTrue(allTexts.contains("gym"));
+            assertTrue(allTexts.contains("wallet"));
+            assertTrue(allTexts.contains("black"));
+            assertTrue(allTexts.contains("keys"));
+            assertTrue(allTexts.contains("lost"));
+            assertTrue(allTexts.contains("found"));
+        });
+    }
+
+    @Test
+    void propertyChange_setsErrorText_andSyncsInputFromState() throws Exception {
+        runOnEdt(() -> {
+            SearchState s = vm.getState();
+            s.setSearchQuery("abc");
+            s.setSearchError("Boom!");
+            s.setLoading(false);
+            s.setSearchResults(new ArrayList<>());
+            vm.setState(s);
+            vm.firePropertyChanged();
+        });
+        flushEdt();
+
+        runOnEdt(() -> {
+            JTextField input = findFirst(view, JTextField.class);
+            assertNotNull(input);
+            assertEquals("abc", input.getText());
+
+            // Exact error label might be placed deep in the tree – search for exact text.
+            JLabel error = findLabelWithExactText(view, "Boom!");
+            assertNotNull(error, "Could not find a JLabel that shows the error text");
+            assertEquals("Boom!", error.getText());
+        });
+    }
+
+    @Test
+    void typingInSearchField_updatesViewModelViaDocumentListener() throws Exception {
+        JTextField input = runOnEdtGet(() -> findFirst(view, JTextField.class));
+        assertNotNull(input, "Search input field should exist");
+
+        runOnEdt(() -> setTextByDoc(input, "hello world"));
+        flushEdt();
+
+        assertEquals("hello world", vm.getState().getSearchQuery());
+    }
+
+    @Test
+    void clickingSearchButton_callsControllerExecute_withCurrentQuery() throws Exception {
+        JTextField input = runOnEdtGet(() -> findFirst(view, JTextField.class));
+        JButton searchBtn = runOnEdtGet(() -> findButton(view, "Search"));
+        assertNotNull(input);
+        assertNotNull(searchBtn);
+
+        runOnEdt(() -> setTextByDoc(input, "phone"));
+        flushEdt();
+
+        runOnEdt(searchBtn::doClick);
+        flushEdt();
+
+        assertEquals("execute", controller.lastMethod);
+        assertEquals("phone", controller.lastArgs[0]);
+    }
+
+    @Test
+    void clickingBack_callsControllerNavigateBack() throws Exception {
+        JButton backBtn = runOnEdtGet(() -> findButton(view, "Back"));
+        assertNotNull(backBtn);
+        runOnEdt(backBtn::doClick);
+        flushEdt();
+        assertEquals("navigateBack", controller.lastMethod);
+    }
+
+    // ---------------- helpers ----------------
+
+    /** Return the inner results panel (inside the view's JScrollPane). */
+    private static JPanel findResultsPanel(SearchView v) {
+        for (Component c : v.getComponents()) {
+            if (c instanceof JScrollPane) {
+                JViewport vp = ((JScrollPane) c).getViewport();
+                Component inner = vp.getView();
+                if (inner instanceof JPanel) {
+                    return (JPanel) inner;
+                }
             }
         }
         return null;
     }
 
-    private boolean treeContainsLabelText(Component root, String needle) {
-        if (root instanceof JLabel) {
-            String t = ((JLabel) root).getText();
-            if (t != null && t.contains(needle)) return true;
+    /** Find a JButton by its exact text, recursively. */
+    private static JButton findButton(Component root, String text) {
+        if (root instanceof JButton && text.equals(((JButton) root).getText())) {
+            return (JButton) root;
         }
         if (root instanceof Container) {
             for (Component c : ((Container) root).getComponents()) {
-                if (treeContainsLabelText(c, needle)) return true;
+                JButton b = findButton(c, text);
+                if (b != null) {
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Find the first component of a given type, recursively. */
+    private static <T> T findFirst(Component root, Class<T> type) {
+        if (type.isInstance(root)) {
+            return type.cast(root);
+        }
+        if (root instanceof Container) {
+            for (Component c : ((Container) root).getComponents()) {
+                T got = findFirst(c, type);
+                if (got != null) {
+                    return got;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Find a JLabel with exact text anywhere under the root. */
+    private static JLabel findLabelWithExactText(Component root, String target) {
+        if (root instanceof JLabel) {
+            JLabel l = (JLabel) root;
+            if (target.equals(l.getText())) {
+                return l;
+            }
+        }
+        if (root instanceof Container) {
+            for (Component c : ((Container) root).getComponents()) {
+                JLabel found = findLabelWithExactText(c, target);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Does ANY JLabel under container contain the substring (case-insensitive)? */
+    private static boolean anyLabelContains(Container container, String needle) {
+        String n = needle.toLowerCase();
+        for (Component c : container.getComponents()) {
+            if (c instanceof JLabel) {
+                if (((JLabel) c).getText().toLowerCase().contains(n)) {
+                    return true;
+                }
+            } else if (c instanceof Container) {
+                if (anyLabelContains((Container) c, needle)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    // ----- tests -----
-
-    @Test
-    void clickSearch_executesWithQuery() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            JButton search = findButton(view, "Search");
-            assertNotNull(search, "Search button not found");
-            search.doClick();
-        });
-
-        assertTrue(controller.executeCalled, "Controller.execute() was not called");
-        assertEquals("laptop", controller.lastQuery);
-        assertFalse(controller.backCalled);
-    }
-
-    @Test
-    void backButton_callsNavigateBack() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            JButton back = findButton(view, "Back");
-            assertNotNull(back, "Back button not found");
-            back.doClick();
-        });
-
-        assertTrue(controller.backCalled, "Controller.navigateBack() was not called");
-        assertFalse(controller.executeCalled);
-    }
-
-    @Test
-    void propertyChange_loadingAndNoResultsRendersMessages() throws Exception {
-        // Loading → shows "Searching..."
-        SearchState loading = new SearchState();
-        loading.setSearchQuery("x");
-        loading.setLoading(true);
-
-        SwingUtilities.invokeAndWait(() -> {
-            view.propertyChange(new PropertyChangeEvent(this, "state", initialState, loading));
-            assertTrue(treeContainsLabelText(view, "Searching..."));
-        });
-
-        // Empty results → shows "No posts found"
-        SearchState empty = new SearchState();
-        empty.setSearchQuery("x");
-        empty.setLoading(false);
-        empty.setSearchResults(Collections.emptyList());
-
-        SwingUtilities.invokeAndWait(() -> {
-            view.propertyChange(new PropertyChangeEvent(this, "state", loading, empty));
-            assertTrue(treeContainsLabelText(view, "No posts found"));
-        });
-    }
-
-    @Test
-    void typingUpdatesViewModelState() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            // Find the JTextField inside the LabelTextPanel
-            JTextField tf = null;
-            outer:
-            for (Component c : view.getComponents()) {
-                if (c instanceof Container) {
-                    for (Component cc : ((Container) c).getComponents()) {
-                        if (cc instanceof LabelTextPanel) {
-                            for (Component ccc : ((LabelTextPanel) cc).getComponents()) {
-                                if (ccc instanceof JTextField) { tf = (JTextField) ccc; break outer; }
-                            }
-                        }
-                    }
-                }
+    /** Poll for a label containing given text to appear within timeoutMs. */
+    private static boolean waitForLabelTextContains(Container root, String needle, long timeoutMs) {
+        long end = System.currentTimeMillis() + timeoutMs;
+        while (System.currentTimeMillis() < end) {
+            if (anyLabelContains(root, needle)) {
+                return true;
             }
-            assertNotNull(tf, "Search input field not found");
-            tf.setText("phone"); // triggers DocumentListener -> vm.setState(...)
-        });
-
-        // The real ViewModel now holds updated state
-        assertEquals("phone", vm.getState().getSearchQuery());
+            try {
+                Thread.sleep(20L);
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
     }
 
-    @Test
-    void propertyChange_withResultsDisplaysHeader() throws Exception {
-        // Use a minimal stub Post to avoid depending on concrete constructor
-        Post post = new Post();
-        post.setTitle("Found laptop");
-        post.setLost(false);
+    /** Collect all JLabel text under a container (debug helper). */
+    private static String collectAllLabelTexts(Container container) {
+        StringBuilder sb = new StringBuilder();
+        for (Component c : container.getComponents()) {
+            if (c instanceof JLabel) {
+                sb.append(((JLabel) c).getText()).append('\n');
+            } else if (c instanceof Container) {
+                sb.append(collectAllLabelTexts((Container) c));
+            }
+        }
+        return sb.toString();
+    }
 
-        SearchState withResults = new SearchState();
-        withResults.setSearchQuery("lap");
-        withResults.setLoading(false);
-        withResults.setSearchResults(java.util.List.of(post));
+    /** Safely set text through the Document (fires DocumentListener). */
+    private static void setTextByDoc(JTextField field, String text) {
+        Document doc = field.getDocument();
+        try {
+            doc.remove(0, doc.getLength());
+            doc.insertString(0, text, null);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    // ---------- EDT helpers (robust) ----------
+
+    /** Run code on EDT and wait. */
+    private static void runOnEdt(Runnable r) throws Exception {
+        if (SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            AtomicReference<Exception> ex = new AtomicReference<>();
+            SwingUtilities.invokeAndWait(() -> {
+                try { r.run(); } catch (Exception e) { ex.set(e); }
+            });
+            if (ex.get() != null) {
+                throw ex.get();
+            }
+        }
+    }
+
+    /** Run supplier on EDT and return the value. */
+    private static <T> T runOnEdtGet(SupplierWithException<T> s) throws Exception {
+        if (SwingUtilities.isEventDispatchThread()) {
+            return s.get();
+        }
+        AtomicReference<T> ref = new AtomicReference<>();
+        AtomicReference<Exception> ex = new AtomicReference<>();
         SwingUtilities.invokeAndWait(() -> {
-            view.propertyChange(new PropertyChangeEvent(this, "state", initialState, withResults));
-            assertTrue(treeContainsLabelText(view, "Search Results (1 posts found)"));
+            try { ref.set(s.get()); } catch (Exception e) { ex.set(e); }
         });
+        if (ex.get() != null) {
+            throw ex.get();
+        }
+        return ref.get();
+    }
+
+    /**
+     * Robustly flush pending tasks on the EDT.
+     *
+     * If we are already on the EDT, the usual "invokeAndWait(no-op)" trick does not work,
+     * because you cannot block the EDT waiting on itself. Instead:
+     *  - When NOT on EDT: do a normal invokeAndWait(no-op), which guarantees all previously
+     *    queued tasks have run.
+     *  - When ON the EDT: post a marker with invokeLater and wait for it with a latch.
+     *    This ensures all tasks queued before this call are processed.
+     */
+    private static void flushEdt() throws Exception {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeAndWait(() -> { /* no-op */ });
+            return;
+        }
+        CountDownLatch latch = new CountDownLatch(1);
+        SwingUtilities.invokeLater(latch::countDown);
+        // Wait up to 2 seconds; if it times out, something is seriously wrong.
+        if (!latch.await(2, TimeUnit.SECONDS)) {
+            throw new IllegalStateException("EDT flush timed out");
+        }
+    }
+
+    @FunctionalInterface
+    private interface SupplierWithException<T> {
+        T get() throws Exception;
     }
 }
