@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cee90c25-e7e9-472e-92f4-eb352449f6c4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/handler/FuzzyFilterHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/handler/NormalizeHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/handler/RankHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/handler/SearchHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/FuzzyMatchHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/use_case/fuzzy_search/util/FuzzyMatchHelper.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +66,9 @@
     "JUnit.DashboardViewTest.executor": "Coverage",
     "JUnit.DeleteUserControllerTest.executor": "Coverage",
     "JUnit.DeleteUserViewTest.executor": "Coverage",
+    "JUnit.FirebaseChatDataAccessObjectTest.executor": "Coverage",
+    "JUnit.FuzzyMatchHelperTest.executor": "Coverage",
+    "JUnit.FuzzySearchInteractorTest.executor": "Coverage",
     "JUnit.FuzzySearchViewTest.executor": "Coverage",
     "JUnit.LabelTextPanelTest.executor": "Coverage",
     "JUnit.LoggedInViewTest.executor": "Coverage",
@@ -68,12 +76,12 @@
     "JUnit.LoginViewTest.executor": "Coverage",
     "JUnit.LogoutInteractorTest.executor": "Run",
     "JUnit.ResolvePostInteractorTest.executor": "Run",
-    "JUnit.SearchInteractorTest.executor": "Run",
+    "JUnit.SearchInteractorTest.executor": "Coverage",
     "JUnit.SearchViewTest.executor": "Coverage",
     "JUnit.SignupInteractorTest.executor": "Run",
     "JUnit.SignupViewTest.executor": "Coverage",
     "JUnit.ViewManagerTest.executor": "Coverage",
-    "JUnit.test in homework-5.executor": "Coverage",
+    "JUnit.test in homework-5.executor": "Run",
     "JUnit.use_case in homework-5.executor": "Coverage",
     "JUnit.view in homework-5 (1).executor": "Coverage",
     "JUnit.view in homework-5.executor": "Coverage",
@@ -92,38 +100,38 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="JUnit.view in homework-5 (1)">
-    <configuration name="AdminViewTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.SearchViewTest">
+    <configuration name="FuzzyMatchHelperTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="homework-5" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="view.*" />
+          <option name="PATTERN" value="use_case.fuzzy_search.util.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="view" />
-      <option name="MAIN_CLASS_NAME" value="view.AdminViewTest" />
+      <option name="PACKAGE_NAME" value="use_case.fuzzy_search.util" />
+      <option name="MAIN_CLASS_NAME" value="use_case.fuzzy_search.util.FuzzyMatchHelperTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DashboardViewTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="FuzzySearchInteractorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="homework-5" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="view.*" />
+          <option name="PATTERN" value="use_case.fuzzy_search.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="view" />
-      <option name="MAIN_CLASS_NAME" value="view.DashboardViewTest" />
+      <option name="PACKAGE_NAME" value="use_case.fuzzy_search" />
+      <option name="MAIN_CLASS_NAME" value="use_case.fuzzy_search.FuzzySearchInteractorTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DeleteUserViewTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="FuzzySearchViewTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="homework-5" />
       <extension name="coverage">
         <pattern>
@@ -132,7 +140,22 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="view" />
-      <option name="MAIN_CLASS_NAME" value="view.DeleteUserViewTest" />
+      <option name="MAIN_CLASS_NAME" value="view.FuzzySearchViewTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SearchInteractorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="homework-5" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="use_case.search.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="use_case.search" />
+      <option name="MAIN_CLASS_NAME" value="use_case.search.SearchInteractorTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -153,14 +176,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="view in homework-5 (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="homework-5" />
-      <option name="TEST_OBJECT" value="directory" />
-      <dir value="$PROJECT_DIR$/test/java/view" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="CSC207-Miao-Miao" />
       <method v="2">
@@ -169,11 +184,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.view in homework-5 (1)" />
         <item itemvalue="JUnit.SearchViewTest" />
-        <item itemvalue="JUnit.AdminViewTest" />
-        <item itemvalue="JUnit.DeleteUserViewTest" />
-        <item itemvalue="JUnit.DashboardViewTest" />
+        <item itemvalue="JUnit.FuzzySearchViewTest" />
+        <item itemvalue="JUnit.SearchInteractorTest" />
+        <item itemvalue="JUnit.FuzzyMatchHelperTest" />
+        <item itemvalue="JUnit.FuzzySearchInteractorTest" />
       </list>
     </recent_temporary>
   </component>
@@ -212,16 +227,39 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$ViewManagerTest.ic" NAME="ViewManagerTest Coverage Results" MODIFIED="1755058479090" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DMsViewTest.ic" NAME="DMsViewTest Coverage Results" MODIFIED="1755047390320" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LoginViewTest.ic" NAME="LoginViewTest Coverage Results" MODIFIED="1755057556132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$FuzzySearchInteractorTest.ic" NAME="FuzzySearchInteractorTest Coverage Results" MODIFIED="1755097739252" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.fuzzy_search.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdvancedSearchViewTest.ic" NAME="AdvancedSearchViewTest Coverage Results" MODIFIED="1755052026048" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AccountViewTest.ic" NAME="AccountViewTest Coverage Results" MODIFIED="1755047800427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$use_case_in_homework_5.ic" NAME="use_case in homework-5 Coverage Results" MODIFIED="1755058736626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$FuzzySearchViewTest.ic" NAME="FuzzySearchViewTest Coverage Results" MODIFIED="1755097791000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$view_in_homework_5__1_.ic" NAME="view in homework-5 (1) Coverage Results" MODIFIED="1755066521835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SearchViewTest.ic" NAME="SearchViewTest Coverage Results" MODIFIED="1755097805643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LoggedInViewTest.ic" NAME="LoggedInViewTest Coverage Results" MODIFIED="1755056781816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminViewTest.ic" NAME="AdminViewTest Coverage Results" MODIFIED="1755066358703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DeleteUserViewTest.ic" NAME="DeleteUserViewTest Coverage Results" MODIFIED="1755065657322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$ViewManagerTest.ic" NAME="ViewManagerTest Coverage Results" MODIFIED="1755058479090" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>view.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LoginViewTest.ic" NAME="LoginViewTest Coverage Results" MODIFIED="1755057556132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$view_in_homework_5.ic" NAME="view in homework-5 Coverage Results" MODIFIED="1755064217142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -230,18 +268,14 @@
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DashboardViewTest.ic" NAME="DashboardViewTest Coverage Results" MODIFIED="1755065059877" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$FirebaseChatDataAccessObjectTest.ic" NAME="FirebaseChatDataAccessObjectTest Coverage Results" MODIFIED="1755094001107" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>data_access.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$test_in_homework_5.ic" NAME="test in homework-5 Coverage Results" MODIFIED="1755048077273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminLoggedInViewTest.ic" NAME="AdminLoggedInViewTest Coverage Results" MODIFIED="1755050547133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AccountViewTest.ic" NAME="AccountViewTest Coverage Results" MODIFIED="1755047800427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SignupViewTest.ic" NAME="SignupViewTest Coverage Results" MODIFIED="1755058313557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$use_case_in_homework_5.ic" NAME="use_case in homework-5 Coverage Results" MODIFIED="1755058736626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$FuzzySearchViewTest.ic" NAME="FuzzySearchViewTest Coverage Results" MODIFIED="1755057183814" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminLoggedInViewTest.ic" NAME="AdminLoggedInViewTest Coverage Results" MODIFIED="1755050547133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DMsInteractorTest.ic" NAME="DMsInteractorTest Coverage Results" MODIFIED="1755059243408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -250,21 +284,14 @@
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LabelTextPanelTest.ic" NAME="LabelTextPanelTest Coverage Results" MODIFIED="1755057259371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$view_in_homework_5__1_.ic" NAME="view in homework-5 (1) Coverage Results" MODIFIED="1755066521835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SearchViewTest.ic" NAME="SearchViewTest Coverage Results" MODIFIED="1755066506369" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SearchInteractorTest.ic" NAME="SearchInteractorTest Coverage Results" MODIFIED="1755097774445" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.search.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LoggedInViewTest.ic" NAME="LoggedInViewTest Coverage Results" MODIFIED="1755056781816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$FuzzyMatchHelperTest.ic" NAME="FuzzyMatchHelperTest Coverage Results" MODIFIED="1755097752317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.fuzzy_search.util.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DMsInteractorTest__1_.ic" NAME="DMsInteractorTest (1) Coverage Results" MODIFIED="1755060277928" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>use_case.dms.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminViewTest.ic" NAME="AdminViewTest Coverage Results" MODIFIED="1755066358703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DeleteUserViewTest.ic" NAME="DeleteUserViewTest Coverage Results" MODIFIED="1755065657322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
-      <FILTER>view.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DeleteUserControllerTest.ic" NAME="DeleteUserControllerTest Coverage Results" MODIFIED="1755056644422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
