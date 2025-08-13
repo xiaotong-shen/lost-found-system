@@ -1,4 +1,4 @@
-# **miao miao / nyan nyanz – Lost & Found System**
+# ** CSC207 Group 8 - MIAO MIAO – Lost & Found System**
 
 ## **Authors & Contributors**
 - Yipeng Zhao
