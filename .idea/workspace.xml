@@ -5,25 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cee90c25-e7e9-472e-92f4-eb352449f6c4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/test/java/use_case/dms/DMsInteractorTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/AccountViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/AdminLoggedInViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/AdvancedSearchViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/DMsViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/DashboardViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/DeleteUserViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/FuzzySearchViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/LabelTextPanelTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/LoggedInViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/LoginViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/SignupViewTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/java/view/ViewManagerTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/java/view/AdminView.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/view/AdminView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/java/view/LoggedInView.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/view/LoggedInView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/java/use_case/resolve_post/ResolvePostInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/java/use_case/resolve_post/ResolvePostInteractorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/java/view/AdminViewTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/java/view/AdminViewTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/java/view/SearchViewTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/java/view/SearchViewTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -268,8 +250,8 @@
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LabelTextPanelTest.ic" NAME="LabelTextPanelTest Coverage Results" MODIFIED="1755057259371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$view_in_homework_5__1_.ic" NAME="view in homework-5 (1) Coverage Results" MODIFIED="1755066281543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SearchViewTest.ic" NAME="SearchViewTest Coverage Results" MODIFIED="1755066251473" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$view_in_homework_5__1_.ic" NAME="view in homework-5 (1) Coverage Results" MODIFIED="1755066521835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$SearchViewTest.ic" NAME="SearchViewTest Coverage Results" MODIFIED="1755066506369" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$LoggedInViewTest.ic" NAME="LoggedInViewTest Coverage Results" MODIFIED="1755056781816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -278,7 +260,7 @@
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DMsInteractorTest__1_.ic" NAME="DMsInteractorTest (1) Coverage Results" MODIFIED="1755060277928" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>use_case.dms.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminViewTest.ic" NAME="AdminViewTest Coverage Results" MODIFIED="1755065701890" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$AdminViewTest.ic" NAME="AdminViewTest Coverage Results" MODIFIED="1755066358703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>view.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/CSC207_Miao_Miao$DeleteUserViewTest.ic" NAME="DeleteUserViewTest Coverage Results" MODIFIED="1755065657322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
