@@ -16,6 +16,16 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
     public void execute(DeleteUserInputData deleteUserInputData) {
         String username = deleteUserInputData.getUsername();
 
+        // Validate username
+        if (username == null) {
+            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be null");
+            return;
+        }
+        if (username.trim().isEmpty()) {
+            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be empty");
+            return;
+        }
+
         try {
             userDataAccessObject.deleteUser(username);
             DeleteUserOutputData deleteUserOutputData = new DeleteUserOutputData(true,
@@ -42,4 +52,3 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
         }
     }
 }
-
