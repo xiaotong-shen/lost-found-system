@@ -170,6 +170,10 @@ public class AppBuilder {
     public AppBuilder addSignupView() {
         signupViewModel = new SignupViewModel();
         signupView = new SignupView(signupViewModel, viewManagerModel);
+        
+        // Set the component name to match the viewName
+        signupView.setName("sign up");
+        
         cardPanel.add(signupView, signupView.getViewName());
         return this;
     }
@@ -181,6 +185,10 @@ public class AppBuilder {
     public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
         loginView = new LoginView(loginViewModel, viewManagerModel);
+        
+        // Set the component name to match the viewName
+        loginView.setName("log in");
+        
         cardPanel.add(loginView, loginView.getViewName());
         return this;
     }
@@ -203,6 +211,10 @@ public class AppBuilder {
     public AppBuilder addAdminLoggedInView() {
         adminloggedInViewModel = new AdminLoggedInViewModel();
         adminloggedInView = new AdminLoggedInView(adminloggedInViewModel, viewManagerModel);
+        
+        // Set the component name to match the viewName
+        adminloggedInView.setName("admin logged in");
+        
         cardPanel.add(adminloggedInView, adminloggedInView.getViewName());
         return this;
     }
@@ -214,6 +226,10 @@ public class AppBuilder {
     public AppBuilder addSearchView() {
         searchViewModel = new SearchViewModel();
         searchView = new SearchView(searchViewModel);
+        
+        // Set the component name to match the viewName
+        searchView.setName("search");
+        
         cardPanel.add(searchView, searchView.getViewName());
         return this;
     }
@@ -227,6 +243,10 @@ public class AppBuilder {
             searchViewModel = new SearchViewModel();
         }
         advancedSearchView = new AdvancedSearchView(searchViewModel);
+        
+        // Set the component name to match the viewName
+        advancedSearchView.setName("advanced search");
+        
         cardPanel.add(advancedSearchView, advancedSearchView.getViewName());
         return this;
     }
@@ -238,14 +258,22 @@ public class AppBuilder {
     public AppBuilder addDashboardView() {
         dashboardViewModel = new DashboardViewModel();
         dashboardView = new DashboardView(dashboardViewModel);
+        
+        // Set the component name to match the viewName
+        dashboardView.setName("dashboard");
+        
         cardPanel.add(dashboardView, dashboardView.getViewName());
         return this;
     }
 
     public AppBuilder addAdminView() {
         adminViewModel = new AdminViewModel();
-
         adminView = new AdminView(adminViewModel);
+        
+        // Make sure the view component itself has a name
+        adminView.setName("admin");
+        
+        // Add the view to the card panel with the view name from getViewName()
         cardPanel.add(adminView, adminView.getViewName());
         return this;
     }
@@ -268,6 +296,10 @@ public class AppBuilder {
     public AppBuilder addDMsView() {
         dmsViewModel = new DMsViewModel();
         dmsView = new DMsView(viewManagerModel, dmsViewModel);
+        
+        // Set the component name to match the viewName
+        dmsView.setName("dms");
+        
         cardPanel.add(dmsView, dmsView.getViewName());
         return this;
     }
@@ -295,7 +327,10 @@ public class AppBuilder {
         
         // Create view with the ready controller
         FuzzySearchView fuzzySearchView = new FuzzySearchView(fuzzySearchViewModel, fuzzySearchController, viewManagerModel);
-
+        
+        // Set the component name to match the viewName
+        fuzzySearchView.setName("fuzzy search");
+        
         cardPanel.add(fuzzySearchView, fuzzySearchView.viewName);
         return this;
     }
@@ -439,8 +474,17 @@ public class AppBuilder {
         final DMsInputBoundary dMsInteractor = new DMsInteractor(dmsDataAccessObject, dMsOutputBoundary);
         final DMsController dMsController = new DMsController(dMsInteractor);
         dmsView.setDMsController(dMsController);
-        loggedInView.setDMsView(dmsView);
-        adminloggedInView.setDMsView(dmsView);
+        
+        // Only set DMsView if loggedInView exists
+        if (loggedInView != null) {
+            loggedInView.setDMsView(dmsView);
+        }
+        
+        // Only set DMsView if adminloggedInView exists
+        if (adminloggedInView != null) {
+            adminloggedInView.setDMsView(dmsView);
+        }
+        
         return this;
     }
 
@@ -490,7 +534,18 @@ public class AppBuilder {
         application.add(cardPanel);
 
         viewManagerModel.setMainFrame(application);
-        viewManagerModel.pushView(signupView.getViewName());
+        
+        // Choose an initial view to display
+        if (signupView != null) {
+            viewManagerModel.pushView(signupView.getViewName());
+        } else if (loginView != null) {
+            viewManagerModel.pushView(loginView.getViewName());
+        } else if (dashboardView != null) {
+            viewManagerModel.pushView(dashboardView.getViewName());
+        } else if (adminView != null) {
+            viewManagerModel.pushView(adminView.getViewName());
+        }
+        // If none of the above views exist, don't push any view
 
         return application;
     }

@@ -300,14 +300,14 @@ public class AdminView extends JPanel implements ActionListener, PropertyChangeL
             String location = locationField.getText().trim();
             boolean isLost = lostButton.isSelected();
 
-            if (titleField.getText().trim().isEmpty() || descriptionArea.getText().trim().isEmpty()) {
+            // FIX: Use contentArea instead of descriptionArea
+            if (title.isEmpty() || content.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                        "Title and description are required.",
+                        "Title and content are required.",
                         "Validation Error",
                         JOptionPane.ERROR_MESSAGE);
                 return; // Don't proceed with the submission
             }
-
 
             List<String> tags = new ArrayList<>();
             if (!tagsText.isEmpty()) {
