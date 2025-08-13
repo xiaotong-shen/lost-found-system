@@ -114,6 +114,7 @@ public class DashboardInputData {
         this.resolvedByUsername = null;
     }
     
+    // Make sure there's a constructor that accepts an action and an integer post ID
     public DashboardInputData(String action, int postId) {
         this.action = action;
         this.searchQuery = null;
@@ -155,7 +156,11 @@ public class DashboardInputData {
     public boolean isLost() { return isLost; }
     public String getAuthor() { return author; }
     public entity.Post getPost() { return post; }
-    public int getPostId() { return postId; }
+    
+    // Make sure the getPostId method returns the post ID
+    public int getPostId() {
+        return postId;
+    }
     public String getCreditedUsername() { return creditedUsername; }
     public String getResolvedByUsername() { return resolvedByUsername; }
 }
