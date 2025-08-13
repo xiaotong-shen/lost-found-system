@@ -18,11 +18,11 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
 
         // Validate username
         if (username == null) {
-            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be null");
+            deleteUserOutputBoundary.prepareFailView("Failed to delete user: Username cannot be null");
             return;
         }
         if (username.trim().isEmpty()) {
-            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be empty");
+            deleteUserOutputBoundary.prepareFailView("Failed to delete user: Username cannot be empty");
             return;
         }
 
