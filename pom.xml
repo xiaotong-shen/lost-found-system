@@ -146,6 +146,33 @@
                 <version>3.1.2</version>
             </plugin>
             
+            <!-- Checkstyle Plugin - extremely minimal configuration -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>false</consoleOutput>
+                    <failsOnError>false</failsOnError>
+                    <failsOnWarning>false</failsOnWarning>
+                    <linkXRef>false</linkXRef>
+                    <violationSeverity>info</violationSeverity>
+                    <maxAllowedViolations>9999</maxAllowedViolations>
+                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+                    <skip>false</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <!-- JaCoCo plugin for code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
