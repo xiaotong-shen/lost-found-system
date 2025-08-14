@@ -4,12 +4,12 @@ import data_access.FirebaseUserDataAccessObject;
 
 public class DeleteUserInteractor implements DeleteUserInputBoundary {
     final FirebaseUserDataAccessObject userDataAccessObject;
-    final DeleteUserOutputBoundary deleteUserPresenter;
+    final DeleteUserOutputBoundary deleteUserOutputBoundary;
 
     public DeleteUserInteractor(FirebaseUserDataAccessObject userDataAccessObject,
                                 DeleteUserOutputBoundary deleteUserOutputBoundary) {
         this.userDataAccessObject = userDataAccessObject;
-        this.deleteUserPresenter = deleteUserOutputBoundary;
+        this.deleteUserOutputBoundary = deleteUserOutputBoundary;
     }
 
     @Override
@@ -18,11 +18,11 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
 
         // Validate username
         if (username == null) {
-            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be null");
+            deleteUserOutputBoundary.prepareFailView("Failed to delete user: Username cannot be null");
             return;
         }
         if (username.trim().isEmpty()) {
-            deleteUserPresenter.prepareFailView("Failed to delete user: Username cannot be empty");
+            deleteUserOutputBoundary.prepareFailView("Failed to delete user: Username cannot be empty");
             return;
         }
 
@@ -30,12 +30,12 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
             userDataAccessObject.deleteUser(username);
             DeleteUserOutputData deleteUserOutputData = new DeleteUserOutputData(true,
                     "Successfully deleted user: " + username);
-            deleteUserPresenter.prepareSuccessView(deleteUserOutputData);
+            deleteUserOutputBoundary.prepareSuccessView(deleteUserOutputData);
 
             // Reload users list after successful deletion
             loadUsers();
         } catch (Exception e) {
-            deleteUserPresenter.prepareFailView("Failed to delete user: " + e.getMessage());
+            deleteUserOutputBoundary.prepareFailView("Failed to delete user: " + e.getMessage());
         }
     }
 
@@ -45,10 +45,10 @@ public class DeleteUserInteractor implements DeleteUserInputBoundary {
         try {
             var users = userDataAccessObject.getAllUsers();
             System.out.println("DEBUG: Retrieved users from DAO: " + users);
-            deleteUserPresenter.presentUsersList(users);
+            deleteUserOutputBoundary.presentUsersList(users);
         } catch (Exception e) {
             System.err.println("DEBUG: Error in loadUsers: " + e.getMessage());
-            deleteUserPresenter.prepareFailView("Failed to load users: " + e.getMessage());
+            deleteUserOutputBoundary.prepareFailView("Failed to load users: " + e.getMessage());
         }
     }
 }
