@@ -1,0 +1,20 @@
+# Firebase Configuration Example
+# Copy this file to firebase-config.properties and update with your values
+
+# Your Firebase Project ID (found in Firebase Console)
+firebase.project.id=your-firebase-project-id
+
+# Path to your service account key file (for production)
+# Leave empty to use default credentials (for development)
+firebase.service.account.path=
+
+# Firebase collection name for users
+firebase.collection.users=users
+
+# Use default credentials for development (true/false)
+firebase.use.default.credentials=true
+
+# Firebase collection names
+firebase.collection.posts=posts
+firebase.collection.chats=chats
+firebase.collection.messages=messages
