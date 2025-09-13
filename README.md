@@ -25,13 +25,14 @@ To create a more efficient and community-driven way for people to report, find, 
 
 ## **Table of Contents**
 1. [Features](#features)
-2. [Technology Stack](#technology-stack)
-3. [Project Structure](#project-structure)
-4. [Installation](#installation)
-5. [Usage](#usage)
-6. [License](#license)
-7. [Feedback](#feedback)
-8. [Contributing](#contributing)
+2. [Demo](#demo)
+3. [Technology Stack](#technology-stack)
+4. [Project Structure](#project-structure)
+5. [Installation](#installation)
+6. [Usage](#usage)
+7. [License](#license)
+8. [Feedback](#feedback)
+9. [Contributing](#contributing)
 
 ---
 
@@ -51,6 +52,51 @@ To create a more efficient and community-driven way for people to report, find, 
 - **Data Persistence:**  
   Uses Firebase APIs to store posts, comments, and chat history.
 
+---
+
+## **Demo**
+
+### **Application Overview**
+The Lost & Found System provides an intuitive interface for managing lost and found items with real-time communication features.
+
+https://github.com/user-attachments/assets/media1.mov
+*Main dashboard showing recent lost and found posts with search functionality*
+
+### **User Authentication**
+Secure login and registration system with Firebase authentication.
+
+https://github.com/user-attachments/assets/media2.mov
+*User login and registration interface with email and password authentication*
+
+### **Posting Lost & Found Items**
+Easy-to-use forms for creating detailed posts about lost or found items.
+
+https://github.com/user-attachments/assets/media3.mov
+*Form for creating a new lost or found item post with tags and location*
+
+### **Search & Discovery**
+Advanced search functionality with fuzzy matching and filtering options.
+
+https://github.com/user-attachments/assets/media4.mov
+*Search page with keyword, tag, and location filters*
+
+### **Direct Messaging**
+Private communication system for arranging item returns.
+
+https://github.com/user-attachments/assets/media5.mov
+*Real-time chat interface for private communication*
+
+### **Admin Features**
+Comprehensive admin panel for managing users and content.
+
+https://github.com/user-attachments/assets/media6.mov
+*Admin dashboard showing user management and system statistics*
+
+https://github.com/user-attachments/assets/media7.mov
+*Additional features and functionality demonstrations*
+
+---
+
 ## **Technology Stack**
 - **Backend:** Java 17 with Clean Architecture pattern
 - **Build Tool:** Maven
@@ -62,15 +108,15 @@ To create a more efficient and community-driven way for people to report, find, 
 ## **Project Structure**
 ```
 CSC207-Miao-Miao/
-├── main/java/
-│   ├── app/                 # Main application entry point
-│   ├── data_access/         # Firebase data access layer
-│   ├── entity/              # Domain entities (User, Post, Chat, etc.)
-│   ├── interface_adapter/   # Controllers, Presenters, ViewModels
+├── java/
+│   ├── app/                 # Application entry point
+│   ├── entity/              # Domain entities (User, Post, Chat)
 │   ├── use_case/            # Business logic and use cases
-│   └── view/                # UI components and views
-├── test/java/               # Test files mirroring main structure
+│   ├── interface_adapter/   # Controllers, Presenters, ViewModels
+│   ├── data_access/         # Firebase data access layer
+│   └── view/                # Swing-based UI components
 ├── resources/               # Configuration files and Firebase credentials
+├── test/java/               # Comprehensive test suite
 ├── pom.xml                  # Maven configuration and dependencies
 └── README.md               # This file
 ```

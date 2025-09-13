@@ -10,7 +10,7 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# IDE
+# IDE and Editor Files
 .idea/
 *.iws
 *.iml
@@ -19,20 +19,19 @@ buildNumber.properties
 .project
 .classpath
 .settings/
+*.swp
+*.swo
+*~
 
-# Compiled class file
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
+firebase-debug.log
+.firebase/
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -41,7 +40,7 @@ buildNumber.properties
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
@@ -54,21 +53,29 @@ replay_pid*
 ehthumbs.db
 Thumbs.db
 
-# Firebase
-firebase-debug.log
-.firebase/
-
-# Environment variables
+# Environment variables and configuration
 .env
 .env.local
 .env.production
 .env.staging
+*.properties.bak
+config.properties
 
 # Temporary files
 *.tmp
 *.temp
-*~
 
-# Application specific
-*.properties.bak
-config.properties
+# Firebase
+firebase-debug.log
+.firebase/
+
+# Checkstyle and code quality
+checkstyle-result.xml
+checkstyle-suppressions.xml
+
+# Test coverage reports
+site/
+
+# Backup files
+*.bak
+*.backup
