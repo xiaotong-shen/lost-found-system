@@ -59,40 +59,40 @@ To create a more efficient and community-driven way for people to report, find, 
 ### **Application Overview**
 The Lost & Found System provides an intuitive interface for managing lost and found items with real-time communication features.
 
-https://github.com/user-attachments/assets/media1.mov
+![Application Overview](docs/images/demo1.gif)
 *Main dashboard showing recent lost and found posts with search functionality*
 
 ### **User Authentication**
 Secure login and registration system with Firebase authentication.
 
-https://github.com/user-attachments/assets/media2.mov
+![User Authentication](docs/images/demo2.gif)
 *User login and registration interface with email and password authentication*
 
 ### **Posting Lost & Found Items**
 Easy-to-use forms for creating detailed posts about lost or found items.
 
-https://github.com/user-attachments/assets/media3.mov
+![Posting Lost & Found Items](docs/images/demo3.gif)
 *Form for creating a new lost or found item post with tags and location*
 
 ### **Search & Discovery**
 Advanced search functionality with fuzzy matching and filtering options.
 
-https://github.com/user-attachments/assets/media4.mov
+![Search & Discovery](docs/images/demo4.gif)
 *Search page with keyword, tag, and location filters*
 
 ### **Direct Messaging**
 Private communication system for arranging item returns.
 
-https://github.com/user-attachments/assets/media5.mov
+![Direct Messaging](docs/images/demo5.gif)
 *Real-time chat interface for private communication*
 
 ### **Admin Features**
 Comprehensive admin panel for managing users and content.
 
-https://github.com/user-attachments/assets/media6.mov
+![Admin Features](docs/images/demo6.gif)
 *Admin dashboard showing user management and system statistics*
 
-https://github.com/user-attachments/assets/media7.mov
+![Additional Features](docs/images/demo7.gif)
 *Additional features and functionality demonstrations*
 
 ---
